@@ -2,6 +2,8 @@
 
 import threading
 import lcddriver
+import datetime
+
 import forecast
 
 # Load the driver and set it to "display"
@@ -10,10 +12,10 @@ display = lcddriver.lcd()
 
 # display function
 def print_lcd():
-        t = threading.Timer(60, printLcd) # every x seconds call printLcd method
+        t = threading.Timer(60, print_lcd) # every x seconds call printLcd method
         t.start()
         # Actual Thread
-	weather = forecast.get_weather()
+        weather = forecast.get_weather()
         rate_info = forecast.get_gold_rate()
 
         #print ('Writing to display')
@@ -35,5 +37,5 @@ try:
 	print_lcd()
 
 except KeyboardInterrupt:
-	print ('Cleaning up !")
+	print ('Cleaning up !')
 	display.lcd_clear();
