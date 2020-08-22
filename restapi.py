@@ -10,32 +10,51 @@ import forecast
 # If you use something from the driver library use the "display." prefix first
 display = lcddriver.lcd()
 
+
+def get_time():
+    currentTime = datetime.datetime.now()
+    return currentTime
+
+
+# return currentTime.strftime("%d.%m %a %H:%M")
+
+
 # display function
 def print_lcd():
-        t = threading.Timer(60, print_lcd) # every x seconds call printLcd method
-        t.start()
-        # Actual Thread
+    global counter
+    global weather
+    global rate_info
+
+    t = threading.Timer(1, print_lcd)
+    t.start()
+
+    print('Writing to display: ', counter)
+
+    if counter == 0:
         weather = forecast.get_weather()
         rate_info = forecast.get_gold_rate()
 
-        #print ('Writing to display')
+    counter = counter + 1
 
-        #while True:
-        timeStr = str(datetime.datetime.now().time().strftime("%H:%M:%S"))
-        weather_line = 'Temp:' + weather.get_temp() + '' + timeStr
-        display.lcd_display_string(weather_line, 1)
+    if counter == 60:
+        counter = 0
 
-        rate_line = 'Gold Rate: ' + rate_info.get_gold22()
-        display.lcd_display_string(rate_line, 2)
+    timeStr = str(get_time().time().strftime("%H:%M:%S"))
+    weather_line = 'Temp:' + weather.get_temp() + ' ' + timeStr
+    display.lcd_display_string(weather_line, 1)
 
+    rate_line = 'G: ' + rate_info.get_gold22() + ' S: ' + rate_info.get_silver()
+    display.lcd_display_string(rate_line, 2)
 
 # main starts here
 
-print ('Test')
+print('Test')
+
+counter = 0
 
 try:
-	print_lcd()
+    print_lcd()
 
 except KeyboardInterrupt:
-	print ('Cleaning up !')
-	display.lcd_clear();
+    print('Cleaning up !')
+    display.lcd_clear();
