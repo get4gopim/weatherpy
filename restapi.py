@@ -30,21 +30,29 @@ def print_lcd():
 
     print('Writing to display: ', counter)
 
-    if counter == 0:
+    if counter == 10:
+        counter = 0
         weather = forecast.get_weather()
-        rate_info = forecast.get_gold_rate()
+        if datetime.datetime.today().weekday() != 6:
+            rate_info = forecast.get_gold_rate()
+        display.lcd_clear();
 
     counter = counter + 1
 
-    if counter == 60:
-        counter = 0
+    #timeStr = str(get_time().time().strftime("%H:%M:%S"))
+    #timeStr = get_time().strftime("%d.%b.%y %a %H:%M")
+    line1 = get_time().strftime("%d.%m %a %H:%M:%S")
+    line2 = str(weather.get_condition()) + '  ' + str(weather.get_temp()) + 'c'
+    #line3 = 'Gold ' + rate_info.get_gold22() + ' Sil ' + rate_info.get_silver()
+    line3 = 'Gold Rate      ' + rate_info.get_gold22()
+    line4 = 'Silver Rate    ' + rate_info.get_silver()
+    #line4 = weather.get_location()[0:20]
 
-    timeStr = str(get_time().time().strftime("%H:%M:%S"))
-    weather_line = 'Temp:' + weather.get_temp() + ' ' + timeStr
-    display.lcd_display_string(weather_line, 1)
+    display.lcd_display_string(line1, 1)
+    display.lcd_display_string(line2, 2)
+    display.lcd_display_string(line3, 3)
+    display.lcd_display_string(line4, 4)
 
-    rate_line = 'G: ' + rate_info.get_gold22() + ' S: ' + rate_info.get_silver()
-    display.lcd_display_string(rate_line, 2)
 
 # main starts here
 
@@ -53,6 +61,8 @@ print('Test')
 counter = 0
 
 try:
+    weather = forecast.get_weather()
+    rate_info = forecast.get_gold_rate()
     print_lcd()
 
 except KeyboardInterrupt:

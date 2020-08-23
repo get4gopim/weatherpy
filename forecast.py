@@ -18,7 +18,7 @@ def get_weather():
 
     if weather_response.status_code == 200:
         weather_json = weather_response.text
-        #print(weather_json)
+        print(weather_json)
 
         x = json.loads(weather_json, object_hook=lambda d: namedtuple('x', d.keys())(*d.values()))
         #print('Temp: ', x.temperature, ' Date: ', x.asOf)
@@ -37,7 +37,7 @@ def get_gold_rate():
 
     if gold_rate_response:
         gold_json = gold_rate_response.text
-        #print(gold_json)
+        print(gold_json)
 
         x = json.loads(gold_json, object_hook=lambda d: namedtuple('x', d.keys())(*d.values()))
         #print('Rate Card: ', x.goldRate22, ' Silver: ', x.silver)

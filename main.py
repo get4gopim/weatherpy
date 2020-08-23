@@ -1,12 +1,28 @@
+#!/usr/bin/python3.8
 # This is a sample Python script.
+
+
 
 # Press Shift+F10 to execute it or replace it with your code.
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
-import RateInfo
-import WeatherInfo
 import forecast
 import threading
 import datetime
+import lcddriver
+import asyncio
+
+
+weather_url = 'http://localhost:8080/forecast/weather'
+
+async def print_when_done(tasks):
+    for res in asyncio.as_completed(tasks):
+        print(await res)
+
+coros = [
+    forecast.get_weather()
+    for i in range(10)
+]
+asyncio.run(print_when_done(coros))
 
 def print_hi(name):
     # Use a breakpoint in the code line below to debug your script.
@@ -26,10 +42,10 @@ def print_lcd():
 
     print('Writing to display: ', counter)
 
-    if counter == 5:
+    if counter == 10:
+        counter = 0
         weather = forecast.get_weather()
         rate_info = forecast.get_gold_rate()
-        counter = 0
 
     counter = counter + 1
 
@@ -38,13 +54,14 @@ def print_lcd():
 
     timeStr = str(get_time().time().strftime("%H:%M:%S"))
     weather_line = 'Temp:' + weather.get_temp() + ' ' + timeStr
-    print (weather_line)
+    #print (weather_line)
 
     rate_line = 'G: ' + rate_info.get_gold22() + ' S: ' + rate_info.get_silver()
-    print (rate_line)
+    #print (rate_line)
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
+    display.lcd_clear();
     counter = 0
     weather = forecast.get_weather()
     rate_info = forecast.get_gold_rate()
