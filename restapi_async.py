@@ -68,8 +68,8 @@ def update_lines():
     line2 = temperature + ' ' + str(weather.get_temp()) + 'c'
     # line3 = weather.get_location()[0:20]
     # line4 = 'Gold   ' + rate_info.get_gold22() + ' Silv ' + rate_info.get_silver()
-    line3 = 'Gold   Rate   ' + rate_info.get_gold22()
-    line4 = 'Silver Rate   ' + rate_info.get_silver()
+    line3 = 'Gold   Rate   ' + str(rate_info.get_gold22())
+    line4 = 'Silver Rate   ' + str(rate_info.get_silver())
 
 # display function
 def print_lcd():
