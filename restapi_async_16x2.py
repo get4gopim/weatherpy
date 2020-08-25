@@ -70,7 +70,7 @@ def print_lcd():
 
     # Make string right justified of length 4 by padding 3 spaces to left
     temperature = str(weather.get_condition())[0:12]
-    temperature = temperature.rjust(12, ' ')
+    temperature = temperature.ljust(12, ' ')
     line2 = temperature + ' ' + str(weather.get_temp()) + 'c'
 
     #line2 = weather.get_location()[0:20]

@@ -66,7 +66,7 @@ def print_lcd():
     t.start()
 
     temperature = str(weather.get_condition())[0:16]
-    temperature = temperature.rjust(16, ' ')
+    temperature = temperature.ljust(16, ' ')
 
     line1 = get_time().strftime("%d.%m  %a  %H:%M:%S")
     line2 = temperature + ' ' + str(weather.get_temp()) + 'c'
