@@ -109,11 +109,10 @@ if __name__ == '__main__':
     display.lcd_display_string("Starting Now ...", 2)
     counter = 0
 
-    time.sleep(30)
-
     try:
         asyncio.run(get_weather())
         asyncio.run(get_gold_rate())
+        time.sleep(25)
         print_lcd()
 
     except KeyboardInterrupt:
