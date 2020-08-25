@@ -35,7 +35,7 @@ async def get_weather():
             print(x)
             weather = WeatherInfo.WeatherInfo(x.temperature, x.low, x.high, x.asOf, x.currentCondition, x.location)
             weather.set_error(None)
-            update_lines()
+            update_weather_line()
             return weather
     except ClientConnectorError as ex:
         print ('Unable to connect weather API')
@@ -52,20 +52,26 @@ async def get_gold_rate():
             print(x)
             rate_info = RateInfo.RateInfo(x.goldRate22, x.goldRate24, x.silver)
             rate_info.set_error(None)
-            update_lines()
+            update_rate_line()
             return rate_info
     except ClientConnectorError as ex:
         print ('Unable to connect rate API')
         rate_info = RateInfo.RateInfo(0, 0, 0.0)
         rate_info.set_error(ex)
 
-def update_lines():
-    global line1, line2, line3, line4
+# update display line weather strings
+def update_weather_line():
+    global line2
 
     temperature = str(weather.get_condition())[0:16]
     temperature = temperature.ljust(16, ' ')
 
     line2 = temperature + ' ' + str(weather.get_temp()) + 'c'
+
+# update display line rate strings
+def update_rate_line():
+    global line3, line4
+
     # line3 = weather.get_location()[0:20]
     # line4 = 'Gold   ' + rate_info.get_gold22() + ' Silv ' + rate_info.get_silver()
     line3 = 'Gold   Rate   ' + str(rate_info.get_gold22())
@@ -74,13 +80,14 @@ def update_lines():
 # display function
 def print_lcd():
     global counter
-    # global line1, line2, line3, line4
+    global line1
 
     t = threading.Timer(1, print_lcd)
     t.start()
 
     line1 = get_time().strftime("%d.%m  %a  %H:%M:%S")
-    update_lines()
+    update_weather_line()
+    update_rate_line()
 
     #print('Writing to display: ', counter)
 
