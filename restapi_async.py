@@ -35,6 +35,7 @@ async def get_weather():
             print(x)
             weather = WeatherInfo.WeatherInfo(x.temperature, x.low, x.high, x.asOf, x.currentCondition, x.location)
             weather.set_error(None)
+            update_lines()
             return weather
     except ClientConnectorError as ex:
         print ('Unable to connect weather API')
@@ -51,29 +52,35 @@ async def get_gold_rate():
             print(x)
             rate_info = RateInfo.RateInfo(x.goldRate22, x.goldRate24, x.silver)
             rate_info.set_error(None)
+            update_lines()
             return rate_info
     except ClientConnectorError as ex:
         print ('Unable to connect rate API')
         rate_info = RateInfo.RateInfo(0, 0, 0.0)
         rate_info.set_error(ex)
 
-# display function
-def print_lcd():
-    global counter
+def update_lines():
     global line1, line2, line3, line4
-
-    t = threading.Timer(1, print_lcd)
-    t.start()
 
     temperature = str(weather.get_condition())[0:16]
     temperature = temperature.ljust(16, ' ')
 
-    line1 = get_time().strftime("%d.%m  %a  %H:%M:%S")
     line2 = temperature + ' ' + str(weather.get_temp()) + 'c'
-    #line3 = weather.get_location()[0:20]
-    #line4 = 'Gold   ' + rate_info.get_gold22() + ' Silv ' + rate_info.get_silver()
+    # line3 = weather.get_location()[0:20]
+    # line4 = 'Gold   ' + rate_info.get_gold22() + ' Silv ' + rate_info.get_silver()
     line3 = 'Gold   Rate   ' + rate_info.get_gold22()
     line4 = 'Silver Rate   ' + rate_info.get_silver()
+
+# display function
+def print_lcd():
+    global counter
+    # global line1, line2, line3, line4
+
+    t = threading.Timer(1, print_lcd)
+    t.start()
+
+    line1 = get_time().strftime("%d.%m  %a  %H:%M:%S")
+    update_lines()
 
     #print('Writing to display: ', counter)
 
@@ -104,15 +111,15 @@ def print_lcd():
 
 # main starts here
 if __name__ == '__main__':
-    print('Display 16x4 LCD Module Starts')
+    print('Display 20x4 LCD Module Starts')
     display.lcd_display_string("Welcome", 1)
     display.lcd_display_string("Starting Now ...", 2)
     counter = 0
+    time.sleep(20)
 
     try:
         asyncio.run(get_weather())
         asyncio.run(get_gold_rate())
-        time.sleep(25)
         print_lcd()
 
     except KeyboardInterrupt:
