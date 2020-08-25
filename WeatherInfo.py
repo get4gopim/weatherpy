@@ -1,6 +1,7 @@
 # Weather Info Class file
 
 class WeatherInfo:
+
     def __init__(self, temp, low, high, asof, condition, location):
         self.__temp = temp
         self.__low = low
@@ -8,6 +9,13 @@ class WeatherInfo:
         self.__asof = asof
         self.__condition = condition
         self.__location = location
+        self.error = None
+
+    def get_error(self):
+        return self.error;
+
+    def set_error(self, error):
+        self.error = error;
 
     def get_temp(self):
         return self.__temp
