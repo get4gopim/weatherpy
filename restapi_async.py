@@ -94,7 +94,7 @@ def print_lcd():
     t.start()
 
     currentTime = get_time();
-    line1 = currentTime.strftime("%d%b%y %a %H:%M:%S")
+    line1 = currentTime.strftime("%d.%m  %a  %H:%M:%S")
     update_weather_line()
     update_rate_line()
 
