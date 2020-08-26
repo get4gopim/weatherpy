@@ -82,8 +82,8 @@ def update_rate_line():
     global line3, line4
 
     # line4 = 'Gold   ' + rate_info.get_gold22() + ' Silv ' + rate_info.get_silver()
-    line3 = 'Gold   Rate   ' + str(rate_info.get_gold22())
-    line4 = 'Silver Rate   ' + str(rate_info.get_silver())
+    line3 = 'Gold   Rate     ' + str(rate_info.get_gold22())
+    line4 = 'Silver Rate    ' + str(rate_info.get_silver())
 
 # display function
 def print_lcd():
