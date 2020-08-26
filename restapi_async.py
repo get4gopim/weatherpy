@@ -1,8 +1,10 @@
 # Main LCD 16x2 I2C - Forecast API Consume Python Script
-
+import random
 import threading
 import asyncio
 import json
+import logging
+import os
 
 import datetime
 import time
@@ -32,13 +34,13 @@ async def get_weather():
         async with ClientSession() as s, s.get(weather_url) as response:
             ret = await response.read()
             x = json.loads(ret, object_hook=lambda d: namedtuple('x', d.keys())(*d.values()))
-            print(x)
+            LOGGER.info(x)
             weather = WeatherInfo.WeatherInfo(x.temperature, x.low, x.high, x.asOf, x.currentCondition, x.location)
             weather.set_error(None)
             update_weather_line()
             return weather
     except ClientConnectorError as ex:
-        print ('Unable to connect weather API')
+        LOGGER.exception ('Unable to connect weather API', ex)
         weather = WeatherInfo.WeatherInfo(0, 0, 0, "00:00", "", "")
         weather.set_error(ex)
 
@@ -49,13 +51,13 @@ async def get_gold_rate():
         async with ClientSession() as s, s.get(gold_rate_url) as response:
             ret = await response.read()
             x = json.loads(ret, object_hook=lambda d: namedtuple('x', d.keys())(*d.values()))
-            print(x)
+            LOGGER.info(x)
             rate_info = RateInfo.RateInfo(x.goldRate22, x.goldRate24, x.silver)
             rate_info.set_error(None)
             update_rate_line()
             return rate_info
     except ClientConnectorError as ex:
-        print ('Unable to connect rate API')
+        LOGGER.exception ('Unable to connect rate API', ex)
         rate_info = RateInfo.RateInfo(0, 0, 0.0)
         rate_info.set_error(ex)
 
@@ -68,11 +70,17 @@ def update_weather_line():
 
     line2 = temperature + ' ' + str(weather.get_temp()) + 'c'
 
+# update display line strings
+def update_weather_line2():
+    global line2
+
+    # Make string 16 chars only
+    line2 = str(weather.get_location())[0:20]
+
 # update display line rate strings
 def update_rate_line():
     global line3, line4
 
-    # line3 = weather.get_location()[0:20]
     # line4 = 'Gold   ' + rate_info.get_gold22() + ' Silv ' + rate_info.get_silver()
     line3 = 'Gold   Rate   ' + str(rate_info.get_gold22())
     line4 = 'Silver Rate   ' + str(rate_info.get_silver())
@@ -85,11 +93,24 @@ def print_lcd():
     t = threading.Timer(1, print_lcd)
     t.start()
 
-    line1 = get_time().strftime("%d.%m  %a  %H:%M:%S")
+    currentTime = get_time();
+    line1 = currentTime.strftime("%d%b%y %a %H:%M:%S")
     update_weather_line()
     update_rate_line()
 
     #print('Writing to display: ', counter)
+
+    change_every_x_secs = 5;
+    rand_bool = random.choice([True, False])
+
+    if currentTime.second % change_every_x_secs == 0:
+        if rand_bool:
+            update_weather_line2()
+        else:
+            update_weather_line()
+
+        if weather.get_error() is None:
+            display.lcd_display_string(line2, 2)
 
     display.lcd_display_string(line1, 1)
 
@@ -97,9 +118,6 @@ def print_lcd():
     if counter == 0:
         display.lcd_clear();
         display.lcd_display_string(line1, 1)
-
-        if weather.get_error() is None:
-            display.lcd_display_string(line2, 2)
 
         if rate_info.get_error() is None:
             display.lcd_display_string(line3, 3)
@@ -118,11 +136,16 @@ def print_lcd():
 
 # main starts here
 if __name__ == '__main__':
+    logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO"), format='%(asctime)s %(message)s')
+    LOGGER = logging.getLogger(__name__)
+
+    LOGGER.info('Display 20x4 LCD Module Start')
+
     print('Display 20x4 LCD Module Starts')
     display.lcd_display_string("Welcome", 1)
     display.lcd_display_string("Starting Now ...", 2)
     counter = 0
-    time.sleep(20)
+    time.sleep(25)
 
     try:
         asyncio.run(get_weather())
@@ -130,5 +153,5 @@ if __name__ == '__main__':
         print_lcd()
 
     except KeyboardInterrupt:
-        print('Cleaning up !')
+        LOGGER.info('Cleaning up !')
         display.lcd_clear()

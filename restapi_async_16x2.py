@@ -1,5 +1,5 @@
 # Main LCD 16x2 I2C - Forecast API Consume Python Script
-
+import random
 import threading
 import asyncio
 import json
@@ -70,6 +70,13 @@ def update_weather_line():
     line2 = temperature + ' ' + str(weather.get_temp()) + 'c'
 
 # update display line strings
+def update_weather_line2():
+    global line2
+
+    # Make string 16 chars only
+    line2 = str(weather.get_location())[0:16]
+
+# update display line strings
 def update_rate_line():
     global line2
 
@@ -84,9 +91,23 @@ def print_lcd():
     t = threading.Timer(1, print_lcd)
     t.start()
 
-    line1 = get_time().strftime("%d.%b %H:%M:%S")
-    update_weather_line()
-    update_rate_line()
+    currentTime = get_time();
+    line1 = currentTime.strftime("%d%b%y %H:%M:%S")
+    #update_weather_line()
+
+    change_every_x_secs = 5;
+
+    rand_bool = random.choice([True, False])
+
+    if currentTime.second % change_every_x_secs == 0:
+        print(currentTime.second, ' mod ', currentTime.second % change_every_x_secs, ' display: ', rand_bool)
+        if rand_bool:
+            update_weather_line2()
+        else:
+            update_weather_line()
+
+        if weather.get_error() is None:
+            display.lcd_display_string(line2, 2)
 
     #print('Writing to display: ', counter)
 
@@ -97,15 +118,8 @@ def print_lcd():
         display.lcd_clear();
         display.lcd_display_string(line1, 1)
 
-        if weather.get_error() is None:
-            display.lcd_display_string(line2, 2)
-
-        #if rate_info.get_error() is None:
-        #    display.lcd_display_string(line2, 2)
-            #display.lcd_display_string(line4, 2)
-
     # Refresh the data every 5 mins (300 seconds once)
-    if counter == 10:
+    if counter == 60:
         counter = 0
         asyncio.run(get_weather())
         # Query Gold Rate only in between 9 AM to 5 PM and not on SUNDAYS
@@ -121,7 +135,7 @@ if __name__ == '__main__':
     display.lcd_display_string("Welcome", 1)
     display.lcd_display_string("Starting Now ...", 2)
     counter = 0
-    time.sleep(20)
+    time.sleep(2)
 
     try:
         asyncio.run(get_weather())
