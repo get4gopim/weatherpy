@@ -1,12 +1,11 @@
 # Rate Info Class file
 
 
-class RateInfo:
+class FuelInfo:
 
-    def __init__(self, gold22, gold24, silver, date, last_updated_time):
-        self.__gold22 = gold22
-        self.__gold24 = gold24
-        self.__silver = silver
+    def __init__(self, petrol, diesel, date, last_updated_time):
+        self.__petrol = petrol
+        self.__diesel = diesel
         self.__date = date
         self.__last_updated_time = last_updated_time
         self.error = None
@@ -17,14 +16,11 @@ class RateInfo:
     def set_error(self, error):
         self.error = error
 
-    def get_gold22(self):
-        return self.__gold22
+    def get_petrol(self):
+        return self.__petrol
 
-    def get_gold24(self):
-        return self.__gold24
-
-    def get_silver(self):
-        return self.__silver
+    def get_diesel(self):
+        return self.__diesel
 
     def get_date(self):
         return self.__date

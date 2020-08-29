@@ -13,6 +13,7 @@ import lcddriver
 
 import WeatherInfo
 import RateInfo
+import FuelInfo
 
 from aiohttp import ClientSession, ClientConnectorError
 from collections import namedtuple
@@ -26,6 +27,7 @@ def get_time():
 
 weather_url = 'http://localhost:8080/forecast/weather'
 gold_rate_url = 'http://localhost:8080/forecast/gold'
+fuel_rate_url = 'http://localhost:8080/forecast/fuel'
 
 # call async rest call to get weather details
 async def get_weather():
@@ -52,14 +54,31 @@ async def get_gold_rate():
             ret = await response.read()
             x = json.loads(ret, object_hook=lambda d: namedtuple('x', d.keys())(*d.values()))
             LOGGER.info(x)
-            rate_info = RateInfo.RateInfo(x.goldRate22, x.goldRate24, x.silver)
+            rate_info = RateInfo.RateInfo(x.goldRate22, x.goldRate24, x.silver, x.lastUpdateTime, x.date)
             rate_info.set_error(None)
             update_rate_line()
             return rate_info
     except ClientConnectorError as ex:
         LOGGER.exception ('Unable to connect rate API', ex)
-        rate_info = RateInfo.RateInfo(0, 0, 0.0)
+        rate_info = RateInfo.RateInfo(0, 0, 0.0, "", "")
         rate_info.set_error(ex)
+
+# call async rest call to get fuel details
+async def get_fuel():
+    global fuel_info
+    try:
+        async with ClientSession() as s, s.get(weather_url) as response:
+            ret = await response.read()
+            x = json.loads(ret, object_hook=lambda d: namedtuple('x', d.keys())(*d.values()))
+            LOGGER.info(x)
+            fuel_info = FuelInfo.FuelInfo(x.petrolPrice, x.dieselPrice, x.date, x.lastUpdatedTime)
+            fuel_info.set_error(None)
+            update_fuel_line()
+            return fuel_info
+    except ClientConnectorError as ex:
+        LOGGER.exception ('Unable to connect weather API', ex)
+        fuel_info = FuelInfo.FuelInfo(0, 0, "", "")
+        fuel_info.set_error(ex)
 
 # update display line weather strings
 def update_weather_line():
@@ -85,6 +104,13 @@ def update_rate_line():
     line3 = 'Gold   Rate     ' + str(rate_info.get_gold22())
     line4 = 'Silver Rate    ' + str(rate_info.get_silver())
 
+def update_fuel_line():
+    global line3, line4
+
+    # line4 = 'Petrol ' + fuel_info.get_petrol() + ' Disel' + fuel_info.get_diesel()
+    line3 = 'Petrol Rate    ' + str(fuel_info.get_petrol())
+    line4 = 'Diesel Rate    ' + str(fuel_info.get_diesel())
+
 # display function
 def print_lcd():
     global counter
@@ -96,7 +122,7 @@ def print_lcd():
     currentTime = get_time();
     line1 = currentTime.strftime("%d.%m  %a  %H:%M:%S")
     update_weather_line()
-    update_rate_line()
+    update_fuel_line()
 
     #print('Writing to display: ', counter)
 
@@ -130,7 +156,8 @@ def print_lcd():
         # Query Gold Rate only in between 9 AM to 5 PM and not on SUNDAYS
         if (datetime.datetime.today().weekday() != 6 and
                 (9 <= get_time().hour <= 17)):
-            asyncio.run(get_gold_rate())
+            #asyncio.run(get_gold_rate())
+            asyncio.run(get_fuel())
 
     counter = counter + 1
 
@@ -150,6 +177,7 @@ if __name__ == '__main__':
     try:
         asyncio.run(get_weather())
         asyncio.run(get_gold_rate())
+        asyncio.run(get_fuel())
         print_lcd()
 
     except KeyboardInterrupt:
