@@ -67,7 +67,7 @@ async def get_gold_rate():
 async def get_fuel():
     global fuel_info
     try:
-        async with ClientSession() as s, s.get(weather_url) as response:
+        async with ClientSession() as s, s.get(fuel_rate_url) as response:
             ret = await response.read()
             x = json.loads(ret, object_hook=lambda d: namedtuple('x', d.keys())(*d.values()))
             LOGGER.info(x)
