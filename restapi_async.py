@@ -201,7 +201,7 @@ if __name__ == '__main__':
     display.lcd_display_string("Starting Now ...", 2)
     counter = 0
     rand_bool = True
-    time.sleep(26)
+    time.sleep(2)
 
     try:
         asyncio.run(get_weather())
