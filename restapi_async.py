@@ -217,8 +217,14 @@ def print_lcd():
 
 def welcome_date_month():
     currentTime = get_time()
+    day = currentTime.strftime("%d")
+    month = currentTime.strftime("%B")
+    if currentTime.month == 8 and currentTime.weekday() in (1, 2, 3, 5):
+        month = currentTime.strftime("%b")
+    week_day = currentTime.strftime("%A")
+
     # Format: 29 August Sunday
-    wel_date = currentTime.strftime("%d %B %A")
+    wel_date = day + month + week_day
     return wel_date.center(lcd_disp_length, ' ')
 
 # main starts here
