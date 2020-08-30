@@ -33,7 +33,7 @@ gold_rate_url = scheme + '://' + host + ':' + port + '/forecast/gold'
 fuel_rate_url = scheme + '://' + host + ':' + port + '/forecast/fuel'
 
 lcd_disp_length = 20
-service_start_time_in_secs = 27
+service_start_time_in_secs = 30
 
 # get current system time
 def get_time():
