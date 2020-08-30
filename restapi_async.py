@@ -24,7 +24,8 @@ from collections import namedtuple
 display = lcddriver.lcd()
 
 scheme = 'http'
-host = '192.168.29.101'
+host = 'localhost'
+# host = '192.168.29.101'
 port = '8080'
 
 weather_url = scheme + '://' + host + ':' + port + '/forecast/weather'
@@ -32,6 +33,7 @@ gold_rate_url = scheme + '://' + host + ':' + port + '/forecast/gold'
 fuel_rate_url = scheme + '://' + host + ':' + port + '/forecast/fuel'
 
 lcd_disp_length = 20
+service_start_time_in_secs = 30
 
 # get current system time
 def get_time():
@@ -205,7 +207,7 @@ if __name__ == '__main__':
     display.lcd_display_string("Starting Now ...", 2)
     counter = 0
     rand_bool = True
-    time.sleep(26)
+    time.sleep(service_start_time_in_secs)
 
     try:
         asyncio.run(get_weather())
