@@ -224,7 +224,7 @@ def welcome_date_month():
     week_day = currentTime.strftime("%A")
 
     # Format: 29 August Sunday
-    wel_date = day + month + week_day
+    wel_date = str (day, ' ', month, ' ', week_day)
     return wel_date.center(lcd_disp_length, ' ')
 
 # main starts here
