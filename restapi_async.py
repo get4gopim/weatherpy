@@ -219,7 +219,7 @@ def welcome_date_month():
     currentTime = get_time()
     day = currentTime.strftime("%d")
     month = currentTime.strftime("%B")
-    if currentTime.month == 8 and currentTime.weekday() in (1, 2, 3, 5):
+    if currentTime.month == 8 and currentTime.weekday() in [1, 2, 3, 5]:
         month = currentTime.strftime("%b")
     week_day = currentTime.strftime("%A")
 
