@@ -217,8 +217,9 @@ def print_lcd():
 
 def welcome_date_month():
     currentTime = get_time()
-    wel_date = currentTime.strftime("%d %M %A")
-    return wel_date.rjust(lcd_disp_length, ' ')
+    # Format: 29 August Sunday
+    wel_date = currentTime.strftime("%d  %B  %A")
+    return wel_date.center(lcd_disp_length, ' ')
 
 # main starts here
 if __name__ == '__main__':
@@ -228,8 +229,8 @@ if __name__ == '__main__':
     LOGGER.info('Display 20x4 LCD Module Start')
 
     print('Display 20x4 LCD Module Starts')
-    display.lcd_display_string("Welcome".rjust(lcd_disp_length, ' '), 1)
-    display.lcd_display_string("Starting Now ...".rjust(lcd_disp_length, ' '), 2)
+    display.lcd_display_string("Welcome".center(lcd_disp_length, ' '), 1)
+    display.lcd_display_string("Starting Now ...".center(lcd_disp_length, ' '), 2)
     display.lcd_display_string(welcome_date_month(), 3)
 
     counter = 0
