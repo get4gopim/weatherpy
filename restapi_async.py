@@ -35,9 +35,11 @@ fuel_rate_url = scheme + '://' + host + ':' + port + '/forecast/fuel'
 lcd_disp_length = 20
 service_start_time_in_secs = 30
 
+
 # get current system time
 def get_time():
     return datetime.datetime.now()
+
 
 # call async rest call to get weather details
 async def get_weather():
@@ -56,6 +58,7 @@ async def get_weather():
         weather = WeatherInfo.WeatherInfo(0, 0, 0, "00:00", "", "")
         weather.set_error(ex)
 
+
 # call async rest call to get gold rate detail
 async def get_gold_rate():
     global rate_info
@@ -72,6 +75,7 @@ async def get_gold_rate():
         LOGGER.exception ('Unable to connect rate API', ex)
         rate_info = RateInfo.RateInfo(0, 0, 0.0, "", "")
         rate_info.set_error(ex)
+
 
 # call async rest call to get fuel details
 async def get_fuel():
@@ -90,6 +94,7 @@ async def get_fuel():
         fuel_info = FuelInfo.FuelInfo(0, 0, "", "")
         fuel_info.set_error(ex)
 
+
 # update display line strings
 def update_weather_temp():
     global line2
@@ -101,6 +106,7 @@ def update_weather_temp():
     line2 = temperature + ' ' + str(weather.get_temp()) + 'c'
 
     line2 = line2.ljust(lcd_disp_length, ' ')
+
 
 # update display line strings
 def update_weather_location():
@@ -115,6 +121,7 @@ def update_weather_location():
     line2 = location[0:lcd_disp_length]
     line2 = line2.ljust(lcd_disp_length, ' ')
 
+
 # update display line rate strings
 def update_rate_line():
     global line3, line4
@@ -125,6 +132,7 @@ def update_rate_line():
 
     line3 = line3.ljust(lcd_disp_length, ' ')
     line4 = line4.ljust(lcd_disp_length, ' ')
+
 
 # update display fuel price line
 def update_fuel_line():
@@ -137,17 +145,21 @@ def update_fuel_line():
     line3 = line3.ljust(lcd_disp_length, ' ')
     line4 = line4.ljust(lcd_disp_length, ' ')
 
+
 def update_time_line(currentTime):
     global line1
 
     line1 = currentTime.strftime("%d.%m  %a  %H:%M:%S")
 
+
 def print_line1():
     display.lcd_display_string(line1, 1)
+
 
 def print_line2():
     if weather.get_error() is None:
         display.lcd_display_string(line2, 2)
+
 
 # print line 3 and 4
 def print_line3_and_4():
@@ -215,18 +227,20 @@ def print_lcd():
 
     counter = counter + 1
 
+
 def welcome_date_month():
-    currentTime = get_time()
-    day = currentTime.strftime("%d")
-    month = currentTime.strftime("%B")
-    week_day = currentTime.strftime("%A")
+    current_time = get_time()
+    day = current_time.strftime("%d")
+    month = current_time.strftime("%B")
+    week_day = current_time.strftime("%A")
 
-    if currentTime.month == 8 and currentTime.weekday() in [2, 3, 5, 6]:
-        month = currentTime.strftime("%b")
+    if current_time.month == 9 and current_time.weekday() in [2, 3, 5]:
+        month = current_time.strftime("%b")
 
-    # Format: 29 August Sunday
+    # Format: 29 August Sunday, 22 Sep Wednesday
     wel_date = str (day + ' ' + month + ' ' + week_day)
     return wel_date.center(lcd_disp_length, ' ')
+
 
 # main starts here
 if __name__ == '__main__':
