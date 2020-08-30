@@ -33,7 +33,7 @@ gold_rate_url = scheme + '://' + host + ':' + port + '/forecast/gold'
 fuel_rate_url = scheme + '://' + host + ':' + port + '/forecast/fuel'
 
 lcd_disp_length = 20
-service_start_time_in_secs = 30
+service_start_time_in_secs = 27
 
 # get current system time
 def get_time():
@@ -131,8 +131,8 @@ def update_fuel_line():
     global line3, line4
 
     # line4 = 'Petrol ' + fuel_info.get_petrol() + ' Disel' + fuel_info.get_diesel()
-    line3 = 'Petrol Rate    ' + str(fuel_info.get_petrol())
-    line4 = 'Diesel Rate    ' + str(fuel_info.get_diesel())
+    line3 = 'Petrol Price   ' + str(fuel_info.get_petrol())
+    line4 = 'Diesel Price   ' + str(fuel_info.get_diesel())
 
     line3 = line3.ljust(lcd_disp_length, ' ')
     line4 = line4.ljust(lcd_disp_length, ' ')
