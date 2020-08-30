@@ -137,6 +137,11 @@ def update_fuel_line():
     line3 = line3.ljust(lcd_disp_length, ' ')
     line4 = line4.ljust(lcd_disp_length, ' ')
 
+def update_time_line(currentTime):
+    global line1
+
+    line1 = currentTime.strftime("%d.%m  %a  %H:%M:%S")
+
 def print_line1():
     display.lcd_display_string(line1, 1)
 
@@ -161,7 +166,10 @@ def print_lcd():
     t.start()
 
     currentTime = get_time()
-    line1 = currentTime.strftime("%d.%m  %a  %H:%M:%S")
+    update_time_line(currentTime)
+    # print timer every in second
+    print_line1()
+
     update_weather_temp()
     update_rate_line()
 
@@ -183,8 +191,7 @@ def print_lcd():
         print_line2()
         print_line3_and_4()
 
-    # print timer every in second
-    print_line1()
+
 
     # Every reset counter clear and refresh the data lines
     if counter == 0:
@@ -200,9 +207,18 @@ def print_lcd():
         if (datetime.datetime.today().weekday() != 6 and
                 (9 <= get_time().hour <= 17)):
             asyncio.run(get_gold_rate())
+
+        # Query Fuel Rate only in morning between 6 AM to 8 AM and not on SUNDAYS
+        if (datetime.datetime.today().weekday() != 6 and
+                    (6 <= get_time().hour <= 8)):
             asyncio.run(get_fuel())
 
     counter = counter + 1
+
+def welcome_date_month():
+    currentTime = get_time()
+    wel_date = currentTime.strftime("%d %M %A")
+    return wel_date.rjust(lcd_disp_length, ' ')
 
 # main starts here
 if __name__ == '__main__':
@@ -212,8 +228,10 @@ if __name__ == '__main__':
     LOGGER.info('Display 20x4 LCD Module Start')
 
     print('Display 20x4 LCD Module Starts')
-    display.lcd_display_string("Welcome", 1)
-    display.lcd_display_string("Starting Now ...", 2)
+    display.lcd_display_string("Welcome".rjust(lcd_disp_length, ' '), 1)
+    display.lcd_display_string("Starting Now ...".rjust(lcd_disp_length, ' '), 2)
+    display.lcd_display_string(welcome_date_month(), 3)
+
     counter = 0
     rand_bool = True
     time.sleep(service_start_time_in_secs)
