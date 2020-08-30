@@ -120,8 +120,8 @@ def update_rate_line():
     global line3, line4
 
     # line4 = 'Gold   ' + rate_info.get_gold22() + ' Silv ' + rate_info.get_silver()
-    line3 = 'Gold   Rate     ' + str(rate_info.get_gold22())
-    line4 = 'Silver Rate    ' + str(rate_info.get_silver())
+    line3 = 'Gold            ' + str(rate_info.get_gold22())
+    line4 = 'Silver         ' + str(rate_info.get_silver())
 
     line3 = line3.ljust(lcd_disp_length, ' ')
     line4 = line4.ljust(lcd_disp_length, ' ')
@@ -131,14 +131,29 @@ def update_fuel_line():
     global line3, line4
 
     # line4 = 'Petrol ' + fuel_info.get_petrol() + ' Disel' + fuel_info.get_diesel()
-    line3 = 'Petrol Price   ' + str(fuel_info.get_petrol())
-    line4 = 'Diesel Price   ' + str(fuel_info.get_diesel())
+    line3 = 'Petrol         ' + str(fuel_info.get_petrol())
+    line4 = 'Diesel         ' + str(fuel_info.get_diesel())
 
     line3 = line3.ljust(lcd_disp_length, ' ')
     line4 = line4.ljust(lcd_disp_length, ' ')
 
+def print_line1():
+    display.lcd_display_string(line1, 1)
+
+def print_line2():
+    if weather.get_error() is None:
+        display.lcd_display_string(line2, 2)
+
+# print line 3 and 4
+def print_line3_and_4():
+    if rate_info.get_error() is None and fuel_info.get_error() is None:
+        display.lcd_display_string(line3, 3)
+        display.lcd_display_string(line4, 4)
+
+
 # display function
 def print_lcd():
+    global line1
     global counter
     global rand_bool
 
@@ -154,6 +169,7 @@ def print_lcd():
 
     change_every_x_secs = 5
 
+    # change display line2 every x seconds
     if currentTime.second % change_every_x_secs == 0:
         # print(currentTime.second, ' mod ', currentTime.second % change_every_x_secs, ' display: ', rand_bool)
         if rand_bool:
@@ -164,24 +180,17 @@ def print_lcd():
             update_weather_location()
             update_fuel_line()
             rand_bool = True
+        print_line2()
+        print_line3_and_4()
 
-        if weather.get_error() is None:
-            display.lcd_display_string(line2, 2)
-
-        if rate_info.get_error() is None and fuel_info.get_error() is None:
-            display.lcd_display_string(line3, 3)
-            display.lcd_display_string(line4, 4)
-
-    display.lcd_display_string(line1, 1)
+    # print timer every in second
+    print_line1()
 
     # Every reset counter clear and refresh the data lines
     if counter == 0:
         display.lcd_clear()
-        display.lcd_display_string(line1, 1)
-
-        if rate_info.get_error() is None and fuel_info.get_error() is None:
-            display.lcd_display_string(line3, 3)
-            display.lcd_display_string(line4, 4)
+        print_line1()
+        print_line3_and_4()
 
     # Refresh the data every 5 mins (300 seconds once)
     if counter == 300:
