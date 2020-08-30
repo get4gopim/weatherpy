@@ -175,7 +175,7 @@ def print_lcd():
 
     #print('Writing to display: ', counter)
 
-    change_every_x_secs = 5
+    change_every_x_secs = 10
 
     # change display line2 every x seconds
     if currentTime.second % change_every_x_secs == 0:
@@ -219,9 +219,10 @@ def welcome_date_month():
     currentTime = get_time()
     day = currentTime.strftime("%d")
     month = currentTime.strftime("%B")
-    if currentTime.month == 8 and currentTime.weekday() in [1, 2, 3, 5]:
-        month = currentTime.strftime("%b")
     week_day = currentTime.strftime("%A")
+
+    if currentTime.month == 8 and currentTime.weekday() in [2, 3, 5, 6]:
+        month = currentTime.strftime("%b")
 
     # Format: 29 August Sunday
     wel_date = str (day + ' ' + month + ' ' + week_day)

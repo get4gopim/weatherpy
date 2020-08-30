@@ -181,6 +181,19 @@ def print_lcd():
 
     counter = counter + 1
 
+def welcome_date_month():
+    currentTime = get_time()
+    day = currentTime.strftime("%d")
+    month = currentTime.strftime("%B")
+    print (str(currentTime.month) + ' ' + str(currentTime.weekday()) + ' ' + str(currentTime.day) )
+    if currentTime.month == 8 and currentTime.weekday() in [2, 3, 5, 6]:
+        month = currentTime.strftime("%b")
+    week_day = currentTime.strftime("%A")
+
+    # Format: 29 August Sunday
+    wel_date = str (day + ' ' + month + ' ' + week_day)
+    return wel_date.center(lcd_disp_length, ' ')
+
 # main starts here
 if __name__ == '__main__':
     logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO"), format='%(asctime)s %(message)s')
@@ -188,7 +201,7 @@ if __name__ == '__main__':
     LOGGER.info('Display 16x2 LCD Module Starts')
 
     print('Display 16x2 LCD Module Starts')
-    display.lcd_display_string("Welcome", 1)
+    display.lcd_display_string(welcome_date_month(), 1)
     display.lcd_display_string("Starting Now ...", 2)
     counter = 0
     time.sleep(2)
