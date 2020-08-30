@@ -230,8 +230,8 @@ if __name__ == '__main__':
 
     print('Display 20x4 LCD Module Starts')
     display.lcd_display_string("Welcome".center(lcd_disp_length, ' '), 1)
-    display.lcd_display_string("Starting Now ...".center(lcd_disp_length, ' '), 2)
-    display.lcd_display_string(welcome_date_month(), 3)
+    display.lcd_display_string(welcome_date_month(), 2)
+    display.lcd_display_string("Starting Now ...".center(lcd_disp_length, ' '), 4)
 
     counter = 0
     rand_bool = True
