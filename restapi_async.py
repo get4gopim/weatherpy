@@ -166,6 +166,10 @@ def print_lcd():
         if weather.get_error() is None:
             display.lcd_display_string(line2, 2)
 
+        if rate_info.get_error() is None and fuel_info.get_error() is None:
+            display.lcd_display_string(line3, 3)
+            display.lcd_display_string(line4, 4)
+
     display.lcd_display_string(line1, 1)
 
     # Every reset counter clear and refresh the data lines
@@ -173,7 +177,7 @@ def print_lcd():
         display.lcd_clear()
         display.lcd_display_string(line1, 1)
 
-        if rate_info.get_error() is None:
+        if rate_info.get_error() is None and fuel_info.get_error() is None:
             display.lcd_display_string(line3, 3)
             display.lcd_display_string(line4, 4)
 
