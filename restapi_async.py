@@ -14,6 +14,7 @@ import lcddriver
 import WeatherInfo
 import RateInfo
 import FuelInfo
+import util
 
 from aiohttp import ClientSession, ClientConnectorError
 from collections import namedtuple
@@ -22,12 +23,19 @@ from collections import namedtuple
 # If you use something from the driver library use the "display." prefix first
 display = lcddriver.lcd()
 
+scheme = 'http'
+host = '192.168.29.101'
+port = '8080'
+
+weather_url = scheme + '://' + host + ':' + port + '/forecast/weather'
+gold_rate_url = scheme + '://' + host + ':' + port + '/forecast/gold'
+fuel_rate_url = scheme + '://' + host + ':' + port + '/forecast/fuel'
+
+lcd_disp_length = 20
+
+# get current system time
 def get_time():
     return datetime.datetime.now()
-
-weather_url = 'http://localhost:8080/forecast/weather'
-gold_rate_url = 'http://localhost:8080/forecast/gold'
-fuel_rate_url = 'http://localhost:8080/forecast/fuel'
 
 # call async rest call to get weather details
 async def get_weather():
@@ -39,7 +47,7 @@ async def get_weather():
             LOGGER.info(x)
             weather = WeatherInfo.WeatherInfo(x.temperature, x.low, x.high, x.asOf, x.currentCondition, x.location)
             weather.set_error(None)
-            update_weather_line()
+            update_weather_temp()
             return weather
     except ClientConnectorError as ex:
         LOGGER.exception ('Unable to connect weather API', ex)
@@ -76,25 +84,34 @@ async def get_fuel():
             update_fuel_line()
             return fuel_info
     except ClientConnectorError as ex:
-        LOGGER.exception ('Unable to connect weather API', ex)
+        LOGGER.exception ('Unable to connect fuel API', ex)
         fuel_info = FuelInfo.FuelInfo(0, 0, "", "")
         fuel_info.set_error(ex)
 
-# update display line weather strings
-def update_weather_line():
+# update display line strings
+def update_weather_temp():
     global line2
 
-    temperature = str(weather.get_condition())[0:16]
-    temperature = temperature.ljust(16, ' ')
-
+    # Make string right justified of length 4 by padding 3 spaces to left
+    justl = lcd_disp_length - 4
+    temperature = str(weather.get_condition())[0:justl]
+    temperature = temperature.ljust(justl, ' ')
     line2 = temperature + ' ' + str(weather.get_temp()) + 'c'
 
+    line2 = line2.ljust(lcd_disp_length, ' ')
+
 # update display line strings
-def update_weather_line2():
+def update_weather_location():
     global line2
 
-    # Make string 16 chars only
-    line2 = str(weather.get_location())[0:20]
+    location = weather.get_location()
+    delimiter_idx = util.index_of(location, ',')
+    if delimiter_idx > 0:
+        location = location[0:delimiter_idx]
+
+    # Make string 16 chars only and left justify with space if length is less.
+    line2 = location[0:lcd_disp_length]
+    line2 = line2.ljust(lcd_disp_length, ' ')
 
 # update display line rate strings
 def update_rate_line():
@@ -104,6 +121,10 @@ def update_rate_line():
     line3 = 'Gold   Rate     ' + str(rate_info.get_gold22())
     line4 = 'Silver Rate    ' + str(rate_info.get_silver())
 
+    line3 = line3.ljust(lcd_disp_length, ' ')
+    line4 = line4.ljust(lcd_disp_length, ' ')
+
+# update display fuel price line
 def update_fuel_line():
     global line3, line4
 
@@ -111,29 +132,36 @@ def update_fuel_line():
     line3 = 'Petrol Rate    ' + str(fuel_info.get_petrol())
     line4 = 'Diesel Rate    ' + str(fuel_info.get_diesel())
 
+    line3 = line3.ljust(lcd_disp_length, ' ')
+    line4 = line4.ljust(lcd_disp_length, ' ')
+
 # display function
 def print_lcd():
     global counter
-    global line1
+    global rand_bool
 
     t = threading.Timer(1, print_lcd)
     t.start()
 
-    currentTime = get_time();
+    currentTime = get_time()
     line1 = currentTime.strftime("%d.%m  %a  %H:%M:%S")
-    update_weather_line()
-    update_fuel_line()
+    update_weather_temp()
+    update_rate_line()
 
     #print('Writing to display: ', counter)
 
-    change_every_x_secs = 5;
-    rand_bool = random.choice([True, False])
+    change_every_x_secs = 5
 
     if currentTime.second % change_every_x_secs == 0:
+        # print(currentTime.second, ' mod ', currentTime.second % change_every_x_secs, ' display: ', rand_bool)
         if rand_bool:
-            update_weather_line2()
+            update_weather_temp()
+            update_rate_line()
+            rand_bool = False
         else:
-            update_weather_line()
+            update_weather_location()
+            update_fuel_line()
+            rand_bool = True
 
         if weather.get_error() is None:
             display.lcd_display_string(line2, 2)
@@ -142,7 +170,7 @@ def print_lcd():
 
     # Every reset counter clear and refresh the data lines
     if counter == 0:
-        display.lcd_clear();
+        display.lcd_clear()
         display.lcd_display_string(line1, 1)
 
         if rate_info.get_error() is None:
@@ -156,7 +184,7 @@ def print_lcd():
         # Query Gold Rate only in between 9 AM to 5 PM and not on SUNDAYS
         if (datetime.datetime.today().weekday() != 6 and
                 (9 <= get_time().hour <= 17)):
-            #asyncio.run(get_gold_rate())
+            asyncio.run(get_gold_rate())
             asyncio.run(get_fuel())
 
     counter = counter + 1
@@ -172,7 +200,8 @@ if __name__ == '__main__':
     display.lcd_display_string("Welcome", 1)
     display.lcd_display_string("Starting Now ...", 2)
     counter = 0
-    time.sleep(25)
+    rand_bool = True
+    time.sleep(26)
 
     try:
         asyncio.run(get_weather())
