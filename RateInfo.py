@@ -4,8 +4,8 @@ import util
 class RateInfo:
 
     def __init__(self, gold22, gold24, silver, date, last_updated_time):
-        self.__gold22 = self.remove_fraction (gold22)
-        self.__gold24 = self.remove_fraction (gold24)
+        self.__gold22 = self.remove_fraction (str(gold22))
+        self.__gold24 = self.remove_fraction (str(gold24))
         self.__silver = silver
         self.__date = date
         self.__last_updated_time = last_updated_time

@@ -70,7 +70,7 @@ async def get_gold_rate():
             return rate_info
     except ClientConnectorError as ex:
         print ('Unable to connect rate API')
-        rate_info = RateInfo.RateInfo(0, 0, 0.0, "", "")
+        rate_info = RateInfo.RateInfo('0', '0', 0.0, "", "")
         rate_info.set_error(ex)
 
 # call async rest call to get fuel details
