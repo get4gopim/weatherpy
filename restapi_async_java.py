@@ -14,7 +14,6 @@ import lcddriver
 import WeatherInfo
 import RateInfo
 import FuelInfo
-import HtmlParser
 import util
 
 from aiohttp import ClientSession, ClientConnectorError
@@ -24,9 +23,17 @@ from collections import namedtuple
 # If you use something from the driver library use the "display." prefix first
 display = lcddriver.lcd()
 
+scheme = 'http'
+host = 'localhost'
+# host = '192.168.29.101'
+port = '8080'
+
+weather_url = scheme + '://' + host + ':' + port + '/forecast/weather'
+gold_rate_url = scheme + '://' + host + ':' + port + '/forecast/gold'
+fuel_rate_url = scheme + '://' + host + ':' + port + '/forecast/fuel'
 
 lcd_disp_length = 20
-service_start_time_in_secs = 3
+service_start_time_in_secs = 30
 
 
 # get current system time
@@ -38,12 +45,16 @@ def get_time():
 async def get_weather():
     global weather
     try:
-        weather = HtmlParser.get_weather()
-        weather.set_error(None)
-        update_weather_location()
-        return weather
-    except Exception as ex:
-        print('Unable to connect weather API')
+        async with ClientSession() as s, s.get(weather_url) as response:
+            ret = await response.read()
+            x = json.loads(ret, object_hook=lambda d: namedtuple('x', d.keys())(*d.values()))
+            LOGGER.info(x)
+            weather = WeatherInfo.WeatherInfo(x.temperature, x.low, x.high, x.asOf, x.currentCondition, x.location)
+            weather.set_error(None)
+            update_weather_temp()
+            return weather
+    except ClientConnectorError as ex:
+        LOGGER.exception ('Unable to connect weather API', ex)
         weather = WeatherInfo.WeatherInfo(0, 0, 0, "00:00", "", "")
         weather.set_error(ex)
 
@@ -52,13 +63,17 @@ async def get_weather():
 async def get_gold_rate():
     global rate_info
     try:
-        rate_info = HtmlParser.get_gold_price()
-        rate_info.set_error(None)
-        update_rate_line()
-        return rate_info
-    except Exception as ex:
-        print('Unable to connect rate API')
-        rate_info = RateInfo.RateInfo('0', '0', 0.0, "", "")
+        async with ClientSession() as s, s.get(gold_rate_url) as response:
+            ret = await response.read()
+            x = json.loads(ret, object_hook=lambda d: namedtuple('x', d.keys())(*d.values()))
+            LOGGER.info(x)
+            rate_info = RateInfo.RateInfo(x.goldRate22, x.goldRate24, x.silver, x.lastUpdateTime, x.date)
+            rate_info.set_error(None)
+            update_rate_line()
+            return rate_info
+    except ClientConnectorError as ex:
+        LOGGER.exception ('Unable to connect rate API', ex)
+        rate_info = RateInfo.RateInfo(0, 0, 0.0, "", "")
         rate_info.set_error(ex)
 
 
@@ -66,12 +81,16 @@ async def get_gold_rate():
 async def get_fuel():
     global fuel_info
     try:
-        fuel_info = HtmlParser.get_fuel_price()
-        fuel_info.set_error(None)
-        update_fuel_line()
-        return fuel_info
-    except Exception as ex:
-        LOGGER.exception('Unable to connect Fuel API', ex)
+        async with ClientSession() as s, s.get(fuel_rate_url) as response:
+            ret = await response.read()
+            x = json.loads(ret, object_hook=lambda d: namedtuple('x', d.keys())(*d.values()))
+            LOGGER.info(x)
+            fuel_info = FuelInfo.FuelInfo(x.petrolPrice, x.dieselPrice, x.date, x.lastUpdatedTime)
+            fuel_info.set_error(None)
+            update_fuel_line()
+            return fuel_info
+    except ClientConnectorError as ex:
+        LOGGER.exception ('Unable to connect fuel API', ex)
         fuel_info = FuelInfo.FuelInfo(0, 0, "", "")
         fuel_info.set_error(ex)
 
@@ -102,18 +121,6 @@ def update_weather_location():
     line2 = location[0:lcd_disp_length]
     line2 = line2.ljust(lcd_disp_length, ' ')
 
-# update preciption line strings
-def update_weather_preciption():
-    global line2
-
-    preciption = weather.get_preciption()
-    delimiter_idx = util.index_of(preciption, ' until')
-    if delimiter_idx > 0:
-        preciption = preciption[0:delimiter_idx]
-
-    # Make string 16 chars only and left justify with space if length is less.
-    line2 = preciption[0:lcd_disp_length]
-    line2 = line2.ljust(lcd_disp_length, ' ')
 
 # update display line rate strings
 def update_rate_line():
@@ -190,7 +197,7 @@ def print_lcd():
             update_rate_line()
             rand_bool = False
         else:
-            update_weather_preciption()
+            update_weather_location()
             update_fuel_line()
             rand_bool = True
         print_line2()

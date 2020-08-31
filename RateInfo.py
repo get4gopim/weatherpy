@@ -37,3 +37,6 @@ class RateInfo:
 
     def get_last_updated_time(self):
         return self.__last_updated_time
+
+    def __str__(self):
+        return "RateInfo: [date: " + self.__date + ", gold22: " + self.__gold22 + ", gold24: " + self.__gold24 + ", silver: " + self.__silver + ", lastUpdated: " + self.__last_updated_time + "]"

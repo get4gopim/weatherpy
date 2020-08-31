@@ -2,13 +2,14 @@
 
 class WeatherInfo:
 
-    def __init__(self, temp, low, high, asof, condition, location):
+    def __init__(self, temp, low, high, asof, condition, location, preciption):
         self.__temp = temp
         self.__low = low
         self.__high = high
         self.__asof = asof
         self.__condition = condition
         self.__location = location
+        self.__preciption = preciption
         self.error = None
 
     def get_error(self):
@@ -34,3 +35,9 @@ class WeatherInfo:
 
     def get_location(self):
         return self.__location
+
+    def get_preciption(self):
+        return self.__preciption
+
+    def __str__(self):
+        return "WeatherInfo: [location: " + self.__location + ", temp: " + self.__temp + ", low: " + self.__low + ", high: " + self.__high + ", condition: " + self.__condition + ", preciption: " + self.__preciption + "]"

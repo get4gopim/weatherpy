@@ -27,3 +27,6 @@ class FuelInfo:
 
     def get_last_updated_time(self):
         return self.__last_updated_time
+
+    def __str__(self):
+        return "FuelInfo: [date: " + self.__date + ", petrol: " + self.__petrol + ", diesel: " + self.__diesel + ", lastUpdated: " + self.__last_updated_time + "]"
