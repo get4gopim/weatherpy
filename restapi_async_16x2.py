@@ -109,7 +109,7 @@ def update_weather_location():
 def update_weather_preciption():
     global line2
 
-    preciption = weather.get_preciption()
+    preciption = '20% chance of until' # weather.get_preciption()
     delimiter_idx = util.index_of(preciption, 'until')
     if delimiter_idx > 0:
         preciption = preciption[0:delimiter_idx]
