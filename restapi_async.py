@@ -44,7 +44,7 @@ async def get_weather():
         return weather
     except Exception as ex:
         print('Unable to connect weather API')
-        weather = WeatherInfo.WeatherInfo(0, 0, 0, "00:00", "", "")
+        weather = WeatherInfo.WeatherInfo(0, 0, 0, "00:00", "", "", "")
         weather.set_error(ex)
 
 
@@ -107,7 +107,7 @@ def update_weather_preciption():
     global line2
 
     preciption = str(weather.get_preciption())
-    idx = 0 # util.index_of(preciption, 'until')
+    idx = util.index_of(preciption, 'until')
     if idx > 0:
         preciption = preciption[0:idx]
 
