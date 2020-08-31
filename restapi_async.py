@@ -107,7 +107,7 @@ def update_weather_preciption():
     global line2
 
     preciption = str(weather.get_preciption())
-    idx = util.index_of(preciption, 'until')
+    idx = 0 # util.index_of(preciption, 'until')
     if idx > 0:
         preciption = preciption[0:idx]
 
