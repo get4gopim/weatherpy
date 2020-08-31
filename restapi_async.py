@@ -115,7 +115,7 @@ def update_weather_preciption():
     # Make string 16 chars only and left justify with space if length is less.
     line2 = preciption[0:lcd_disp_length]
     print (line2)
-    line2 = line2.just(lcd_disp_length, ' ')
+    line2 = line2.center(lcd_disp_length, ' ')
 
 # update display line rate strings
 def update_rate_line():
