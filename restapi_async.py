@@ -191,7 +191,7 @@ def print_lcd():
 
     # print('Writing to display: ', line1, line2)
 
-    change_every_x_secs = 5
+    change_every_x_secs = 10
 
     # change display line2 every x seconds
     if currentTime.second % change_every_x_secs == 0:
