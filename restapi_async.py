@@ -198,7 +198,7 @@ def print_lcd():
 
 
     print_line1()
-    change_every_x_secs = 5
+    change_every_x_secs = 10
 
     # change display line2 every x seconds
     if currentTime.second % change_every_x_secs == 0:
@@ -220,7 +220,7 @@ def print_lcd():
         print_line3_and_4_fuel()
 
     # Refresh the data every 5 mins (300 seconds once)
-    if counter == 30:
+    if counter == 300:
         counter = 0
         asyncio.run(get_weather())
         # Query Gold Rate only in between 9 AM to 6 PM and not on SUNDAYS
