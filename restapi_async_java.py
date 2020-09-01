@@ -49,13 +49,13 @@ async def get_weather():
             ret = await response.read()
             x = json.loads(ret, object_hook=lambda d: namedtuple('x', d.keys())(*d.values()))
             LOGGER.info(x)
-            weather = WeatherInfo.WeatherInfo(x.temperature, x.low, x.high, x.asOf, x.currentCondition, x.location)
+            weather = WeatherInfo.WeatherInfo(x.temperature, x.low, x.high, x.asOf, x.currentCondition, x.location, '')
             weather.set_error(None)
             update_weather_temp()
             return weather
     except ClientConnectorError as ex:
         LOGGER.exception ('Unable to connect weather API', ex)
-        weather = WeatherInfo.WeatherInfo(0, 0, 0, "00:00", "", "")
+        weather = WeatherInfo.WeatherInfo(0, 0, 0, "00:00", "", "", "")
         weather.set_error(ex)
 
 
@@ -212,7 +212,7 @@ def print_lcd():
         print_line3_and_4()
 
     # Refresh the data every 5 mins (300 seconds once)
-    if counter == 300:
+    if counter == 60:
         counter = 0
         asyncio.run(get_weather())
         # Query Gold Rate only in between 9 AM to 5 PM and not on SUNDAYS
