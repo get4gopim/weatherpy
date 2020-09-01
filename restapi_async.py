@@ -107,14 +107,18 @@ def update_weather_preciption():
     global line2
 
     preciption = str(weather.get_preciption())
-    idx = util.index_of(preciption, 'until')
-    if idx > 0:
-        preciption = preciption[0:idx]
+    if len(preciption) > 0:
+        idx = util.index_of(preciption, 'until')
+        if idx > 0:
+            preciption = preciption[0:idx]
 
-    # Make string 20 chars only and left justify with space if length is less.
-    line2 = preciption[0:lcd_disp_length]
-    line2 = line2.ljust(lcd_disp_length, ' ')
-
+        # Make string 20 chars only and left justify with space if length is less.
+        line2 = preciption[0:lcd_disp_length]
+        line2 = line2.ljust(lcd_disp_length, ' ')
+    else:
+        update_weather_location()
+        
+        
 # update display line rate strings
 def update_rate_line():
     global line3, line4
