@@ -26,7 +26,7 @@ display = lcddriver.lcd()
 
 
 lcd_disp_length = 20
-service_start_time_in_secs = 2
+service_start_time_in_secs = 10
 
 
 # get current system time
