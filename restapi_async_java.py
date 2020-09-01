@@ -249,7 +249,7 @@ if __name__ == '__main__':
 
     LOGGER.info('Display 20x4 LCD Module Start')
 
-    print('Display 20x4 LCD Module Starts')
+    # print('Display 20x4 LCD Module Starts')
     display.lcd_display_string("Welcome".center(lcd_disp_length, ' '), 1)
     display.lcd_display_string(welcome_date_month(), 2)
     display.lcd_display_string("Starting Now ...".center(lcd_disp_length, ' '), 4)
