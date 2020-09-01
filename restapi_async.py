@@ -176,11 +176,10 @@ def print_lcd():
 
     currentTime = get_time()
     update_time_line(currentTime)
-    # print timer every in second
-    print_line1()
 
-    update_weather_temp()
-    update_rate_line()
+
+    #update_weather_temp()
+    #update_rate_line()
 
     #print('Writing to display: ', counter)
 
@@ -200,7 +199,8 @@ def print_lcd():
         print_line2()
         print_line3_and_4()
 
-
+    # print timer every in second
+    print_line1()
 
     # Every reset counter clear and refresh the data lines
     if counter == 0:
