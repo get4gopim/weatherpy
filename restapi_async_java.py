@@ -206,6 +206,11 @@ def print_lcd():
 
     change_every_x_secs = 10
 
+    if 0 <= currentTime.second <= 30:
+        update_rate_line()
+    else:
+        update_fuel_line()
+
     # change display line2 every x seconds
     if currentTime.second % change_every_x_secs == 0:
         # print(currentTime.second, ' mod ', currentTime.second % change_every_x_secs, ' display: ', rand_bool)
@@ -221,12 +226,12 @@ def print_lcd():
         print_line3_and_4()
 
 
-
     # Every reset counter clear and refresh the data lines
     if counter == 0:
         display.lcd_clear()
         print_line1()
-        print_line3_and_4()
+        # print_line2()
+        # print_line3_and_4()
 
     # Refresh the data every 5 mins (300 seconds once)
     if counter == 60:
@@ -241,8 +246,8 @@ def print_lcd():
         if (datetime.datetime.today().weekday() != 6 and
                     (6 <= get_time().hour <= 8)):
             asyncio.run(get_fuel())
-
-    counter = counter + 1
+    else:
+        counter = counter + 1
 
 
 def welcome_date_month():
