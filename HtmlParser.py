@@ -9,14 +9,16 @@ import util
 
 from bs4 import BeautifulSoup
 
+weather_url = 'https://weather.com/en-IN/weather/today/l/4ef51d4289943c7792cbe77dee741bff9216f591eed796d7a5d598c38828957d'
+gold_url = 'http://www.livechennai.com/gold_silverrate.asp'
+fuel_url = 'https://www.livechennai.com/petrol_price.asp'
 
 logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO"), format='%(asctime)s %(message)s')
 LOGGER = logging.getLogger(__name__)
 
 
 def get_fuel_price():
-    url = 'https://www.livechennai.com/petrol_price.asp'
-    page = requests.get(url)
+    page = requests.get(fuel_url)
     soup = BeautifulSoup(page.content, 'html.parser')
 
     table = soup.select("table#BC_GridView1").__getitem__(0)
@@ -54,8 +56,7 @@ def get_fuel_price():
 
 
 def get_gold_price():
-    url = 'http://www.livechennai.com/gold_silverrate.asp'
-    page = requests.get(url)
+    page = requests.get(gold_url)
     soup = BeautifulSoup(page.content, 'html.parser')
 
     table = soup.select('table.table-price').__getitem__(1)
@@ -91,8 +92,7 @@ def get_gold_price():
 
 
 def get_weather():
-    url = 'https://weather.com/en-IN/weather/today/l/4ef51d4289943c7792cbe77dee741bff9216f591eed796d7a5d598c38828957d'
-    page = requests.get(url)
+    page = requests.get(weather_url, timeout = 30)
     soup = BeautifulSoup(page.content, 'html.parser')
 
     seg_temp = soup.find_all('div', {'id' : 'WxuCurrentConditions-main-b3094163-ef75-4558-8d9a-e35e6b9b1034'})[0]
@@ -149,7 +149,10 @@ def get_weather():
     preciption = seg_temp.find('div',
                              class_='_-_-node_modules--wxu-components-src-organism-CurrentConditions-CurrentConditions--precipValue--RBVJT')
     # print(preciption.text)
-    preciption = preciption.text
+    if preciption is not None:
+        preciption = preciption.text
+    else:
+        preciption = ''
 
     weatherInfo = WeatherInfo.WeatherInfo(temp, low, high, as_of, condition, location, preciption)
 
@@ -162,5 +165,5 @@ if __name__ == '__main__':
     print("Parser starts ...")
 
     get_weather()
-    get_fuel_price()
-    get_gold_price()
+    #get_fuel_price()
+    #get_gold_price()

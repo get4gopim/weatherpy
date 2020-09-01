@@ -43,14 +43,13 @@ lcd_disp_length = 16
 async def get_weather():
     global weather
     try:
-        LOGGER.info(weather_url)
         weather = HtmlParser.get_weather()
         weather.set_error(None)
         update_weather_location()
         return weather
     except Exception as ex:
-        print ('Unable to connect weather API')
-        weather = WeatherInfo.WeatherInfo(0, 0, 0, "00:00", "", "")
+        LOGGER.error ('Unable to connect weather API', ex)
+        weather = WeatherInfo.WeatherInfo(0, 0, 0, "00:00", "", "", "")
         weather.set_error(ex)
 
 
@@ -109,14 +108,17 @@ def update_weather_location():
 def update_weather_preciption():
     global line2
 
-    preciption = '20% chance of r until' # weather.get_preciption()
-    delimiter_idx = util.index_of(preciption, 'until')
-    if delimiter_idx > 0:
-        preciption = preciption[0:delimiter_idx]
+    preciption = weather.get_preciption()
+    if len(preciption) > 0:
+        delimiter_idx = util.index_of(preciption, 'until')
+        if delimiter_idx > 0:
+            preciption = preciption[0:delimiter_idx]
 
-    # Make string 16 chars only and left justify with space if length is less.
-    line2 = preciption[0:lcd_disp_length]
-    line2 = line2.rjust(lcd_disp_length, ' ')
+        # Make string 16 chars only and left justify with space if length is less.
+        line2 = preciption[0:lcd_disp_length]
+        line2 = line2.rjust(lcd_disp_length, ' ')
+    else:
+        update_weather_location()
 
 # update display line strings
 def update_rate_line():
