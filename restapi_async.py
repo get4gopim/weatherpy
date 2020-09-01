@@ -218,7 +218,7 @@ def print_lcd():
         print_line3_and_4_fuel()
 
     # Refresh the data every 5 mins (300 seconds once)
-    if counter == 300:
+    if counter == 60:
         counter = 0
         asyncio.run(get_weather())
         # Query Gold Rate only in between 9 AM to 6 PM and not on SUNDAYS
