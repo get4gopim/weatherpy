@@ -49,7 +49,7 @@ async def get_weather():
             ret = await response.read()
             x = json.loads(ret, object_hook=lambda d: namedtuple('x', d.keys())(*d.values()))
             LOGGER.info(x)
-            weather = WeatherInfo.WeatherInfo(x.temperature, x.low, x.high, x.asOf, x.currentCondition, x.location, '')
+            weather = WeatherInfo.WeatherInfo(x.temperature, x.low, x.high, x.asOf, x.currentCondition, x.location, x.preciption)
             weather.set_error(None)
             update_weather_temp()
             return weather
@@ -120,6 +120,23 @@ def update_weather_location():
     # Make string 16 chars only and left justify with space if length is less.
     line2 = location[0:lcd_disp_length]
     line2 = line2.ljust(lcd_disp_length, ' ')
+
+
+# update preciption line strings
+def update_weather_preciption():
+    global line2
+
+    preciption = str(weather.get_preciption())
+    if len(preciption) > 0:
+        idx = util.index_of(preciption, 'until')
+        if idx > 0:
+            preciption = preciption[0:idx]
+
+        # Make string 20 chars only and left justify with space if length is less.
+        line2 = preciption[0:lcd_disp_length]
+        line2 = line2.ljust(lcd_disp_length, ' ')
+    else:
+        update_weather_location()
 
 
 # update display line rate strings
@@ -197,7 +214,7 @@ def print_lcd():
             update_rate_line()
             rand_bool = False
         else:
-            update_weather_location()
+            update_weather_preciption()
             update_fuel_line()
             rand_bool = True
         print_line2()
