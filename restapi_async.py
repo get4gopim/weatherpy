@@ -26,7 +26,7 @@ display = lcddriver.lcd()
 
 
 lcd_disp_length = 20
-service_start_time_in_secs = 10
+service_start_time_in_secs = 2
 
 
 # get current system time
@@ -40,10 +40,10 @@ async def get_weather():
     try:
         weather = HtmlParser.get_weather()
         weather.set_error(None)
-        update_weather_location()
+        update_weather_temp()
         return weather
     except Exception as ex:
-        print('Unable to connect weather API')
+        LOGGER.error('Unable to connect weather API ' + getattr(ex, 'message', repr(ex)))
         weather = WeatherInfo.WeatherInfo(0, 0, 0, "00:00", "", "", "")
         weather.set_error(ex)
 
@@ -57,7 +57,7 @@ async def get_gold_rate():
         update_rate_line()
         return rate_info
     except Exception as ex:
-        print('Unable to connect rate API')
+        LOGGER.error('Unable to connect rate API ' + getattr(ex, 'message', repr(ex)))
         rate_info = RateInfo.RateInfo('0', '0', 0.0, "", "")
         rate_info.set_error(ex)
 
@@ -71,7 +71,7 @@ async def get_fuel():
         update_fuel_line()
         return fuel_info
     except Exception as ex:
-        LOGGER.exception('Unable to connect Fuel API', ex)
+        LOGGER.error('Unable to connect Fuel API ' + getattr(ex, 'message', repr(ex)))
         fuel_info = FuelInfo.FuelInfo(0, 0, "", "")
         fuel_info.set_error(ex)
 
@@ -123,24 +123,31 @@ def update_weather_preciption():
 def update_rate_line():
     global line3, line4
 
-    # line4 = 'Gold   ' + rate_info.get_gold22() + ' Silv ' + rate_info.get_silver()
-    line3 = 'Gold            ' + str(rate_info.get_gold22())
-    line4 = 'Silver         ' + str(rate_info.get_silver())
+    just = lcd_disp_length - 5
+    prefix_p = 'Gold'
+    prefix_d = 'Silver'
 
-    line3 = line3.ljust(lcd_disp_length, ' ')
-    line4 = line4.ljust(lcd_disp_length, ' ')
+    line3 = prefix_p.ljust(just, ' ') + ' ' + str(rate_info.get_gold22())
+    line4 = prefix_d.ljust(just, ' ') + str(rate_info.get_silver())
 
 
 # update display fuel price line
 def update_fuel_line():
-    global line3, line4
+    global line5, line6
+
+    just = lcd_disp_length - 6
+    prefix_p = 'Petrol'
+    prefix_d = 'Diesel'
+
+    line5 = prefix_p.ljust(just, ' ') + str(fuel_info.get_petrol())
+    line6 = prefix_d.ljust(just, ' ') + str(fuel_info.get_diesel())
 
     # line4 = 'Petrol ' + fuel_info.get_petrol() + ' Disel' + fuel_info.get_diesel()
-    line3 = 'Petrol         ' + str(fuel_info.get_petrol())
-    line4 = 'Diesel         ' + str(fuel_info.get_diesel())
+    # line5 = 'Petrol        ' + str(fuel_info.get_petrol())
+    # line6 = 'Diesel        ' + str(fuel_info.get_diesel())
 
-    line3 = line3.ljust(lcd_disp_length, ' ')
-    line4 = line4.ljust(lcd_disp_length, ' ')
+    # line5 = line5.ljust(lcd_disp_length, ' ')
+    # line6 = line6.ljust(lcd_disp_length, ' ')
 
 
 def update_time_line(currentTime):
@@ -168,8 +175,8 @@ def print_line3_and_4_rate():
 # print line 3 and 4
 def print_line3_and_4_fuel():
     if fuel_info.get_error() is None:
-        display.lcd_display_string(line3, 3)
-        display.lcd_display_string(line4, 4)
+        display.lcd_display_string(line5, 3)
+        display.lcd_display_string(line6, 4)
 
 
 # display function
@@ -184,52 +191,49 @@ def print_lcd():
     currentTime = get_time()
     update_time_line(currentTime)
 
-    # print timer every in second
+    # Every reset counter clear and refresh the data lines
+    if counter == 0:
+        LOGGER.info('need to clear display ?')
+        display.lcd_clear()
+
+
     print_line1()
-    #update_weather_temp()
-    #update_rate_line()
-
-    # print('Writing to display: ', line1, line2)
-
-    change_every_x_secs = 10
+    change_every_x_secs = 5
 
     # change display line2 every x seconds
     if currentTime.second % change_every_x_secs == 0:
         # print(currentTime.second, ' mod ', currentTime.second % change_every_x_secs, ' display: ', rand_bool)
+        print_line2()
+
         if rand_bool:
             update_weather_temp()
-            update_rate_line()
-            print_line3_and_4_rate()
             rand_bool = False
         else:
             update_weather_preciption()
-            update_fuel_line()
-            #print_line3_and_4_fuel()
             rand_bool = True
 
-        print_line2()
-        #print_line3_and_4()
-
-    # Every reset counter clear and refresh the data lines
-    if counter == 0:
-        display.lcd_clear()
-        print_line1()
+    if 0 <= currentTime.second <= 30:
+        update_rate_line()
+        print_line3_and_4_rate()
+    else:
+        update_fuel_line()
+        print_line3_and_4_fuel()
 
     # Refresh the data every 5 mins (300 seconds once)
-    if counter == 300:
+    if counter == 30:
         counter = 0
         asyncio.run(get_weather())
         # Query Gold Rate only in between 9 AM to 6 PM and not on SUNDAYS
-        if (datetime.datetime.today().weekday() != 6 and
-                (9 <= get_time().hour <= 17)):
+        if (currentTime.weekday() != 6 and
+                (9 <= currentTime.hour <= 17)):
             asyncio.run(get_gold_rate())
 
         # Query Fuel Rate only in morning between 6 AM to 8 AM and not on SUNDAYS
-        if (datetime.datetime.today().weekday() != 6 and
-                    (6 <= get_time().hour <= 7)):
+        if (currentTime.weekday() != 6 and
+                    (6 <= currentTime.hour <= 7)):
             asyncio.run(get_fuel())
-
-    counter = counter + 1
+    else:
+        counter = counter + 1
 
 
 def welcome_date_month():
