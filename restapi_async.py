@@ -189,7 +189,7 @@ def print_lcd():
     #update_weather_temp()
     #update_rate_line()
 
-    print('Writing to display: ', line1, line2)
+    # print('Writing to display: ', line1, line2)
 
     change_every_x_secs = 5
 
@@ -209,8 +209,6 @@ def print_lcd():
 
         print_line2()
         #print_line3_and_4()
-
-
 
     # Every reset counter clear and refresh the data lines
     if counter == 0:
