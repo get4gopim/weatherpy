@@ -150,7 +150,7 @@ def print_lcd():
     line1 = currentTime.strftime("%d%b%y %H:%M:%S")
     #update_weather_line()
 
-    change_every_x_secs = 5;
+    change_every_x_secs = 5
 
     # rand_bool = True # random.choice([True, False])
 

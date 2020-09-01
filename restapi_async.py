@@ -159,8 +159,15 @@ def print_line2():
 
 
 # print line 3 and 4
-def print_line3_and_4():
-    if rate_info.get_error() is None and fuel_info.get_error() is None:
+def print_line3_and_4_rate():
+    if rate_info.get_error() is None:
+        display.lcd_display_string(line3, 3)
+        display.lcd_display_string(line4, 4)
+
+
+# print line 3 and 4
+def print_line3_and_4_fuel():
+    if fuel_info.get_error() is None:
         display.lcd_display_string(line3, 3)
         display.lcd_display_string(line4, 4)
 
@@ -177,13 +184,14 @@ def print_lcd():
     currentTime = get_time()
     update_time_line(currentTime)
 
-
+    # print timer every in second
+    print_line1()
     #update_weather_temp()
     #update_rate_line()
 
-    #print('Writing to display: ', counter)
+    print('Writing to display: ', line1, line2)
 
-    change_every_x_secs = 10
+    change_every_x_secs = 5
 
     # change display line2 every x seconds
     if currentTime.second % change_every_x_secs == 0:
@@ -191,35 +199,36 @@ def print_lcd():
         if rand_bool:
             update_weather_temp()
             update_rate_line()
+            print_line3_and_4_rate()
             rand_bool = False
         else:
-            update_weather_location()
+            update_weather_preciption()
             update_fuel_line()
+            #print_line3_and_4_fuel()
             rand_bool = True
-        print_line2()
-        print_line3_and_4()
 
-    # print timer every in second
-    print_line1()
+        print_line2()
+        #print_line3_and_4()
+
+
 
     # Every reset counter clear and refresh the data lines
     if counter == 0:
         display.lcd_clear()
         print_line1()
-        print_line3_and_4()
 
     # Refresh the data every 5 mins (300 seconds once)
     if counter == 300:
         counter = 0
         asyncio.run(get_weather())
-        # Query Gold Rate only in between 9 AM to 5 PM and not on SUNDAYS
+        # Query Gold Rate only in between 9 AM to 6 PM and not on SUNDAYS
         if (datetime.datetime.today().weekday() != 6 and
                 (9 <= get_time().hour <= 17)):
             asyncio.run(get_gold_rate())
 
         # Query Fuel Rate only in morning between 6 AM to 8 AM and not on SUNDAYS
         if (datetime.datetime.today().weekday() != 6 and
-                    (6 <= get_time().hour <= 8)):
+                    (6 <= get_time().hour <= 7)):
             asyncio.run(get_fuel())
 
     counter = counter + 1
