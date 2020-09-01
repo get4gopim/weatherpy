@@ -118,7 +118,7 @@ def update_weather_preciption():
     else:
         update_weather_location()
         
-        
+
 # update display line rate strings
 def update_rate_line():
     global line3, line4
@@ -194,7 +194,7 @@ def print_lcd():
             update_rate_line()
             rand_bool = False
         else:
-            update_weather_preciption()
+            update_weather_location()
             update_fuel_line()
             rand_bool = True
         print_line2()
