@@ -39,7 +39,7 @@ line3 = ''
 line4 = ''
 line5 = ''
 line6 = ''
-weather = WeatherInfo.WeatherInfo(0, 0, 0, "00:00", "", "", "", "")
+weather = WeatherInfo.WeatherInfo(0, 0, 0, "00:00", "", "", "")
 
 # get current system time
 def get_time():
