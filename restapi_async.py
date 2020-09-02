@@ -5,6 +5,7 @@ import asyncio
 import json
 import logging
 import os
+import sched
 
 import datetime
 import time
@@ -29,6 +30,8 @@ display = lcddriver.lcd()
 lcd_disp_length = 20
 service_start_time_in_secs = 1
 
+refresh_weather_in_x_secs = 60
+s = sched.scheduler(time.time, time.sleep)
 
 # get current system time
 def get_time():
@@ -278,11 +281,22 @@ def print_line3_and_4_fuel():
         display.lcd_display_string(line6, 4)
 
 
+def refresh_weather_data():
+    tick = 0
+    refresh_interval = 60
+
+    LOGGER.info ('refresh_weather_data')
+    t = threading.Timer(refresh_interval, refresh_weather_data)
+    t.start()
+
+    call_weather_api()
+
+
 # display function
 def print_lcd():
     global line1
-    global counter
     global rand_bool
+    counter = 0
 
     t = threading.Timer(1, print_lcd)
     t.start()
@@ -343,6 +357,14 @@ def print_lcd():
         counter = counter + 1
 
 
+def refresh_weather_data (sc):
+    LOGGER.info ("Doing stuff...")
+    # do your stuff
+    call_weather_api()
+
+    s.enter(refresh_weather_in_x_secs, 1, refresh_weather_data, (sc,))
+
+
 def welcome_date_month():
     current_time = get_time()
     day = current_time.strftime("%d")
@@ -369,13 +391,16 @@ if __name__ == '__main__':
     display.lcd_display_string(welcome_date_month(), 2)
     display.lcd_display_string("Starting Now ...".center(lcd_disp_length, ' '), 4)
 
-    counter = 0
+    # counter = 0
     rand_bool = True
     time.sleep(service_start_time_in_secs)
 
     try:
         call_apis_async()
         print_lcd()
+
+        s.enter(refresh_weather_in_x_secs, 1, refresh_weather_data, (s,))
+        s.run()
 
     except KeyboardInterrupt:
         LOGGER.info('Cleaning up !')
