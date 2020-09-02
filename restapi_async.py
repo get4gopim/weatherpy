@@ -296,7 +296,7 @@ def refresh_weather_data():
 def print_lcd():
     global line1
     global rand_bool
-    counter = 0
+    global counter
 
     t = threading.Timer(1, print_lcd)
     t.start()
@@ -391,7 +391,7 @@ if __name__ == '__main__':
     display.lcd_display_string(welcome_date_month(), 2)
     display.lcd_display_string("Starting Now ...".center(lcd_disp_length, ' '), 4)
 
-    # counter = 0
+    counter = 0
     rand_bool = True
     time.sleep(service_start_time_in_secs)
 
