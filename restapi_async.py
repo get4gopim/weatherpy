@@ -319,14 +319,14 @@ def print_lcd():
         print_line3_and_4_rate()
     else:
         update_weather_preciption()
-        # update_fuel_line()
+        update_fuel_line()
         print_line2()
-        # print_line3_and_4_fuel()
+        print_line3_and_4_fuel()
 
     # Refresh the data every 5 mins (300 seconds once)
     if counter == 60:
-        # counter = 0
-        call_weather_api()
+        counter = 0
+        # call_weather_api()
 
         # # Query Gold Rate only in between 9 AM to 6 PM and not on SUNDAYS
         # if (currentTime.weekday() != 6 and
@@ -338,8 +338,7 @@ def print_lcd():
         #             (6 <= currentTime.hour <= 7)):
         #     call_fuel_api()
         #
-        counter = 0
-        LOGGER.info (f'returned {currentTime} counter: {counter}')
+        # LOGGER.info (f'returned {currentTime} counter: {counter}')
     else:
         counter = counter + 1
 
