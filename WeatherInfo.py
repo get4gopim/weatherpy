@@ -40,4 +40,4 @@ class WeatherInfo:
         return self.__preciption
 
     def __str__(self):
-        return "WeatherInfo: [location: " + self.__location + ", temp: " + self.__temp + ", low: " + self.__low + ", high: " + self.__high + ", condition: " + self.__condition + ", preciption: " + self.__preciption + "]"
+        return "WeatherInfo: [location: " + str(self.__location) + ", temp: " + str(self.__temp) + ", low: " + str(self.__low) + ", high: " + str(self.__high) + ", condition: " + str(self.__condition) + ", preciption: " + str(self.__preciption) + "]"

@@ -15,6 +15,7 @@ import WeatherInfo
 import RateInfo
 import FuelInfo
 import HtmlParser
+import HtmlParser2
 import util
 
 from aiohttp import ClientSession, ClientConnectorError
@@ -26,67 +27,165 @@ display = lcddriver.lcd()
 
 
 lcd_disp_length = 20
-service_start_time_in_secs = 10
+service_start_time_in_secs = 1
 
 
 # get current system time
 def get_time():
     return datetime.datetime.now()
 
+def initalize_default():
+    print ('init default')
+    weather = WeatherInfo.WeatherInfo(0, 0, 0, "00:00", "", "", "", "")
+    rate_info = RateInfo.RateInfo('0', '0', 0.0, "", "")
+    fuel_info = FuelInfo.FuelInfo(0, 0, "", "")
+
+
+def call_apis_async():
+    # global weather, rate_info, fuel_info
+    # initalize_default()
+
+    start = time.time()
+    loop = asyncio.get_event_loop()
+
+    f1 = asyncio.Future()
+    f2 = asyncio.Future()
+    f3 = asyncio.Future()
+
+    f1.add_done_callback( callback_weather)
+    f2.add_done_callback(callback_gold)
+    f3.add_done_callback(callback_fuel)
+
+    tasks = [HtmlParser2.get_weather(f1), HtmlParser2.get_gold_price(f2), HtmlParser2.get_fuel_price(f3)]
+    loop.run_until_complete(asyncio.wait(tasks))
+
+    loop.close()
+
+    LOGGER.info(f'Total Time Taken {time.time() - start}')
+    print()
+
+
+def call_weather_api():
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
+    f1 = asyncio.Future()
+
+    f1.add_done_callback(callback_weather)
+
+    LOGGER.debug ("before weather")
+    tasks = [HtmlParser2.get_weather(f1)]
+    loop.run_until_complete(asyncio.wait(tasks))
+    LOGGER.debug ("completed")
+
+    time.sleep(5)
+
+    loop.close()
+    print()
+
+
+def call_gold_api():
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
+    f1 = asyncio.Future()
+
+    f1.add_done_callback(callback_gold)
+
+    tasks = [HtmlParser2.get_gold_price(f1)]
+    loop.run_until_complete(asyncio.wait(tasks))
+
+    time.sleep(5)
+
+    loop.close()
+    print()
+
+
+def call_fuel_api():
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
+    f1 = asyncio.Future()
+
+    f1.add_done_callback(callback_fuel)
+
+    tasks = [HtmlParser2.get_fuel_price(f1)]
+    loop.run_until_complete(asyncio.wait(tasks))
+
+    time.sleep(5)
+
+    loop.close()
+    print()
+
+def callback_weather(future):
+    global weather
+    weather = future.result()
+
+
+def callback_gold(future):
+    global rate_info
+    rate_info = future.result()
+
+
+def callback_fuel(future):
+    global fuel_info
+    fuel_info = future.result()
+
 
 # call async rest call to get weather details
-async def get_weather():
-    global weather
-    try:
-        weather = HtmlParser.get_weather()
-        weather.set_error(None)
-        update_weather_temp()
-        return weather
-    except Exception as ex:
-        LOGGER.error('Unable to connect weather API ' + getattr(ex, 'message', repr(ex)))
-        weather = WeatherInfo.WeatherInfo(0, 0, 0, "00:00", "", "", "")
-        weather.set_error(ex)
+# async def get_weather():
+#     global weather
+#     try:
+#         weather = HtmlParser.get_weather()
+#         weather.set_error(None)
+#         update_weather_temp()
+#         return weather
+#     except Exception as ex:
+#         LOGGER.error('Unable to connect weather API ' + getattr(ex, 'message', repr(ex)))
+#         weather = WeatherInfo.WeatherInfo(0, 0, 0, "00:00", "", "", "")
+#         weather.set_error(ex)
 
 
 # call async rest call to get gold rate detail
-async def get_gold_rate():
-    global rate_info
-    try:
-        rate_info = HtmlParser.get_gold_price()
-        rate_info.set_error(None)
-        update_rate_line()
-        return rate_info
-    except Exception as ex:
-        LOGGER.error('Unable to connect rate API ' + getattr(ex, 'message', repr(ex)))
-        rate_info = RateInfo.RateInfo('0', '0', 0.0, "", "")
-        rate_info.set_error(ex)
+# async def get_gold_rate():
+#     global rate_info
+#     try:
+#         rate_info = HtmlParser.get_gold_price()
+#         rate_info.set_error(None)
+#         update_rate_line()
+#         return rate_info
+#     except Exception as ex:
+#         LOGGER.error('Unable to connect rate API ' + getattr(ex, 'message', repr(ex)))
+#         rate_info = RateInfo.RateInfo('0', '0', 0.0, "", "")
+#         rate_info.set_error(ex)
 
 
 # call async rest call to get fuel details
-async def get_fuel():
-    global fuel_info
-    try:
-        fuel_info = HtmlParser.get_fuel_price()
-        fuel_info.set_error(None)
-        update_fuel_line()
-        return fuel_info
-    except Exception as ex:
-        LOGGER.error('Unable to connect Fuel API ' + getattr(ex, 'message', repr(ex)))
-        fuel_info = FuelInfo.FuelInfo(0, 0, "", "")
-        fuel_info.set_error(ex)
+# async def get_fuel():
+#     global fuel_info
+#     try:
+#         fuel_info = HtmlParser.get_fuel_price()
+#         fuel_info.set_error(None)
+#         update_fuel_line()
+#         return fuel_info
+#     except Exception as ex:
+#         LOGGER.error('Unable to connect Fuel API ' + getattr(ex, 'message', repr(ex)))
+#         fuel_info = FuelInfo.FuelInfo(0, 0, "", "")
+#         fuel_info.set_error(ex)
 
 
 # update display line strings
 def update_weather_temp():
     global line2
 
-    # Make string right justified of length 4 by padding 3 spaces to left
-    justl = lcd_disp_length - 4
-    temperature = str(weather.get_condition())[0:justl]
-    temperature = temperature.ljust(justl, ' ')
-    line2 = temperature + ' ' + str(weather.get_temp()) + 'c'
+    if weather is not None:
+        # Make string right justified of length 4 by padding 3 spaces to left
+        justl = lcd_disp_length - 4
+        temperature = str(weather.get_condition())[0:justl]
+        temperature = temperature.ljust(justl, ' ')
+        line2 = temperature + ' ' + str(weather.get_temp()) + 'c'
 
-    line2 = line2.ljust(lcd_disp_length, ' ')
+        line2 = line2.ljust(lcd_disp_length, ' ')
 
 
 # update display line strings
@@ -191,24 +290,27 @@ def print_lcd():
     currentTime = get_time()
     update_time_line(currentTime)
 
+    # LOGGER.info (f'counter = {counter} currentTime = {currentTime}')
+
     # Every reset counter clear and refresh the data lines
     if counter == 0:
+        # print ('clear lcd called')
         display.lcd_clear()
+        update_weather_temp()
 
     print_line1()
-    change_every_x_secs = 10
+    change_every_x_secs = 5
 
     # change display line2 every x seconds
     if currentTime.second % change_every_x_secs == 0:
         # print(currentTime.second, ' mod ', currentTime.second % change_every_x_secs, ' display: ', rand_bool)
-        print_line2()
-
         if rand_bool:
             update_weather_temp()
             rand_bool = False
         else:
             update_weather_preciption()
             rand_bool = True
+        print_line2()
 
     if 0 <= currentTime.second <= 30:
         update_rate_line()
@@ -220,16 +322,19 @@ def print_lcd():
     # Refresh the data every 5 mins (300 seconds once)
     if counter == 60:
         counter = 0
-        asyncio.run(get_weather())
+        call_weather_api()
+
         # Query Gold Rate only in between 9 AM to 6 PM and not on SUNDAYS
         if (currentTime.weekday() != 6 and
-                (9 <= currentTime.hour <= 17)):
-            asyncio.run(get_gold_rate())
+                (9 <= currentTime.hour <= 22)):
+            call_gold_api()
 
         # Query Fuel Rate only in morning between 6 AM to 8 AM and not on SUNDAYS
         if (currentTime.weekday() != 6 and
-                    (6 <= currentTime.hour <= 7)):
-            asyncio.run(get_fuel())
+                    (6 <= currentTime.hour <= 22)):
+            call_fuel_api()
+
+        LOGGER.info (f'returned {currentTime}')
     else:
         counter = counter + 1
 
@@ -265,9 +370,7 @@ if __name__ == '__main__':
     time.sleep(service_start_time_in_secs)
 
     try:
-        asyncio.run(get_weather())
-        asyncio.run(get_gold_rate())
-        asyncio.run(get_fuel())
+        call_apis_async()
         print_lcd()
 
     except KeyboardInterrupt:

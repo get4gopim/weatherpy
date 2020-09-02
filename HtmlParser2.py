@@ -2,8 +2,11 @@ import requests
 import logging
 import os
 import asyncio
+import async_timeout
 import time
 import threading
+import aiohttp
+from dateutil.rrule import weekday
 
 import WeatherInfo
 import FuelInfo
@@ -21,39 +24,64 @@ fuel_url = 'https://www.livechennai.com/petrol_price.asp'
 logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO"), format='%(asctime)s %(message)s')
 LOGGER = logging.getLogger(__name__)
 
-def get_weather():
-    start = time.time();
-    page = requests.get(weather_url, timeout=30)
+
+async def fetch(session, url):
+    async with async_timeout.timeout(20):
+        async with session.get(url) as response:
+            return await response.text()
+
+
+async def get_weather(future):
+    start = time.time()
     info = None
 
-    if page.status_code == 200:
-        return parse_weather(page.content)
+    try:
+        async with aiohttp.ClientSession() as session:
+            html = await fetch(session, weather_url)
+            info = await parse_weather(html)
+    except ClientConnectorError as ex:
+        LOGGER.error(f'Unable to connect Weather API : {repr(ex)}')
+        info = WeatherInfo.WeatherInfo('0', "0", "0", "00:00", "", "", "")
+        info.set_error(ex)
 
-    LOGGER.info (f'Time Taken {time.time() - start}')
-    return info
+    LOGGER.info (f'Weather Time Taken {time.time() - start}')
+    future.set_result(info)
 
 
-def get_gold_price():
-    start = time.time();
-    page = requests.get(gold_url)
+async def get_gold_price(future):
+    start = time.time()
     info = None
-    if page.status_code == 200:
-        return parse_gold_info(page.content)
-    LOGGER.info(f'Time Taken {time.time() - start}')
-    return info
+    try:
+        async with aiohttp.ClientSession() as session:
+            html = await fetch(session, gold_url)
+            info = await parse_gold_info(html)
+    except ClientConnectorError as ex:
+        LOGGER.error(f'Unable to connect Gold API : {repr(ex)}')
+        info = RateInfo.RateInfo('0', '0', '0.0', "", "")
+        info.set_error(ex)
+
+    LOGGER.info(f'Gold Time Taken {time.time() - start}')
+    future.set_result(info)
 
 
-def get_fuel_price():
-    start = time.time();
-    page = requests.get(fuel_url)
+async def get_fuel_price(future):
+    start = time.time()
     info = None
-    if page.status_code == 200:
-        return parse_fuel_info(page.content)
-    LOGGER.info(f'Time Taken {time.time() - start}')
-    return info
+
+    try:
+        async with aiohttp.ClientSession() as session:
+            html = await fetch(session, fuel_url)
+            info = await parse_fuel_info(html)
+    except ClientConnectorError as ex:
+        LOGGER.error(f'Unable to connect Fuel API : {repr(ex)}')
+        info = FuelInfo.FuelInfo('0', '0', "", "")
+        info.set_error(ex)
+
+    LOGGER.info(f'Fuel Time Taken {time.time() - start}')
+    future.set_result(info)
 
 
-def parse_weather(page_content):
+async def parse_weather(page_content):
     soup = BeautifulSoup(page_content, 'html.parser')
 
     seg_temp = soup.find_all('div', {'id' : 'WxuCurrentConditions-main-b3094163-ef75-4558-8d9a-e35e6b9b1034'})[0]
@@ -122,7 +150,7 @@ def parse_weather(page_content):
     return weatherInfo
 
 
-def parse_gold_info(page_content):
+async def parse_gold_info(page_content):
     soup = BeautifulSoup(page_content, 'html.parser')
 
     table = soup.select('table.table-price').__getitem__(1)
@@ -157,7 +185,7 @@ def parse_gold_info(page_content):
     return rate_info
 
 
-def parse_fuel_info(page_content):
+async def parse_fuel_info(page_content):
     soup = BeautifulSoup(page_content, 'html.parser')
 
     table = soup.select("table#BC_GridView1").__getitem__(0)
@@ -194,13 +222,31 @@ def parse_fuel_info(page_content):
     return fuel_info
 
 
+def callback(future):
+    print (future.result())
+
+
+def test_async_future():
+    start = time.time()
+    loop = asyncio.get_event_loop()
+
+    f1 = asyncio.Future()
+    f2 = asyncio.Future()
+    f3 = asyncio.Future()
+
+    f1.add_done_callback(callback)
+    f2.add_done_callback(callback)
+    f3.add_done_callback(callback)
+
+    tasks = [get_weather(f1), get_gold_price(f2), get_fuel_price(f3)]
+    loop.run_until_complete(asyncio.wait(tasks))
+
+    loop.close()
+
+    LOGGER.info(f'Total Time Taken {time.time() - start}')
+
 if __name__ == '__main__':
     print("Parser starts ...")
-    start = time.time()
 
-    get_weather()
-    get_gold_price()
-    get_fuel_price()
-
-    LOGGER.info(f'Time Taken {time.time() - start}')
-
+    # test_async()
+    test_async_future()

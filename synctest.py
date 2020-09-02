@@ -1,22 +1,37 @@
-
-import requests
-import time
 import asyncio
+import threading
+import time
 
-def fetch_all(cities):
-    start = time.time();
-    responses = []
-    with requests.session() as session:
-        for city in cities:
-            resp = session.get(f"https://geo.api.gouv.fr/communes?nom={city}&fields=nom,region&format=json&geometry=centr")
-            print(resp.json())
-            responses.append(resp.json())
-    end = time.time()
-    print (f"Time Taken {end - start}")
-    return responses
 
-if __name__ == '__main__':
-    cities = ["US", "Paris", "France", "Pantin", "Drancy", "Bobigny", "Bondy", "Gagny",
-              "US", "Paris", "France", "Pantin", "Drancy", "Bobigny", "Bondy", "Gagny",
-              "US", "Paris", "France", "Pantin", "Drancy", "Bobigny", "Bondy", "Gagny"]
-    fetch_all(cities)
+async def my_callback(result):
+    print("my_callback got:", result)
+    return "My return value is ignored"
+
+
+async def coro(number):
+    print("coro")
+    await asyncio.sleep(number)
+    return number + 1
+
+
+async def add_success_callback(fut, callback):
+    result = await fut
+    await callback(result)
+    return result
+
+def add():
+    print ('add invoked')
+    time.sleep(10)
+    return 5;
+
+# loop = asyncio.get_event_loop()
+# task = asyncio.ensure_future(coro(10))
+# task = add_success_callback(task, my_callback)
+# print("test1")
+# response = loop.run_until_complete(task)
+# print("response:", response)
+# loop.close()
+# print("test2")
+
+threading.Thread(add).start()
+print ('returned')
