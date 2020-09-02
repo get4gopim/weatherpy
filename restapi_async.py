@@ -33,6 +33,14 @@ service_start_time_in_secs = 1
 refresh_weather_in_x_secs = 60
 s = sched.scheduler(time.time, time.sleep)
 
+line1 = ''
+line2 = ''
+line3 = ''
+line4 = ''
+line5 = ''
+line6 = ''
+weather = WeatherInfo.WeatherInfo(0, 0, 0, "00:00", "", "", "", "")
+
 # get current system time
 def get_time():
     return datetime.datetime.now()
@@ -120,6 +128,7 @@ def call_fuel_api():
     loop.close()
     print()
 
+
 def callback_weather(future):
     global weather
     weather = future.result()
@@ -204,6 +213,7 @@ def update_weather_location():
     line2 = location[0:lcd_disp_length]
     line2 = line2.ljust(lcd_disp_length, ' ')
 
+
 # update preciption line strings
 def update_weather_preciption():
     global line2
@@ -223,7 +233,8 @@ def update_weather_preciption():
 
 # update display line rate strings
 def update_rate_line():
-    global line3, line4
+    global line3
+    global line4
 
     just = lcd_disp_length - 5
     prefix_p = 'Gold'
@@ -235,7 +246,8 @@ def update_rate_line():
 
 # update display fuel price line
 def update_fuel_line():
-    global line5, line6
+    global line5
+    global line6
 
     just = lcd_disp_length - 6
     prefix_p = 'Petrol'
@@ -279,7 +291,6 @@ def print_line3_and_4_fuel():
     if fuel_info.get_error() is None:
         display.lcd_display_string(line5, 3)
         display.lcd_display_string(line6, 4)
-
 
 
 # display function
