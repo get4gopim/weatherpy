@@ -41,13 +41,15 @@ line5 = ''
 line6 = ''
 weather = WeatherInfo.WeatherInfo(0, 0, 0, "00:00", "", "", "")
 
+
 # get current system time
 def get_time():
     return datetime.datetime.now()
 
+
 def initalize_default():
     print ('init default')
-    weather = WeatherInfo.WeatherInfo(0, 0, 0, "00:00", "", "", "", "")
+    weather = WeatherInfo.WeatherInfo(0, 0, 0, "00:00", "", "", "")
     rate_info = RateInfo.RateInfo('0', '0', 0.0, "", "")
     fuel_info = FuelInfo.FuelInfo(0, 0, "", "")
 
@@ -314,28 +316,28 @@ def print_lcd():
     # LOGGER.info (f'counter = {counter} currentTime = {currentTime}')
 
     print_line1()
-    # change_every_x_secs = 10
-    #
-    # # change display line2 every x seconds
-    # if currentTime.second % change_every_x_secs == 0:
-    #     # print(currentTime.second, ' mod ', currentTime.second % change_every_x_secs, ' display: ', rand_bool)
-    #     if rand_bool:
-    #         update_weather_temp()
-    #         rand_bool = False
-    #     else:
-    #         update_weather_preciption()
-    #         rand_bool = True
-    #     print_line2()
+
+    change_every_x_secs = 10
+    # change display line2 every x seconds
+    if currentTime.second % change_every_x_secs == 0:
+        # print(currentTime.second, ' mod ', currentTime.second % change_every_x_secs, ' display: ', rand_bool)
+        if rand_bool:
+            update_weather_temp()
+            rand_bool = False
+        else:
+            update_weather_preciption()
+            rand_bool = True
+        print_line2()
 
     if 0 <= currentTime.second <= 30:
-        update_weather_temp()
+        # update_weather_temp()
         update_rate_line()
-        print_line2()
+        # print_line2()
         print_line3_and_4_rate()
     else:
-        update_weather_preciption()
+        # update_weather_preciption()
         update_fuel_line()
-        print_line2()
+        # print_line2()
         print_line3_and_4_fuel()
 
     # Refresh the data every 5 mins (300 seconds once)
@@ -400,8 +402,8 @@ if __name__ == '__main__':
         call_apis_async()
         print_lcd()
 
-        s.enter(refresh_weather_in_x_secs, 1, refresh_weather_data, (s,))
-        s.run()
+        # s.enter(refresh_weather_in_x_secs, 1, refresh_weather_data, (s,))
+        # s.run()
 
     except KeyboardInterrupt:
         LOGGER.info('Cleaning up !')
