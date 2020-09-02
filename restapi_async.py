@@ -281,16 +281,6 @@ def print_line3_and_4_fuel():
         display.lcd_display_string(line6, 4)
 
 
-def refresh_weather_data():
-    tick = 0
-    refresh_interval = 60
-
-    LOGGER.info ('refresh_weather_data')
-    t = threading.Timer(refresh_interval, refresh_weather_data)
-    t.start()
-
-    call_weather_api()
-
 
 # display function
 def print_lcd():
