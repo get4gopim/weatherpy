@@ -289,7 +289,7 @@ def print_lcd():
 
     # Every reset counter clear and refresh the data lines
     if counter == 0:
-        print ('clear lcd called')
+        LOGGER.info ('clear lcd called')
         display.lcd_clear()
         # update_weather_temp()
 
