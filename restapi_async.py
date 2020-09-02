@@ -339,7 +339,7 @@ def print_lcd():
         print_line3_and_4_fuel()
 
     # Refresh the data every 5 mins (300 seconds once)
-    if counter == 60:
+    if counter == 120:
         counter = 0
         # call_weather_api()
 
