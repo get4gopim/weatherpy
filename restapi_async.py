@@ -299,7 +299,7 @@ def print_lcd():
         update_weather_temp()
 
     print_line1()
-    change_every_x_secs = 5
+    change_every_x_secs = 10
 
     # change display line2 every x seconds
     if currentTime.second % change_every_x_secs == 0:
@@ -320,18 +320,18 @@ def print_lcd():
         print_line3_and_4_fuel()
 
     # Refresh the data every 5 mins (300 seconds once)
-    if counter == 60:
+    if counter == 90:
         counter = 0
         call_weather_api()
 
         # Query Gold Rate only in between 9 AM to 6 PM and not on SUNDAYS
         if (currentTime.weekday() != 6 and
-                (9 <= currentTime.hour <= 22)):
+                (9 <= currentTime.hour <= 16)):
             call_gold_api()
 
         # Query Fuel Rate only in morning between 6 AM to 8 AM and not on SUNDAYS
         if (currentTime.weekday() != 6 and
-                    (6 <= currentTime.hour <= 22)):
+                    (6 <= currentTime.hour <= 7)):
             call_fuel_api()
 
         LOGGER.info (f'returned {currentTime}')
