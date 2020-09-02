@@ -289,7 +289,7 @@ def print_lcd():
 
     # Every reset counter clear and refresh the data lines
     if counter == 0:
-        LOGGER.info ('clear lcd called')
+        LOGGER.info (f'clear lcd called counter: {counter}')
         display.lcd_clear()
         # update_weather_temp()
 
@@ -324,8 +324,8 @@ def print_lcd():
         # print_line3_and_4_fuel()
 
     # Refresh the data every 5 mins (300 seconds once)
-    if counter == 90:
-        counter = 0
+    if counter == 60:
+        # counter = 0
         call_weather_api()
 
         # # Query Gold Rate only in between 9 AM to 6 PM and not on SUNDAYS
@@ -338,7 +338,8 @@ def print_lcd():
         #             (6 <= currentTime.hour <= 7)):
         #     call_fuel_api()
         #
-        LOGGER.info (f'returned {currentTime}')
+        counter = 0
+        LOGGER.info (f'returned {currentTime} counter: {counter}')
     else:
         counter = counter + 1
 
