@@ -1,12 +1,9 @@
-import requests
 import logging
 import os
 import asyncio
 import async_timeout
 import time
-import threading
 import aiohttp
-from dateutil.rrule import weekday
 
 import WeatherInfo
 import FuelInfo
@@ -15,7 +12,6 @@ import util
 
 from bs4 import BeautifulSoup
 from aiohttp import ClientSession, ClientConnectorError
-from requests.exceptions import ConnectionError
 
 weather_url = 'https://weather.com/en-IN/weather/today/l/4ef51d4289943c7792cbe77dee741bff9216f591eed796d7a5d598c38828957d'
 gold_url = 'http://www.livechennai.com/gold_silverrate.asp'
