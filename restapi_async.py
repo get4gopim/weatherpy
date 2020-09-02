@@ -78,7 +78,7 @@ def call_weather_api():
     loop.run_until_complete(asyncio.wait(tasks))
     LOGGER.debug ("completed")
 
-    time.sleep(5)
+    # time.sleep(5)
 
     loop.close()
     print()
@@ -95,7 +95,7 @@ def call_gold_api():
     tasks = [HtmlParser2.get_gold_price(f1)]
     loop.run_until_complete(asyncio.wait(tasks))
 
-    time.sleep(5)
+    # time.sleep(5)
 
     loop.close()
     print()
@@ -112,7 +112,7 @@ def call_fuel_api():
     tasks = [HtmlParser2.get_fuel_price(f1)]
     loop.run_until_complete(asyncio.wait(tasks))
 
-    time.sleep(5)
+    # time.sleep(5)
 
     loop.close()
     print()
@@ -287,36 +287,40 @@ def print_lcd():
     t = threading.Timer(1, print_lcd)
     t.start()
 
+    # Every reset counter clear and refresh the data lines
+    if counter == 0:
+        # print ('clear lcd called')
+        display.lcd_clear()
+        # update_weather_temp()
+
     currentTime = get_time()
     update_time_line(currentTime)
 
     # LOGGER.info (f'counter = {counter} currentTime = {currentTime}')
 
-    # Every reset counter clear and refresh the data lines
-    if counter == 0:
-        # print ('clear lcd called')
-        display.lcd_clear()
-        update_weather_temp()
-
     print_line1()
-    change_every_x_secs = 10
-
-    # change display line2 every x seconds
-    if currentTime.second % change_every_x_secs == 0:
-        # print(currentTime.second, ' mod ', currentTime.second % change_every_x_secs, ' display: ', rand_bool)
-        if rand_bool:
-            update_weather_temp()
-            rand_bool = False
-        else:
-            update_weather_preciption()
-            rand_bool = True
-        print_line2()
+    # change_every_x_secs = 10
+    #
+    # # change display line2 every x seconds
+    # if currentTime.second % change_every_x_secs == 0:
+    #     # print(currentTime.second, ' mod ', currentTime.second % change_every_x_secs, ' display: ', rand_bool)
+    #     if rand_bool:
+    #         update_weather_temp()
+    #         rand_bool = False
+    #     else:
+    #         update_weather_preciption()
+    #         rand_bool = True
+    #     print_line2()
 
     if 0 <= currentTime.second <= 30:
+        update_weather_temp()
         update_rate_line()
+        print_line2()
         print_line3_and_4_rate()
     else:
+        update_weather_preciption()
         update_fuel_line()
+        print_line2()
         print_line3_and_4_fuel()
 
     # Refresh the data every 5 mins (300 seconds once)
@@ -324,16 +328,16 @@ def print_lcd():
         counter = 0
         call_weather_api()
 
-        # Query Gold Rate only in between 9 AM to 6 PM and not on SUNDAYS
-        if (currentTime.weekday() != 6 and
-                (9 <= currentTime.hour <= 16)):
-            call_gold_api()
-
-        # Query Fuel Rate only in morning between 6 AM to 8 AM and not on SUNDAYS
-        if (currentTime.weekday() != 6 and
-                    (6 <= currentTime.hour <= 7)):
-            call_fuel_api()
-
+        # # Query Gold Rate only in between 9 AM to 6 PM and not on SUNDAYS
+        # if (currentTime.weekday() != 6 and
+        #         (9 <= currentTime.hour <= 16)):
+        #     call_gold_api()
+        #
+        # # Query Fuel Rate only in morning between 6 AM to 8 AM and not on SUNDAYS
+        # if (currentTime.weekday() != 6 and
+        #             (6 <= currentTime.hour <= 7)):
+        #     call_fuel_api()
+        #
         LOGGER.info (f'returned {currentTime}')
     else:
         counter = counter + 1
