@@ -360,8 +360,8 @@ def every_second():
     global counter
     global rand_bool
 
-    currentTime = get_time()
-    update_time_line(currentTime)
+    current_time = get_time()
+    update_time_line(current_time)
     print_line1()
 
     if counter == 0:
