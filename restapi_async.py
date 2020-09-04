@@ -350,6 +350,11 @@ def print_lcd():
         time.sleep(1)
 
 
+def every_min():
+    update_weather_temp()
+    print_line2()
+
+
 def every_second():
     currentTime = get_time()
     update_time_line(currentTime)
@@ -389,9 +394,10 @@ if __name__ == '__main__':
     time.sleep(service_start_time_in_secs)
 
     schedule.every(.7).seconds.do(every_second)
+    schedule.every(1).minutes.do(every_min)
 
     try:
-        # call_apis_async()
+        call_apis_async()
         # print_lcd()
 
         # call_unknown_api()
