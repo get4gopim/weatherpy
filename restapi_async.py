@@ -161,7 +161,7 @@ def callback_unattended(future):
 def callback_weather(future):
     global weather
     weather = future.result()
-    update_weather_temp()
+    # update_weather_temp()
     update_weather_preciption()
 
 
