@@ -241,7 +241,7 @@ def update_fuel_line():
     global line5
     global line6
 
-    just = lcd_disp_length - 5
+    just = lcd_disp_length - 6
     prefix_p = 'Petrol'
     prefix_d = 'Diesel'
 
@@ -434,7 +434,8 @@ if __name__ == '__main__':
     time.sleep(service_start_time_in_secs)
 
     schedule.every(.7).seconds.do(jobqueue.put, every_second)
-    schedule.every(2).minutes.do(jobqueue.put, call_weather_api)
+    schedule.every(2).monday.tuesday.wednesday.thursday.friday.minutes.do(jobqueue.put, call_gold_api)
+    # schedule.every(2).minutes.do(jobqueue.put, call_weather_api)
     schedule.every(3).minutes.do(jobqueue.put, call_gold_api)
 
     try:
