@@ -399,7 +399,7 @@ if __name__ == '__main__':
 
     schedule.every(.7).seconds.do(every_second)
     schedule.every(2).minutes.do(call_weather_api)
-    schedule.every(3).minutes.do(call_gold_api())
+    schedule.every(3).minutes.do(call_gold_api)
 
     try:
         call_apis_async()
