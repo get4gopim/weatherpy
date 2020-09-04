@@ -170,48 +170,6 @@ def callback_fuel(future):
     fuel_info = future.result()
 
 
-# call async rest call to get weather details
-# async def get_weather():
-#     global weather
-#     try:
-#         weather = HtmlParser.get_weather()
-#         weather.set_error(None)
-#         update_weather_temp()
-#         return weather
-#     except Exception as ex:
-#         LOGGER.error('Unable to connect weather API ' + getattr(ex, 'message', repr(ex)))
-#         weather = WeatherInfo.WeatherInfo(0, 0, 0, "00:00", "", "", "")
-#         weather.set_error(ex)
-
-
-# call async rest call to get gold rate detail
-# async def get_gold_rate():
-#     global rate_info
-#     try:
-#         rate_info = HtmlParser.get_gold_price()
-#         rate_info.set_error(None)
-#         update_rate_line()
-#         return rate_info
-#     except Exception as ex:
-#         LOGGER.error('Unable to connect rate API ' + getattr(ex, 'message', repr(ex)))
-#         rate_info = RateInfo.RateInfo('0', '0', 0.0, "", "")
-#         rate_info.set_error(ex)
-
-
-# call async rest call to get fuel details
-# async def get_fuel():
-#     global fuel_info
-#     try:
-#         fuel_info = HtmlParser.get_fuel_price()
-#         fuel_info.set_error(None)
-#         update_fuel_line()
-#         return fuel_info
-#     except Exception as ex:
-#         LOGGER.error('Unable to connect Fuel API ' + getattr(ex, 'message', repr(ex)))
-#         fuel_info = FuelInfo.FuelInfo(0, 0, "", "")
-#         fuel_info.set_error(ex)
-
-
 # update display line strings
 def update_weather_temp():
     global line2
