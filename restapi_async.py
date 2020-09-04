@@ -367,6 +367,8 @@ def every_second():
     if counter == 0:
         print_line2()
         print_line3_and_4_rate()
+        counter = counter + 1
+        return
 
     change_every_x_secs = 10
     # change display line2 every x seconds
