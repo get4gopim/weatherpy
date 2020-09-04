@@ -364,22 +364,29 @@ def every_second():
     update_time_line(currentTime)
     print_line1()
 
+    if counter == 0:
+        print_line2()
+        print_line3_and_4_rate()
+
     change_every_x_secs = 10
     # change display line2 every x seconds
-    if currentTime.second % change_every_x_secs == 0:
+    if counter % change_every_x_secs == 0:
         if rand_bool:
             update_weather_temp()
+            update_rate_line()
             rand_bool = False
         else:
             update_weather_preciption()
+            update_fuel_line()
             rand_bool = True
         print_line2()
-
-    # print_line2()
-    print_line3_and_4_rate()
+        print_line3_and_4_rate()
 
     counter = counter + 1
 
+    # Refresh the data every 5 mins (300 seconds once)
+    # if counter == 300:
+    #     counter = 0
 
 def welcome_date_month():
     current_time = get_time()
