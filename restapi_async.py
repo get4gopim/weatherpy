@@ -145,7 +145,6 @@ def call_unknown_api():
     LOGGER.debug ("completed unknown api")
 
     # time.sleep(5)
-
     loop.close()
     print()
 
@@ -326,63 +325,67 @@ def print_lcd():
     global rand_bool
     global counter
 
-    t = threading.Timer(1, print_lcd)
-    t.start()
+    # t = threading.Timer(1, print_lcd)
+    # t.start()
 
-    # Every reset counter clear and refresh the data lines
-    if counter == 0:
-        LOGGER.info (f'clear lcd called counter: {counter}')
-        display.lcd_clear()
-        # update_weather_temp()
+    while True:
 
-    currentTime = get_time()
-    update_time_line(currentTime)
+        # Every reset counter clear and refresh the data lines
+        if counter == 0:
+            LOGGER.info (f'clear lcd called counter: {counter}')
+            display.lcd_clear()
+            # update_weather_temp()
 
-    # LOGGER.info (f'counter = {counter} currentTime = {currentTime}')
+        currentTime = get_time()
+        update_time_line(currentTime)
 
-    print_line1()
+        # LOGGER.info (f'counter = {counter} currentTime = {currentTime}')
 
-    change_every_x_secs = 10
-    # change display line2 every x seconds
-    if currentTime.second % change_every_x_secs == 0:
-        # print(currentTime.second, ' mod ', currentTime.second % change_every_x_secs, ' display: ', rand_bool)
-        if rand_bool:
-            update_weather_temp()
-            rand_bool = False
+        print_line1()
+
+        change_every_x_secs = 10
+        # change display line2 every x seconds
+        if currentTime.second % change_every_x_secs == 0:
+            # print(currentTime.second, ' mod ', currentTime.second % change_every_x_secs, ' display: ', rand_bool)
+            if rand_bool:
+                update_weather_temp()
+                rand_bool = False
+            else:
+                update_weather_preciption()
+                rand_bool = True
+            print_line2()
+
+        if 0 <= currentTime.second <= 30:
+            # update_weather_temp()
+            update_rate_line()
+            # print_line2()
+            print_line3_and_4_rate()
         else:
-            update_weather_preciption()
-            rand_bool = True
-        print_line2()
+            # update_weather_preciption()
+            update_fuel_line()
+            # print_line2()
+            print_line3_and_4_fuel()
 
-    if 0 <= currentTime.second <= 30:
-        # update_weather_temp()
-        update_rate_line()
-        # print_line2()
-        print_line3_and_4_rate()
-    else:
-        # update_weather_preciption()
-        update_fuel_line()
-        # print_line2()
-        print_line3_and_4_fuel()
+        # Refresh the data every 5 mins (300 seconds once)
+        if counter == 120:
+            counter = 0
+            # call_weather_api()
 
-    # Refresh the data every 5 mins (300 seconds once)
-    if counter == 120:
-        counter = 0
-        # call_weather_api()
+            # # Query Gold Rate only in between 9 AM to 6 PM and not on SUNDAYS
+            # if (currentTime.weekday() != 6 and
+            #         (9 <= currentTime.hour <= 16)):
+            #     call_gold_api()
+            #
+            # # Query Fuel Rate only in morning between 6 AM to 8 AM and not on SUNDAYS
+            # if (currentTime.weekday() != 6 and
+            #             (6 <= currentTime.hour <= 7)):
+            #     call_fuel_api()
+            #
+            # LOGGER.info (f'returned {currentTime} counter: {counter}')
+        else:
+            counter = counter + 1
 
-        # # Query Gold Rate only in between 9 AM to 6 PM and not on SUNDAYS
-        # if (currentTime.weekday() != 6 and
-        #         (9 <= currentTime.hour <= 16)):
-        #     call_gold_api()
-        #
-        # # Query Fuel Rate only in morning between 6 AM to 8 AM and not on SUNDAYS
-        # if (currentTime.weekday() != 6 and
-        #             (6 <= currentTime.hour <= 7)):
-        #     call_fuel_api()
-        #
-        # LOGGER.info (f'returned {currentTime} counter: {counter}')
-    else:
-        counter = counter + 1
+        time.sleep(1)
 
 
 def refresh_weather_data (sc):
