@@ -393,7 +393,9 @@ if __name__ == '__main__':
         schedule.every(10).seconds.do(every_second())
 
         # call_unknown_api()
-
+        while 1:
+            schedule.run_pending()
+            time.sleep(1)
 
     except KeyboardInterrupt:
         LOGGER.info('Cleaning up !')

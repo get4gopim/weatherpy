@@ -85,13 +85,13 @@ class lcd:
 
    # clocks EN to latch command
    def lcd_strobe(self, data):
-      self.lcd_device.write_cmd(data | En | LCD_NOBACKLIGHT)
+      self.lcd_device.write_cmd(data | En | LCD_BACKLIGHT)
       sleep(.0005)
-      self.lcd_device.write_cmd(((data & ~En) | LCD_NOBACKLIGHT))
+      self.lcd_device.write_cmd(((data & ~En) | LCD_BACKLIGHT))
       sleep(.0001)
 
    def lcd_write_four_bits(self, data):
-      self.lcd_device.write_cmd(data | LCD_NOBACKLIGHT)
+      self.lcd_device.write_cmd(data | LCD_BACKLIGHT)
       self.lcd_strobe(data)
 
    # write a command to lcd
