@@ -357,11 +357,29 @@ def print_lcd():
 
 
 def every_second():
+    global counter
+    global rand_bool
+
     currentTime = get_time()
     update_time_line(currentTime)
     print_line1()
-    print_line2()
+
+    change_every_x_secs = 10
+    # change display line2 every x seconds
+    if currentTime.second % change_every_x_secs == 0:
+        if rand_bool:
+            update_weather_temp()
+            rand_bool = False
+        else:
+            update_weather_preciption()
+            rand_bool = True
+        print_line2()
+
+    # print_line2()
     print_line3_and_4_rate()
+
+    counter = counter + 1
+
 
 def welcome_date_month():
     current_time = get_time()
