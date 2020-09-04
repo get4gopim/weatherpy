@@ -433,7 +433,7 @@ if __name__ == '__main__':
     rand_bool = True
     time.sleep(service_start_time_in_secs)
 
-    schedule.every(.7).seconds.do(every_second)
+    schedule.every(.7).seconds.do(jobqueue.put, every_second)
     schedule.every(2).minutes.do(jobqueue.put, call_weather_api)
     schedule.every(3).minutes.do(jobqueue.put, call_gold_api)
 
