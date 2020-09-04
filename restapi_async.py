@@ -356,15 +356,14 @@ def display_lcd():
     tick_count = 0
 
     while True:
-        new_time = time.time()
-
-        update_time_line(new_time)
+        currentTime = get_time()
+        update_time_line(currentTime)
         print_line1()
 
         tick_count += 1
         targeted_time = start_time + tick * tick_count
 
-        time_to_wait = targeted_time - new_time
+        time_to_wait = targeted_time - currentTime.time()
 
         if time_to_wait > 0:
             time.sleep(time_to_wait)
