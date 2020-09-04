@@ -352,17 +352,15 @@ def print_lcd():
         time.sleep(1)
 
 
-def every_min():
-    call_weather_api()
-    update_weather_temp()
-    print_line2()
-
-
 def every_second():
     currentTime = get_time()
     update_time_line(currentTime)
     print_line1()
+
+    update_weather_temp()
     print_line2()
+
+    update_rate_line()
     print_line3_and_4_rate()
 
 def welcome_date_month():
