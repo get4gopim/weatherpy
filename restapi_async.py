@@ -433,10 +433,20 @@ if __name__ == '__main__':
     rand_bool = True
     time.sleep(service_start_time_in_secs)
 
+    # Update time every second
     schedule.every(.7).seconds.do(jobqueue.put, every_second)
-    schedule.every().monday.tuesday.wednesday.thursday.friday.saturday.hour.at(":15").do(jobqueue.put, call_gold_api)
-    schedule.every(2).minutes.do(jobqueue.put, call_weather_api)
-    # schedule.every(3).minutes.do(jobqueue.put, call_gold_api)
+
+    # Update weather every 15 mins once every day
+    schedule.every(15).minutes.do(jobqueue.put, call_weather_api)
+
+    # Update gold rate every 1 hour except sunday
+    schedule.every().monday.tuesday.wednesday.thursday.friday.saturday \
+        .at("10:00").at("11:00").at("12:00").at("13:00").at("14:00").at("15:00").at("16:00").at("17:00") \
+        .do(call_gold_api)
+
+    # Update fuel rate only in the morning - daily 3 times alone except sunday
+    schedule.every().monday.tuesday.wednesday.thursday.friday.saturday \
+        .at("06:30").at("07:00").at("07:30").do(jobqueue.put, call_fuel_api)
 
     try:
         worker_thread = threading.Thread(target=worker_main)
