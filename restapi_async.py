@@ -392,6 +392,8 @@ if __name__ == '__main__':
         # print_lcd()
 
         # call_unknown_api()
+
+        display.lcd_clear()
         while 1:
             schedule.run_pending()
             time.sleep(1)
