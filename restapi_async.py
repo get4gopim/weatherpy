@@ -368,7 +368,7 @@ def display_lcd():
         if time_to_wait > 0:
             time.sleep(time_to_wait)
 
-        print("Magic happens,waited %f seconds" % time_to_wait)
+        print("Magic happens,waited seconds " +time_to_wait)
 
 def refresh_weather_data (sc):
     LOGGER.info ("Doing stuff...")
@@ -409,7 +409,7 @@ if __name__ == '__main__':
     time.sleep(service_start_time_in_secs)
 
     try:
-        call_apis_async()
+        # call_apis_async()
         # print_lcd()
         display_lcd()
 
