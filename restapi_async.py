@@ -434,9 +434,9 @@ if __name__ == '__main__':
     time.sleep(service_start_time_in_secs)
 
     schedule.every(.7).seconds.do(jobqueue.put, every_second)
-    schedule.every().monday.tuesday.wednesday.thursday.friday.at("22:01").do(jobqueue.put, call_gold_api)
-    # schedule.every(2).minutes.do(jobqueue.put, call_weather_api)
-    schedule.every(3).minutes.do(jobqueue.put, call_gold_api)
+    schedule.every().monday.tuesday.wednesday.thursday.friday.at("22:05").do(jobqueue.put, call_gold_api)
+    schedule.every(2).minutes.do(jobqueue.put, call_weather_api)
+    # schedule.every(3).minutes.do(jobqueue.put, call_gold_api)
 
     try:
         worker_thread = threading.Thread(target=worker_main)
