@@ -414,7 +414,7 @@ def welcome_date_month():
     return wel_date.center(lcd_disp_length, ' ')
 
 
-jobqueue = Queue.Queue()
+jobqueue = Queue()
 # main starts here
 if __name__ == '__main__':
     logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO"), format='%(asctime)s %(message)s')
