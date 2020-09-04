@@ -367,7 +367,7 @@ def print_lcd():
             print_line3_and_4_fuel()
 
         # Refresh the data every 5 mins (300 seconds once)
-        if counter == 120:
+        if counter == 80:
             counter = 0
             # call_weather_api()
 
@@ -391,7 +391,7 @@ def print_lcd():
 def refresh_weather_data (sc):
     LOGGER.info ("Doing stuff...")
     # do your stuff
-    # call_unknown_api()
+    call_unknown_api()
 
     s.enter(refresh_weather_in_x_secs, 1, refresh_weather_data, (sc,))
 
