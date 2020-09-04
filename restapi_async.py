@@ -18,6 +18,7 @@ import FuelInfo
 import HtmlParser
 import HtmlParser2
 import util
+import schedule
 
 from aiohttp import ClientSession, ClientConnectorError
 from collections import namedtuple
@@ -349,28 +350,9 @@ def print_lcd():
         time.sleep(1)
 
 
-def display_lcd():
-    start_time = time.time()
-    tick = 1.0  # 1 second
-
-    tick_count = 0
-
-    display.lcd_clear()
-
-    while True:
-        currentTime = get_time()
-        update_time_line(currentTime)
-        print_line1()
-
-        time.sleep(0.9)
-
-
-def refresh_weather_data (sc):
-    LOGGER.info ("Doing stuff...")
-    # do your stuff
-    call_unknown_api()
-
-    s.enter(refresh_weather_in_x_secs, 1, refresh_weather_data, (sc,))
+def every_second():
+    currentTime = get_time()
+    update_time_line(currentTime)
 
 
 def welcome_date_month():
@@ -403,13 +385,15 @@ if __name__ == '__main__':
     rand_bool = True
     time.sleep(service_start_time_in_secs)
 
+
+
     try:
         # call_apis_async()
         # print_lcd()
-        display_lcd()
+        schedule.every(10).seconds.do(every_second())
 
-        s.enter(refresh_weather_in_x_secs, 1, refresh_weather_data, (s,))
-        s.run()
+        # call_unknown_api()
+
 
     except KeyboardInterrupt:
         LOGGER.info('Cleaning up !')
