@@ -131,6 +131,31 @@ def call_fuel_api():
     print()
 
 
+def call_unknown_api():
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
+    f1 = asyncio.Future()
+
+    f1.add_done_callback(callback_unattended)
+
+    LOGGER.debug ("before unknown api")
+    tasks = [HtmlParser2.get_weather(f1)]
+    loop.run_until_complete(asyncio.wait(tasks))
+    LOGGER.debug ("completed unknown api")
+
+    # time.sleep(5)
+
+    loop.close()
+    print()
+
+
+def callback_unattended(future):
+    global unattended
+    unattended = future.result()
+    LOGGER.info ('Callback unattended received')
+
+
 def callback_weather(future):
     global weather
     weather = future.result()
@@ -363,7 +388,7 @@ def print_lcd():
 def refresh_weather_data (sc):
     LOGGER.info ("Doing stuff...")
     # do your stuff
-    call_weather_api()
+    call_unknown_api()
 
     s.enter(refresh_weather_in_x_secs, 1, refresh_weather_data, (sc,))
 
@@ -402,8 +427,8 @@ if __name__ == '__main__':
         call_apis_async()
         print_lcd()
 
-        # s.enter(refresh_weather_in_x_secs, 1, refresh_weather_data, (s,))
-        # s.run()
+        s.enter(refresh_weather_in_x_secs, 1, refresh_weather_data, (s,))
+        s.run()
 
     except KeyboardInterrupt:
         LOGGER.info('Cleaning up !')
