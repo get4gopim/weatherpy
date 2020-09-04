@@ -353,6 +353,7 @@ def print_lcd():
 def every_second():
     currentTime = get_time()
     update_time_line(currentTime)
+    print_line1()
 
 
 def welcome_date_month():
