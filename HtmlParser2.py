@@ -4,6 +4,8 @@ import asyncio
 import async_timeout
 import time
 import aiohttp
+import threading
+import sched
 
 import WeatherInfo
 import FuelInfo
@@ -22,10 +24,14 @@ LOGGER = logging.getLogger(__name__)
 
 
 async def fetch(session, url):
-    async with async_timeout.timeout(20):
-        async with session.get(url) as response:
-            return await response.text()
-
+    try:
+        async with async_timeout.timeout(20):
+            async with session.get(url) as response:
+                return await response.text()
+    except asyncio.TimeoutError as ex:
+        LOGGER.error(f'Unable to connect remote API : {url} - {repr(ex)}')
+        info = WeatherInfo.WeatherInfo('0', "0", "0", "00:00", "", "", "")
+        info.set_error(ex)
 
 async def get_weather(future):
     start = time.time()
@@ -224,7 +230,8 @@ def callback(future):
 
 def test_async_future():
     start = time.time()
-    loop = asyncio.get_event_loop()
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
 
     f1 = asyncio.Future()
     f2 = asyncio.Future()
@@ -240,9 +247,21 @@ def test_async_future():
     loop.close()
 
     LOGGER.info(f'Total Time Taken {time.time() - start}')
+    print ('\n\n')
+
+
+s = sched.scheduler(time.time, time.sleep)
+
+
+def refresh_weather_data (sc):
+    LOGGER.info ("Doing stuff...")
+    # do your stuff
+    test_async_future()
+
+    s.enter(10, 1, refresh_weather_data, (sc,))
 
 if __name__ == '__main__':
-    print("Parser starts ...")
+    LOGGER.info ("Parser starts ...")
 
-    # test_async()
-    test_async_future()
+    s.enter(10, 1, refresh_weather_data, (s,))
+    s.run()
