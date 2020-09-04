@@ -385,12 +385,11 @@ if __name__ == '__main__':
     rand_bool = True
     time.sleep(service_start_time_in_secs)
 
-
+    schedule.every(1).seconds.do(every_second())
 
     try:
         # call_apis_async()
         # print_lcd()
-        schedule.every(10).seconds.do(every_second())
 
         # call_unknown_api()
         while 1:
