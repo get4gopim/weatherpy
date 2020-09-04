@@ -80,6 +80,8 @@ def call_apis_async():
 
 
 def call_weather_api():
+    LOGGER.info("call_weather_api")
+
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
 
@@ -87,10 +89,10 @@ def call_weather_api():
 
     f1.add_done_callback(callback_weather)
 
-    LOGGER.debug ("before weather")
+    LOGGER.info ("before weather")
     tasks = [HtmlParser2.get_weather(f1)]
     loop.run_until_complete(asyncio.wait(tasks))
-    LOGGER.debug ("completed")
+    LOGGER.info ("completed")
 
     # time.sleep(5)
 
@@ -357,7 +359,6 @@ def every_min():
 
 
 def every_second():
-    call_weather_api()
     currentTime = get_time()
     update_time_line(currentTime)
     print_line1()
