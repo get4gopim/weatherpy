@@ -9,6 +9,7 @@ import sched
 
 import datetime
 import time
+from queue import Queue
 
 import lcddriver
 
@@ -391,6 +392,14 @@ def every_second():
     # if counter == 300:
     #     counter = 0
 
+
+def worker_main():
+    while 1:
+        job_func = jobqueue.get()
+        job_func()
+        jobqueue.task_done()
+
+
 def welcome_date_month():
     current_time = get_time()
     day = current_time.strftime("%d")
@@ -405,6 +414,7 @@ def welcome_date_month():
     return wel_date.center(lcd_disp_length, ' ')
 
 
+jobqueue = Queue.Queue()
 # main starts here
 if __name__ == '__main__':
     logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO"), format='%(asctime)s %(message)s')
@@ -424,10 +434,13 @@ if __name__ == '__main__':
     time.sleep(service_start_time_in_secs)
 
     schedule.every(.7).seconds.do(every_second)
-    schedule.every(2).minutes.do(call_weather_api)
-    schedule.every(3).minutes.do(call_gold_api)
+    schedule.every(2).minutes.do(jobqueue.put, call_weather_api)
+    schedule.every(3).minutes.do(jobqueue.put, call_gold_api)
 
     try:
+        worker_thread = threading.Thread(target=worker_main)
+        worker_thread.start()
+
         call_apis_async()
         # print_lcd()
 
