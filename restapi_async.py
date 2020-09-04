@@ -388,7 +388,7 @@ def print_lcd():
 def refresh_weather_data (sc):
     LOGGER.info ("Doing stuff...")
     # do your stuff
-    call_unknown_api()
+    # call_unknown_api()
 
     s.enter(refresh_weather_in_x_secs, 1, refresh_weather_data, (sc,))
 
