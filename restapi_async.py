@@ -373,6 +373,8 @@ def welcome_date_month():
 # main starts here
 if __name__ == '__main__':
     logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO"), format='%(asctime)s %(message)s')
+    logging.getLogger('schedule').propagate = False
+
     LOGGER = logging.getLogger(__name__)
 
     LOGGER.info('Display 20x4 LCD Module Start')
