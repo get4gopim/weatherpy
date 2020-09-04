@@ -286,6 +286,9 @@ def print_lcd():
     # t = threading.Timer(1, print_lcd)
     # t.start()
 
+    s.enter(refresh_weather_in_x_secs, 1, refresh_weather_data, (s,))
+    s.run()
+
     while True:
 
         # Every reset counter clear and refresh the data lines
