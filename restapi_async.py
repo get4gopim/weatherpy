@@ -362,7 +362,8 @@ def every_second():
     currentTime = get_time()
     update_time_line(currentTime)
     print_line1()
-
+    print_line2()
+    print_line3_and_4_rate()
 
 def welcome_date_month():
     current_time = get_time()
@@ -397,7 +398,8 @@ if __name__ == '__main__':
     time.sleep(service_start_time_in_secs)
 
     schedule.every(.7).seconds.do(every_second)
-    schedule.every(1).minutes.do(every_min)
+    schedule.every(2).minutes.do(call_weather_api)
+    schedule.every(3).minutes.do(call_gold_api())
 
     try:
         call_apis_async()
