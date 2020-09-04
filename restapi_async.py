@@ -349,6 +349,28 @@ def print_lcd():
         time.sleep(1)
 
 
+def display_lcd():
+    start_time = time.time()
+    tick = 1.0  # 1 second
+
+    tick_count = 0
+
+    while True:
+        new_time = time.time()
+
+        update_time_line(new_time)
+        print_line1()
+
+        tick_count += 1
+        targeted_time = start_time + tick * tick_count
+
+        time_to_wait = targeted_time - new_time
+
+        if time_to_wait > 0:
+            time.sleep(time_to_wait)
+
+        print("Magic happens,waited %f seconds" % time_to_wait)
+
 def refresh_weather_data (sc):
     LOGGER.info ("Doing stuff...")
     # do your stuff
@@ -389,7 +411,8 @@ if __name__ == '__main__':
 
     try:
         call_apis_async()
-        print_lcd()
+        # print_lcd()
+        display_lcd()
 
         s.enter(refresh_weather_in_x_secs, 1, refresh_weather_data, (s,))
         s.run()
