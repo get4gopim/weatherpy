@@ -376,13 +376,14 @@ def every_second():
         if rand_bool:
             update_weather_temp()
             update_rate_line()
+            print_line3_and_4_rate()
             rand_bool = False
         else:
             update_weather_preciption()
             update_fuel_line()
+            print_line3_and_4_fuel()
             rand_bool = True
         print_line2()
-        print_line3_and_4_rate()
 
     counter = counter + 1
 
