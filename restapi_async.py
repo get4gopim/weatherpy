@@ -161,16 +161,20 @@ def callback_unattended(future):
 def callback_weather(future):
     global weather
     weather = future.result()
+    update_weather_temp()
+    update_weather_preciption()
 
 
 def callback_gold(future):
     global rate_info
     rate_info = future.result()
+    update_rate_line()
 
 
 def callback_fuel(future):
     global fuel_info
     fuel_info = future.result()
+    update_fuel_line()
 
 
 # update display line strings
@@ -289,8 +293,8 @@ def print_lcd():
     # t = threading.Timer(1, print_lcd)
     # t.start()
 
-    s.enter(refresh_weather_in_x_secs, 1, refresh_weather_data, (s,))
-    s.run()
+    # s.enter(refresh_weather_in_x_secs, 1, refresh_weather_data, (s,))
+    # s.run()
 
     while True:
 
@@ -356,11 +360,7 @@ def every_second():
     currentTime = get_time()
     update_time_line(currentTime)
     print_line1()
-
-    update_weather_temp()
     print_line2()
-
-    update_rate_line()
     print_line3_and_4_rate()
 
 def welcome_date_month():
@@ -404,6 +404,9 @@ if __name__ == '__main__':
         # print_lcd()
 
         # call_unknown_api()
+        update_weather_temp()
+        update_rate_line()
+        update_fuel_line()
 
         display.lcd_clear()
         while 1:
