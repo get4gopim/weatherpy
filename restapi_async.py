@@ -351,11 +351,13 @@ def print_lcd():
 
 
 def every_min():
+    call_weather_api()
     update_weather_temp()
     print_line2()
 
 
 def every_second():
+    call_weather_api()
     currentTime = get_time()
     update_time_line(currentTime)
     print_line1()
