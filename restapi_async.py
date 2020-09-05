@@ -20,7 +20,7 @@ from queue import Queue
 display = lcddriver.lcd()
 
 lcd_disp_length = 20
-service_start_time_in_secs = 1
+service_start_time_in_secs = 20
 
 jobqueue = Queue()
 
@@ -280,7 +280,7 @@ def welcome_date_month():
 
 def add_scheduler():
     # Update time every second
-    schedule.every(.8).seconds.do(jobqueue.put, every_second)
+    schedule.every(1).seconds.do(jobqueue.put, every_second)
 
     # Update weather every 15 mins once every day
     schedule.every(15).minutes.do(jobqueue.put, call_weather_api)
