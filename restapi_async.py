@@ -20,7 +20,7 @@ from queue import Queue
 display = lcddriver.lcd()
 
 lcd_disp_length = 20
-service_start_time_in_secs = 30
+service_start_time_in_secs = 20
 
 jobqueue = Queue()
 
