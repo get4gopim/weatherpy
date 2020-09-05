@@ -188,15 +188,8 @@ def update_fuel_line_3_4():
     prefix_p = 'Petrol'
     prefix_d = 'Diesel'
 
-    line3 = prefix_p.ljust(just, ' ') + str(fuel_info.get_petrol())
-    line4 = prefix_d.ljust(just, ' ') + str(fuel_info.get_diesel())
-
-    # line4 = 'Petrol ' + fuel_info.get_petrol() + ' Disel' + fuel_info.get_diesel()
-    # line5 = 'Petrol        ' + str(fuel_info.get_petrol())
-    # line6 = 'Diesel        ' + str(fuel_info.get_diesel())
-
-    # line5 = line5.ljust(lcd_disp_length, ' ')
-    # line6 = line6.ljust(lcd_disp_length, ' ')
+    line6 = prefix_p.ljust(just, ' ') + str(fuel_info.get_petrol())
+    line5 = prefix_d.ljust(just, ' ') + str(fuel_info.get_diesel())
 
 
 def update_time_line1(currentTime):
@@ -224,8 +217,8 @@ def print_line3_and_4_rate():
 # print line 3 and 4
 def print_line3_and_4_fuel():
     if fuel_info.get_error() is None:
-        display.lcd_display_string(line3, 3)
-        display.lcd_display_string(line4, 4)
+        display.lcd_display_string(line5, 3)
+        display.lcd_display_string(line6, 4)
 
 
 def every_second():

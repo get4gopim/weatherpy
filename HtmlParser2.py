@@ -194,14 +194,14 @@ async def parse_fuel_info(page_content):
 
     rows = table.find_all("tr")
     fuel_date = rows[1].find_all('td')[0].text
-    petrol_price = rows[1].find_all('td')[1].text
+    petrol_price = str(rows[1].find_all('td')[1].text).strip()
 
     table = soup.select("table#BC_GridView1").__getitem__(1)
     # print (table)
 
     rows = table.find_all("tr")
     fuel_date = rows[1].find_all('td')[0].text
-    diesel_price = rows[1].find_all('td')[1].text
+    diesel_price = str(rows[1].find_all('td')[1].text).strip()
 
     table = soup.find_all('table', {'id': 'tableb'}).__getitem__(1)
     # print (table)

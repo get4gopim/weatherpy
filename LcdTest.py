@@ -1,19 +1,14 @@
-import I2C_LCD_driver
+import lcddriver_16x2
+import lcddriver
 
-import socket
-import fcntl
-import struct
+import time
 
-mylcd = I2C_LCD_driver.lcd()
+# mylcd = lcddriver_16x2.lcd()
+mylcd = lcddriver.lcd()
 
-def get_ip_address(ifname):
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    return socket.inet_ntoa(fcntl.ioctl(
-        s.fileno(),
-        0x8915,
-        struct.pack('256s', ifname[:15])
-    )[20:24])
-
-mylcd.lcd_display_string("IP Address:", 1)
-
-mylcd.lcd_display_string(get_ip_address('wlan0'), 2)
+while True:
+    print ("LCD Display Starts ... ")
+    mylcd.lcd_clear()
+    mylcd.lcd_display_string("Hello World", 1)
+    mylcd.lcd_display_string("Testing LCD", 2)
+    time.sleep(1)
