@@ -301,7 +301,7 @@ def add_scheduler():
     schedule.every(15).minutes.do(jobqueue.put, call_weather_api)
 
     # Update gold rate every 1 hour except sunday from 10 AM to 5 PM
-    gold_times = ["10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"]
+    gold_times = ["10:00", "11:00", "12:00", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "17:00"]
     for x in gold_times:
         schedule.every().monday.at(x).do(call_gold_api)
         schedule.every().tuesday.at(x).do(call_gold_api)
