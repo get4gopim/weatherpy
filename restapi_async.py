@@ -24,14 +24,6 @@ service_start_time_in_secs = 1
 
 jobqueue = Queue()
 
-# line1 = ''
-# line2 = ''
-# line3 = ''
-# line4 = ''
-# line5 = ''
-# line6 = ''
-# weather = WeatherInfo.WeatherInfo(0, 0, 0, "00:00", "", "", "")
-
 
 # get current system time
 def get_time():
@@ -319,6 +311,7 @@ def add_scheduler():
         schedule.every().thursday.at(x).do(call_fuel_api)
         schedule.every().friday.at(x).do(call_fuel_api)
         schedule.every().saturday.at(x).do(call_fuel_api)
+
 
 # main starts here
 if __name__ == '__main__':

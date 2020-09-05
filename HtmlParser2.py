@@ -4,8 +4,6 @@ import asyncio
 import async_timeout
 import time
 import aiohttp
-import threading
-import sched
 
 import WeatherInfo
 import FuelInfo
@@ -33,12 +31,13 @@ async def fetch(session, url):
         info = WeatherInfo.WeatherInfo('0', "0", "0", "00:00", "", "", "")
         info.set_error(ex)
 
+
 async def get_weather(future):
     start = time.time()
     info = None
 
     try:
-        async with aiohttp.ClientSession() as session:
+        async with ClientSession() as session:
             html = await fetch(session, weather_url)
             info = await parse_weather(html)
     except ClientConnectorError as ex:
@@ -54,7 +53,7 @@ async def get_gold_price(future):
     start = time.time()
     info = None
     try:
-        async with aiohttp.ClientSession() as session:
+        async with ClientSession() as session:
             html = await fetch(session, gold_url)
             info = await parse_gold_info(html)
     except ClientConnectorError as ex:
@@ -224,6 +223,7 @@ async def parse_fuel_info(page_content):
     return fuel_info
 
 
+# Testing Methods
 def callback(future):
     print (future.result())
 
@@ -249,19 +249,7 @@ def test_async_future():
     LOGGER.info(f'Total Time Taken {time.time() - start}')
     print ('\n\n')
 
-
-s = sched.scheduler(time.time, time.sleep)
-
-
-def refresh_weather_data (sc):
-    LOGGER.info ("Doing stuff...")
-    # do your stuff
-    test_async_future()
-
-    s.enter(10, 1, refresh_weather_data, (sc,))
-
 if __name__ == '__main__':
     LOGGER.info ("Parser starts ...")
 
-    s.enter(10, 1, refresh_weather_data, (s,))
-    s.run()
+    test_async_future()
