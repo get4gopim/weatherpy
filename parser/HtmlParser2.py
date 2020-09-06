@@ -5,10 +5,8 @@ import async_timeout
 import time
 import aiohttp
 
-import WeatherInfo
-import FuelInfo
-import RateInfo
-import util
+from model import FuelInfo, RateInfo, WeatherInfo
+from utility import util
 
 from bs4 import BeautifulSoup
 from aiohttp import ClientSession, ClientConnectorError

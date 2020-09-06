@@ -8,10 +8,10 @@ import schedule
 import datetime
 import time
 
-import lcddriver
+from lcddriver import lcddriver
 
-import HtmlParser2
-import util
+from parser import HtmlParser2
+from utility import util
 
 from queue import Queue
 

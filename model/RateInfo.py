@@ -1,5 +1,6 @@
 # Rate Info Class file
-import util
+from utility import util
+
 
 class RateInfo:
 
