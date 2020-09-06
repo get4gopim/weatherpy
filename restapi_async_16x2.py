@@ -9,9 +9,8 @@ import datetime
 import time
 
 from lcddriver import lcddriver_16x2
-
-from parser import HtmlParser2
 from utility import util
+from service import HtmlParser2
 
 from queue import Queue
 

@@ -1,3 +1,6 @@
+# HTML Web Scrabbing Forecast helper file
+
+
 import logging
 import os
 import asyncio
@@ -248,7 +251,7 @@ def test_async_future():
     print ('\n\n')
 
 
-if __name__ == '__main__':
-    LOGGER.info ("Parser starts ...")
-
-    test_async_future()
+# if __name__ == '__main__':
+#     LOGGER.info ("Parser starts ...")
+#
+#     test_async_future()

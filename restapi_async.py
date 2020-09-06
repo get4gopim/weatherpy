@@ -10,7 +10,7 @@ import time
 
 from lcddriver import lcddriver
 
-from parser import HtmlParser2
+from service import HtmlParser2
 from utility import util
 
 from queue import Queue
