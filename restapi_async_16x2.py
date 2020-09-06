@@ -157,8 +157,9 @@ def update_weather_preciption_line2():
         idx = util.index_of(preciption, 'until')
         if idx > 0:
             preciption = preciption[0:idx]
+            preciption = preciption.replace(' of', '', 1).strip()
 
-        # Make string 20 chars only and left justify with space if length is less.
+            # Make string 20 chars only and left justify with space if length is less.
         line2 = preciption[0:lcd_disp_length]
         line2 = line2.ljust(lcd_disp_length, ' ')
     else:
@@ -323,8 +324,7 @@ if __name__ == '__main__':
 
         call_apis_async()
 
-        update_weather_temp_line2()
-        update_rate_line_3_4()
+        update_weather_location_line2()
         # update_fuel_line_3_4()
 
         add_scheduler()
