@@ -224,6 +224,7 @@ def print_line3_and_4_fuel():
 def every_second():
     global counter
     global rand_bool
+    global _bool_20
 
     current_time = get_time()
     update_time_line1(current_time)
@@ -232,6 +233,22 @@ def every_second():
     if counter == 0:
         print_line2()
         print_line3_and_4_rate()
+        counter = counter + 1
+        return
+
+    change_every_x_secs = 20
+    if counter % change_every_x_secs == 0:
+        if _bool_20:
+            update_weather_location_line2()
+            update_rate_line_3_4()
+            print_line3_and_4_rate()
+            _bool_20 = False
+        else:
+            update_weather_preciption_line2()
+            update_fuel_line_3_4()
+            print_line3_and_4_fuel()
+            _bool_20 = True
+        print_line2()
         counter = counter + 1
         return
 
@@ -321,6 +338,7 @@ if __name__ == '__main__':
 
     counter = 0
     rand_bool = True
+    _bool_20 = True
     time.sleep(service_start_time_in_secs)
 
     try:
@@ -329,7 +347,7 @@ if __name__ == '__main__':
 
         call_apis_async()
 
-        update_weather_temp_line2()
+        update_weather_location_line2()
         update_rate_line_3_4()
         update_fuel_line_3_4()
 
