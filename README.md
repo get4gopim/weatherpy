@@ -11,3 +11,5 @@ The 20x4 display has the following informations on each line on the LCD.
 The 16x2 will display has the informations on each line on the LCD.
 - Current Date and time (hour:min:sec)
 - Temperature,Preciption of weather data, Location and Gold Silver rates
+
+More info: https://github.com/get4gopim/weatherpy.wiki.git
