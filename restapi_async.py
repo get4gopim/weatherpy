@@ -59,23 +59,26 @@ def call_apis_async(location):
 def call_weather_api(location):
     LOGGER.info("call_weather_api")
 
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
+    try:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
 
-    f1 = asyncio.Future()
+        f1 = asyncio.Future()
 
-    f1.add_done_callback(callback_weather)
+        f1.add_done_callback(callback_weather)
 
-    tasks = None
-    if location is not None:
-        tasks.append(HtmlParser2.get_google_weather(f1, location))
-    else:
-        tasks.append(HtmlParser2.get_weather(f1))
+        tasks = []
+        if location is not None:
+            tasks.append(HtmlParser2.get_google_weather(f1, location))
+        else:
+            tasks.append(HtmlParser2.get_weather(f1))
 
-    loop.run_until_complete(asyncio.wait(tasks))
+        loop.run_until_complete(asyncio.wait(tasks))
 
-    loop.close()
-    print()
+        loop.close()
+        print()
+    except Exception as ex:
+        LOGGER.error(f'call_weather_api : {repr(ex)}')
 
 
 def call_gold_api():
@@ -172,7 +175,7 @@ def update_weather_humidity_line2():
 
         line2 = line2.ljust(lcd_disp_length, ' ')
     else:
-        update_weather_location_line2()
+        update_weather_temp_line2()
 
 
 # update preciption line strings
@@ -302,9 +305,12 @@ def every_second():
 
 def worker_main():
     while 1:
-        job_func = jobqueue.get()
-        job_func()
-        jobqueue.task_done()
+        try:
+            job_func, job_args = jobqueue.get()
+            job_func(*job_args)
+            jobqueue.task_done()
+        except BaseException as ex:
+            LOGGER.error(f'worker_main : {repr(ex)}')
 
 
 def welcome_date_month():
@@ -323,30 +329,30 @@ def welcome_date_month():
 
 def add_scheduler(location):
     # Update time every second
-    schedule.every(1).seconds.do(jobqueue.put, every_second)
+    schedule.every(1).seconds.do(jobqueue.put, (every_second, []))
 
     # Update weather every 15 mins once every day
-    schedule.every(15).minutes.do(jobqueue.put, call_weather_api, location)
+    schedule.every(15).minutes.do(jobqueue.put, (call_weather_api, [location]))
 
     # Update gold rate every 1 hour except sunday from 10 AM to 5 PM
-    gold_times = ["10:00", "11:00", "12:00", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "17:00"]
+    gold_times = ["09:30", "10:00", "11:00", "12:00", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "17:00"]
     for x in gold_times:
-        schedule.every().monday.at(x).do(call_gold_api)
-        schedule.every().tuesday.at(x).do(call_gold_api)
-        schedule.every().wednesday.at(x).do(call_gold_api)
-        schedule.every().thursday.at(x).do(call_gold_api)
-        schedule.every().friday.at(x).do(call_gold_api)
-        schedule.every().saturday.at(x).do(call_gold_api)
+        schedule.every().monday.at(x).do(jobqueue.put, (call_gold_api, []))
+        schedule.every().tuesday.at(x).do(jobqueue.put, (call_gold_api, []))
+        schedule.every().wednesday.at(x).do(jobqueue.put, (call_gold_api, []))
+        schedule.every().thursday.at(x).do(jobqueue.put, (call_gold_api, []))
+        schedule.every().friday.at(x).do(jobqueue.put, (call_gold_api, []))
+        schedule.every().saturday.at(x).do(jobqueue.put, (call_gold_api, []))
 
     # Update fuel rate from 6 to 8 AM except sunday
     fuel_times = ["06:00", "06:30", "07:00", "07:30", "08:00"]
     for x in fuel_times:
-        schedule.every().monday.at(x).do(call_fuel_api)
-        schedule.every().tuesday.at(x).do(call_fuel_api)
-        schedule.every().wednesday.at(x).do(call_fuel_api)
-        schedule.every().thursday.at(x).do(call_fuel_api)
-        schedule.every().friday.at(x).do(call_fuel_api)
-        schedule.every().saturday.at(x).do(call_fuel_api)
+        schedule.every().monday.at(x).do(jobqueue.put, (call_fuel_api, []))
+        schedule.every().tuesday.at(x).do(jobqueue.put, (call_fuel_api, []))
+        schedule.every().wednesday.at(x).do(jobqueue.put, (call_fuel_api, []))
+        schedule.every().thursday.at(x).do(jobqueue.put, (call_fuel_api, []))
+        schedule.every().friday.at(x).do(jobqueue.put, (call_fuel_api, []))
+        schedule.every().saturday.at(x).do(jobqueue.put, (call_fuel_api, []))
 
 
 # main starts here

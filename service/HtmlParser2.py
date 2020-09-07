@@ -5,10 +5,13 @@ import logging
 import os
 import asyncio
 import sys
+import threading
+from queue import Queue
 
 import async_timeout
 import time
 import aiohttp
+import schedule
 
 from model import FuelInfo, RateInfo, WeatherInfo
 from utility import util
@@ -337,10 +340,77 @@ def test_async_future(location):
     print ('\n\n')
 
 
+def call_weather_api(location):
+    LOGGER.info("call_weather_api")
+
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
+    f1 = asyncio.Future()
+
+    f1.add_done_callback(callback)
+
+    tasks = []
+    if location is not None:
+        tasks.append(get_google_weather(f1, location))
+    else:
+        tasks.append(get_weather(f1))
+
+    loop.run_until_complete(asyncio.wait(tasks))
+
+    loop.close()
+    print()
+
+
+def call_gold_api():
+    LOGGER.info("call_gold_api")
+
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
+    f1 = asyncio.Future()
+
+    f1.add_done_callback(callback)
+
+    tasks = [get_gold_price(f1)]
+    loop.run_until_complete(asyncio.wait(tasks))
+
+    loop.close()
+    print()
+
+
+def worker_main():
+    while True:
+        try:
+            job_func, job_args = jobqueue.get()
+            job_func(*job_args)
+            jobqueue.task_done()
+        except BaseException as e:
+            print(e)
+            LOGGER.error(f'worker_main : {repr(e)}')
+
+
+jobqueue = Queue()
+
 # if __name__ == '__main__':
 #     LOGGER.info (f"Parser starts ... args: {len(sys.argv)}")
+#
 #     location = None
 #     if len(sys.argv) > 1:
 #         location = sys.argv[1]
 #
-#     test_async_future(location)
+#     schedule.every(1).seconds.do(jobqueue.put, (call_weather_api, [location]))
+#     schedule.every(5).seconds.do(jobqueue.put, (call_gold_api, []))
+#
+#     worker_thread = threading.Thread(target=worker_main)
+#     worker_thread.start()
+#
+#     while True:
+#         try:
+#             schedule.run_pending()
+#             time.sleep(1)
+#         except Exception as e:
+#             print (e)
+#             sys.exit()
+
+    # test_async_future(location)
