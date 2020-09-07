@@ -44,9 +44,9 @@ def call_apis_async(location):
 
     tasks = [HtmlParser2.get_gold_price(f2), HtmlParser2.get_fuel_price(f3)]
     if location is not None:
-        tasks.append([HtmlParser2.get_google_weather(f1, location)])
+        tasks.append(HtmlParser2.get_google_weather(f1, location))
     else:
-        tasks.append([HtmlParser2.get_weather(f1)])
+        tasks.append(HtmlParser2.get_weather(f1))
 
     loop.run_until_complete(asyncio.wait(tasks))
 
@@ -68,9 +68,9 @@ def call_weather_api(location):
 
     tasks = None
     if location is not None:
-        tasks.append([HtmlParser2.get_google_weather(f1, location)])
+        tasks.append(HtmlParser2.get_google_weather(f1, location))
     else:
-        tasks.append([HtmlParser2.get_weather(f1)])
+        tasks.append(HtmlParser2.get_weather(f1))
 
     loop.run_until_complete(asyncio.wait(tasks))
 
