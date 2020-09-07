@@ -1,5 +1,5 @@
 # Main LCD 20x4 I2C - Forecast API Python Script
-
+import sys
 import threading
 import asyncio
 import logging
@@ -30,7 +30,7 @@ def get_time():
     return datetime.datetime.now()
 
 
-def call_apis_async():
+def call_apis_async(location):
     start = time.time()
     loop = asyncio.get_event_loop()
 
@@ -42,7 +42,12 @@ def call_apis_async():
     f2.add_done_callback(callback_gold)
     f3.add_done_callback(callback_fuel)
 
-    tasks = [HtmlParser2.get_weather(f1), HtmlParser2.get_gold_price(f2), HtmlParser2.get_fuel_price(f3)]
+    tasks = [HtmlParser2.get_gold_price(f2), HtmlParser2.get_fuel_price(f3)]
+    if location is not None:
+        tasks.append([HtmlParser2.get_google_weather(f1, location)])
+    else:
+        tasks.append([HtmlParser2.get_weather(f1)])
+
     loop.run_until_complete(asyncio.wait(tasks))
 
     loop.close()
@@ -51,7 +56,7 @@ def call_apis_async():
     print()
 
 
-def call_weather_api():
+def call_weather_api(location):
     LOGGER.info("call_weather_api")
 
     loop = asyncio.new_event_loop()
@@ -61,7 +66,12 @@ def call_weather_api():
 
     f1.add_done_callback(callback_weather)
 
-    tasks = [HtmlParser2.get_weather(f1)]
+    tasks = None
+    if location is not None:
+        tasks.append([HtmlParser2.get_google_weather(f1, location)])
+    else:
+        tasks.append([HtmlParser2.get_weather(f1)])
+
     loop.run_until_complete(asyncio.wait(tasks))
 
     loop.close()
@@ -147,6 +157,22 @@ def update_weather_location_line2():
     # Make string 16 chars only and left justify with space if length is less.
     line2 = location[0:lcd_disp_length]
     line2 = line2.ljust(lcd_disp_length, ' ')
+
+
+# update humidity line strings
+def update_weather_humidity_line2():
+    global line2
+
+    if weather.get_humidity() is not None:
+        # Make string right justified of length 4 by padding 3 spaces to left
+        justl = lcd_disp_length - 4
+        humidity ='Humidity'
+        humidity = humidity.ljust(justl, ' ')
+        line2 = humidity + ' ' + str(weather.get_humidity())
+
+        line2 = line2.ljust(lcd_disp_length, ' ')
+    else:
+        update_weather_location_line2()
 
 
 # update preciption line strings
@@ -244,7 +270,7 @@ def every_second():
             print_line3_and_4_rate()
             _bool_20 = False
         else:
-            update_weather_preciption_line2()
+            update_weather_humidity_line2()
             update_fuel_line_3_4()
             print_line3_and_4_fuel()
             _bool_20 = True
@@ -295,12 +321,12 @@ def welcome_date_month():
     return wel_date.center(lcd_disp_length, ' ')
 
 
-def add_scheduler():
+def add_scheduler(location):
     # Update time every second
     schedule.every(1).seconds.do(jobqueue.put, every_second)
 
     # Update weather every 15 mins once every day
-    schedule.every(15).minutes.do(jobqueue.put, call_weather_api)
+    schedule.every(15).minutes.do(jobqueue.put, call_weather_api, location)
 
     # Update gold rate every 1 hour except sunday from 10 AM to 5 PM
     gold_times = ["10:00", "11:00", "12:00", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "17:00"]
@@ -336,6 +362,10 @@ if __name__ == '__main__':
     display.lcd_display_string(welcome_date_month(), 2)
     display.lcd_display_string("Starting Now ...".center(lcd_disp_length, ' '), 4)
 
+    location = None
+    if len(sys.argv) > 1:
+        location = sys.argv[1]
+
     counter = 0
     rand_bool = True
     _bool_20 = True
@@ -345,13 +375,13 @@ if __name__ == '__main__':
         worker_thread = threading.Thread(target=worker_main)
         worker_thread.start()
 
-        call_apis_async()
+        call_apis_async(location)
 
         update_weather_location_line2()
         update_rate_line_3_4()
         update_fuel_line_3_4()
 
-        add_scheduler()
+        add_scheduler(location)
 
         display.lcd_clear()
         while 1:

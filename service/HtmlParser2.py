@@ -4,6 +4,8 @@
 import logging
 import os
 import asyncio
+import sys
+
 import async_timeout
 import time
 import aiohttp
@@ -18,15 +20,24 @@ weather_url = 'https://weather.com/en-IN/weather/today/l/4ef51d4289943c7792cbe77
 gold_url = 'http://www.livechennai.com/gold_silverrate.asp'
 fuel_url = 'https://www.livechennai.com/petrol_price.asp'
 
+google_weather_url = 'https://www.google.com/search?q=weather'
+default_location = 'chennai'
+
 logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO"), format='%(asctime)s %(message)s')
 LOGGER = logging.getLogger(__name__)
+
+USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:65.0) Gecko/20100101 Firefox/65.0"
+headers = {"user-agent": USER_AGENT}
 
 
 async def fetch(session, url):
     try:
-        async with async_timeout.timeout(20):
-            async with session.get(url) as response:
-                return await response.text()
+        async with async_timeout.timeout(30):
+            async with session.get(url, headers=headers) as response:
+                if response.status == 200:
+                    return await response.text()
+                else:
+                    raise Exception(f'Response Status {response.status} is not OK')
     except asyncio.TimeoutError as ex:
         LOGGER.error(f'Unable to connect remote API : {url} - {repr(ex)}')
         info = WeatherInfo.WeatherInfo('0', "0", "0", "00:00", "", "", "")
@@ -36,12 +47,17 @@ async def fetch(session, url):
 async def get_weather(future):
     start = time.time()
     info = None
+    LOGGER.info(weather_url)
 
     try:
         async with ClientSession() as session:
             html = await fetch(session, weather_url)
             info = await parse_weather(html)
     except ClientConnectorError as ex:
+        LOGGER.error(f'Unable to connect Weather API : {repr(ex)}')
+        info = WeatherInfo.WeatherInfo('0', "0", "0", "00:00", "", "", "")
+        info.set_error(ex)
+    except BaseException as ex:
         LOGGER.error(f'Unable to connect Weather API : {repr(ex)}')
         info = WeatherInfo.WeatherInfo('0', "0", "0", "00:00", "", "", "")
         info.set_error(ex)
@@ -58,6 +74,10 @@ async def get_gold_price(future):
             html = await fetch(session, gold_url)
             info = await parse_gold_info(html)
     except ClientConnectorError as ex:
+        LOGGER.error(f'Unable to connect Gold API : {repr(ex)}')
+        info = RateInfo.RateInfo('0', '0', '0.0', "", "")
+        info.set_error(ex)
+    except BaseException as ex:
         LOGGER.error(f'Unable to connect Gold API : {repr(ex)}')
         info = RateInfo.RateInfo('0', '0', '0.0', "", "")
         info.set_error(ex)
@@ -78,9 +98,69 @@ async def get_fuel_price(future):
         LOGGER.error(f'Unable to connect Fuel API : {repr(ex)}')
         info = FuelInfo.FuelInfo('0', '0', "", "")
         info.set_error(ex)
+    except BaseException as ex:
+        LOGGER.error(f'Unable to connect Weather API : {repr(ex)}')
+        info = FuelInfo.FuelInfo('0', '0', "", "")
+        info.set_error(ex)
 
     LOGGER.info(f'Fuel Time Taken {time.time() - start}')
     future.set_result(info)
+
+
+async def get_google_weather(future, location):
+    start = time.time()
+    info = None
+    if location is not None:
+        url = google_weather_url + '+' + location
+    else:
+        url = google_weather_url + '+' + default_location
+
+    LOGGER.info (url)
+
+    try:
+        async with ClientSession() as session:
+            html = await fetch(session, url)
+            info = await parse_google_weather(html)
+    except BaseException as ex:
+        LOGGER.error(f'Unable to connect Weather API : {repr(ex)}')
+        info = WeatherInfo.WeatherInfo('0', "0", "0", "00:00", "", "", "")
+        info.set_error(ex)
+
+    LOGGER.info (f'Weather Time Taken {time.time() - start}')
+    future.set_result(info)
+
+
+async def parse_google_weather(page_content):
+    soup = BeautifulSoup(page_content, 'html.parser')
+
+    seg_temp = soup.select('div#wob_loc')[0]
+    location = seg_temp.text
+
+    seg_temp = soup.select('div#wob_dts')[0]
+    as_of = seg_temp.text
+
+    seg_temp = soup.select('span#wob_dc')[0]
+    condition = seg_temp.text
+
+    seg_temp = soup.select('span#wob_tm')[0]
+    temp = seg_temp.text
+
+    seg_temp = soup.select('span#wob_hm')[0]
+    humidity = seg_temp.text
+
+    seg_temp = soup.select('span#wob_pp')[0]
+    precipitation = seg_temp.text
+    idx = util.index_of(precipitation, '%')
+    if idx > 0:
+        precipitation = precipitation + ' chance of rain until'
+
+    weatherInfo = WeatherInfo.WeatherInfo(temp, temp, temp, as_of, condition, location, precipitation)
+    weatherInfo.set_humidity(humidity)
+    weatherInfo.set_error(None)
+
+    LOGGER.info(str(weatherInfo))
+
+    return weatherInfo
 
 
 async def parse_weather(page_content):
@@ -229,7 +309,7 @@ def callback(future):
     print (future.result())
 
 
-def test_async_future():
+def test_async_future(location):
     start = time.time()
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
@@ -242,7 +322,13 @@ def test_async_future():
     f2.add_done_callback(callback)
     f3.add_done_callback(callback)
 
-    tasks = [get_weather(f1), get_gold_price(f2), get_fuel_price(f3)]
+    # tasks = [get_google_weather(f1), get_gold_price(f2), get_fuel_price(f3)]
+    tasks = [get_gold_price(f2), get_fuel_price(f3)]
+    if location is not None:
+        tasks.append(get_google_weather(f1, location))
+    else:
+        tasks.append(get_weather(f1))
+
     loop.run_until_complete(asyncio.wait(tasks))
 
     loop.close()
@@ -252,6 +338,9 @@ def test_async_future():
 
 
 # if __name__ == '__main__':
-#     LOGGER.info ("Parser starts ...")
+#     LOGGER.info (f"Parser starts ... args: {len(sys.argv)}")
+#     location = None
+#     if len(sys.argv) > 1:
+#         location = sys.argv[1]
 #
-#     test_async_future()
+#     test_async_future(location)
