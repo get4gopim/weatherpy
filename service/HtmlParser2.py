@@ -148,28 +148,49 @@ async def get_google_weather(future, location):
 async def parse_google_weather(page_content):
     soup = BeautifulSoup(page_content, 'html.parser')
 
-    seg_temp = soup.select('div#wob_loc')[0]
-    location = seg_temp.text
+    # seg_temp = soup.find_all('div#wob_wc')
+    seg_temp = soup.find('div', class_='vk_c card-section')
 
-    seg_temp = soup.select('div#wob_dts')[0]
-    as_of = seg_temp.text
+    # print (seg_temp)
 
-    seg_temp = soup.select('span#wob_dc')[0]
-    condition = seg_temp.text
+    span = seg_temp.select('span')[0]
+    element = span.select('div#wob_loc')[0]
+    location = element.text
 
-    seg_temp = soup.select('span#wob_tm')[0]
-    temp = seg_temp.text
+    element = span.select('div#wob_dts')[0]
+    as_of = element.text
 
-    seg_temp = soup.select('span#wob_hm')[0]
-    humidity = seg_temp.text
+    element = span.select('span#wob_dc')[0]
+    condition = element.text
 
-    seg_temp = soup.select('span#wob_pp')[0]
-    precipitation = seg_temp.text
+    div_sub = seg_temp.select('div#wob_d')[0]
+
+    element = div_sub.select('span#wob_tm')[0]
+    temp = element.text
+
+    div_sub = seg_temp.find('div', class_='vk_gy vk_sh wob-dtl')
+
+    element = div_sub.select('span#wob_hm')[0]
+    humidity = element.text
+
+    element = div_sub.select('span#wob_pp')[0]
+    precipitation = element.text
     idx = util.index_of(precipitation, '%')
     if idx > 0:
         precipitation = precipitation + ' chance of rain until'
 
-    weatherInfo = WeatherInfo.WeatherInfo(temp, temp, temp, as_of, condition, location, precipitation)
+    # fetch low and high temperature for the day
+    high = low = temp
+    div_forecast = seg_temp.find('div', class_='wob_df wob_ds')
+    div_sub = div_forecast.find('div', class_='vk_gy')
+    span = div_sub.select('span')[0]
+    high = span.text
+
+    div_sub = div_forecast.find_all('div')[4]
+    span = div_sub.select('span')[0]
+    low = span.text
+
+    weatherInfo = WeatherInfo.WeatherInfo(temp, low, high, as_of, condition, location, precipitation)
     weatherInfo.set_humidity(humidity)
     weatherInfo.set_error(None)
 
@@ -413,4 +434,4 @@ jobqueue = Queue()
 # if __name__ == '__main__':
 #     LOGGER.info (f"Parser starts ... args: {len(sys.argv)}")
 #
-#     call_weather_api(None)
+#     call_weather_api('thalambur')
