@@ -146,7 +146,7 @@ async def get_google_weather(future, location):
 
 
 async def parse_google_weather(page_content):
-    soup = BeautifulSoup(page_content, 'lxml')
+    soup = BeautifulSoup(page_content, 'html5lib')
 
     # seg_temp = soup.find_all('div#wob_wc')
     seg_temp = soup.find('div', class_='vk_c card-section')
@@ -201,7 +201,7 @@ async def parse_google_weather(page_content):
 
 
 async def parse_weather(page_content):
-    soup = BeautifulSoup(page_content, 'html.parser')
+    soup = BeautifulSoup(page_content, 'lxml') # html.parser # lxml # html5lib
 
     seg_temp = soup.find_all('div', {'id' : 'WxuCurrentConditions-main-b3094163-ef75-4558-8d9a-e35e6b9b1034'})[0]
     # print(seg_temp.text)
@@ -276,7 +276,7 @@ async def parse_weather(page_content):
 
 
 async def parse_gold_info(page_content):
-    soup = BeautifulSoup(page_content, 'html.parser')
+    soup = BeautifulSoup(page_content, 'lxml')
 
     table = soup.select('table.table-price').__getitem__(1)
     rows = table.find_all('tr')
@@ -311,7 +311,7 @@ async def parse_gold_info(page_content):
 
 
 async def parse_fuel_info(page_content):
-    soup = BeautifulSoup(page_content, 'html.parser')
+    soup = BeautifulSoup(page_content, 'lxml')
 
     table = soup.select("table#BC_GridView1").__getitem__(0)
     # print (table)
