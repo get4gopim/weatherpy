@@ -55,7 +55,10 @@ async def get_weather(future):
     try:
         async with ClientSession() as session:
             html = await fetch(session, weather_url)
+            LOGGER.info(f'weather content fetch in {time.time() - start} secs.')
+            parse_start = time.time()
             info = await parse_weather(html)
+            LOGGER.info(f'weather parsing took {time.time() - parse_start} secs.')
     except ClientConnectorError as ex:
         LOGGER.error(f'Unable to connect Weather API : {repr(ex)}')
         info = WeatherInfo.WeatherInfo('0', "0", "0", "00:00", "", "", "")
@@ -75,7 +78,10 @@ async def get_gold_price(future):
     try:
         async with ClientSession() as session:
             html = await fetch(session, gold_url)
+            LOGGER.info(f'gold content fetch in {time.time() - start} secs.')
+            parse_start = time.time()
             info = await parse_gold_info(html)
+            LOGGER.info(f'gold parsing took {time.time() - parse_start} secs.')
     except ClientConnectorError as ex:
         LOGGER.error(f'Unable to connect Gold API : {repr(ex)}')
         info = RateInfo.RateInfo('0', '0', '0.0', "", "")
@@ -96,7 +102,10 @@ async def get_fuel_price(future):
     try:
         async with aiohttp.ClientSession() as session:
             html = await fetch(session, fuel_url)
+            LOGGER.info(f'fuel content fetch in {time.time() - start} secs.')
+            parse_start = time.time()
             info = await parse_fuel_info(html)
+            LOGGER.info(f'fuel parsing took {time.time() - parse_start} secs.')
     except ClientConnectorError as ex:
         LOGGER.error(f'Unable to connect Fuel API : {repr(ex)}')
         info = FuelInfo.FuelInfo('0', '0', "", "")
@@ -123,7 +132,10 @@ async def get_google_weather(future, location):
     try:
         async with ClientSession() as session:
             html = await fetch(session, url)
+            LOGGER.info(f'g-weather content fetch in {time.time() - start} secs.')
+            parse_start = time.time()
             info = await parse_google_weather(html)
+            LOGGER.info(f'g-weather parsing took {time.time() - parse_start} secs.')
     except BaseException as ex:
         LOGGER.error(f'Unable to connect Weather API : {repr(ex)}')
         info = WeatherInfo.WeatherInfo('0', "0", "0", "00:00", "", "", "")
@@ -134,30 +146,52 @@ async def get_google_weather(future, location):
 
 
 async def parse_google_weather(page_content):
-    soup = BeautifulSoup(page_content, 'html.parser')
+    soup = BeautifulSoup(page_content, 'lxml')
 
-    seg_temp = soup.select('div#wob_loc')[0]
-    location = seg_temp.text
+    # seg_temp = soup.find_all('div#wob_wc')
+    seg_temp = soup.find('div', class_='vk_c card-section')
 
-    seg_temp = soup.select('div#wob_dts')[0]
-    as_of = seg_temp.text
+    # print (seg_temp)
 
-    seg_temp = soup.select('span#wob_dc')[0]
-    condition = seg_temp.text
+    span = seg_temp.select('span')[0]       # First Segment
+    element = span.select('div#wob_loc')[0]
+    location = element.text
 
-    seg_temp = soup.select('span#wob_tm')[0]
-    temp = seg_temp.text
+    as_of = ''
+    # element = span.select('div#wob_dts')[0]
+    # as_of = element.text
 
-    seg_temp = soup.select('span#wob_hm')[0]
-    humidity = seg_temp.text
+    element = span.select('span#wob_dc')[0]
+    condition = element.text
 
-    seg_temp = soup.select('span#wob_pp')[0]
-    precipitation = seg_temp.text
+    div_sub = seg_temp.select('div#wob_d')[0]   # Second Segment
+
+    element = div_sub.select('span#wob_tm')[0]
+    temp = element.text
+
+    div_sub = seg_temp.find('div', class_='vk_gy vk_sh wob-dtl') # Second Sub
+
+    element = div_sub.select('span#wob_hm')[0]
+    humidity = element.text
+
+    element = div_sub.select('span#wob_pp')[0]
+    precipitation = element.text
     idx = util.index_of(precipitation, '%')
     if idx > 0:
         precipitation = precipitation + ' chance of rain until'
 
-    weatherInfo = WeatherInfo.WeatherInfo(temp, temp, temp, as_of, condition, location, precipitation)
+    # fetch low and high temperature for the day
+    high = low = temp
+    # div_forecast = seg_temp.find('div', class_='wob_df wob_ds') # Third Segment
+    # div_sub = div_forecast.find('div', class_='vk_gy')
+    # span = div_sub.select('span')[0]
+    # high = span.text
+    #
+    # div_sub = div_forecast.find_all('div')[4]
+    # span = div_sub.select('span')[0]
+    # low = span.text
+
+    weatherInfo = WeatherInfo.WeatherInfo(temp, low, high, as_of, condition, location, precipitation)
     weatherInfo.set_humidity(humidity)
     weatherInfo.set_error(None)
 
@@ -167,7 +201,7 @@ async def parse_google_weather(page_content):
 
 
 async def parse_weather(page_content):
-    soup = BeautifulSoup(page_content, 'html.parser')
+    soup = BeautifulSoup(page_content, 'lxml') # html.parser # lxml # html5lib
 
     seg_temp = soup.find_all('div', {'id' : 'WxuCurrentConditions-main-b3094163-ef75-4558-8d9a-e35e6b9b1034'})[0]
     # print(seg_temp.text)
@@ -228,7 +262,13 @@ async def parse_weather(page_content):
     else:
         preciption = ''
 
+    seg_temp = soup.find_all('div', {'class': '_-_-node_modules-@wxu-components-src-molecule-WeatherDetailsListItem-WeatherDetailsListItem--WeatherDetailsListItem--3w7Gx'})[2]
+    humidity = seg_temp.find('div',
+                               class_='_-_-node_modules-@wxu-components-src-molecule-WeatherDetailsListItem-WeatherDetailsListItem--wxData--23DP5')
+    humidity = str(humidity.text).strip()
+
     weatherInfo = WeatherInfo.WeatherInfo(temp, low, high, as_of, condition, location, preciption)
+    weatherInfo.set_humidity(humidity)
     weatherInfo.set_error(None)
     LOGGER.info(str(weatherInfo))
 
@@ -236,7 +276,7 @@ async def parse_weather(page_content):
 
 
 async def parse_gold_info(page_content):
-    soup = BeautifulSoup(page_content, 'html.parser')
+    soup = BeautifulSoup(page_content, 'lxml')
 
     table = soup.select('table.table-price').__getitem__(1)
     rows = table.find_all('tr')
@@ -271,7 +311,7 @@ async def parse_gold_info(page_content):
 
 
 async def parse_fuel_info(page_content):
-    soup = BeautifulSoup(page_content, 'html.parser')
+    soup = BeautifulSoup(page_content, 'lxml')
 
     table = soup.select("table#BC_GridView1").__getitem__(0)
     # print (table)
@@ -293,6 +333,7 @@ async def parse_fuel_info(page_content):
     # print(rows)
     last_updated = rows[0].find_all('td', {'id': 'subcell'})[0]
     last_updated = last_updated.find_all('div')[3]
+
     # print (last_updated.text)
     last_updated = last_updated.text
     idx = util.index_of(last_updated, 'from ')
@@ -392,25 +433,7 @@ def worker_main():
 
 jobqueue = Queue()
 
-# if __name__ == '__main__':
-#     LOGGER.info (f"Parser starts ... args: {len(sys.argv)}")
-#
-#     location = None
-#     if len(sys.argv) > 1:
-#         location = sys.argv[1]
-#
-#     schedule.every(1).seconds.do(jobqueue.put, (call_weather_api, [location]))
-#     schedule.every(5).seconds.do(jobqueue.put, (call_gold_api, []))
-#
-#     worker_thread = threading.Thread(target=worker_main)
-#     worker_thread.start()
-#
-#     while True:
-#         try:
-#             schedule.run_pending()
-#             time.sleep(1)
-#         except Exception as e:
-#             print (e)
-#             sys.exit()
+if __name__ == '__main__':
+    LOGGER.info (f"Parser starts ... args: {len(sys.argv)}")
 
-    # test_async_future(location)
+    call_weather_api('thalambur')
