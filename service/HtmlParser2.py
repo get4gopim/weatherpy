@@ -146,7 +146,7 @@ async def get_google_weather(future, location):
 
 
 async def parse_google_weather(page_content):
-    soup = BeautifulSoup(page_content, 'html5lib')
+    soup = BeautifulSoup(page_content, 'lxml')
 
     # seg_temp = soup.find_all('div#wob_wc')
     seg_temp = soup.find('div', class_='vk_c card-section')
