@@ -153,7 +153,7 @@ async def parse_google_weather(page_content):
 
     # print (seg_temp)
 
-    span = seg_temp.select('span')[0]
+    span = seg_temp.select('span')[0]       # First Segment
     element = span.select('div#wob_loc')[0]
     location = element.text
 
@@ -163,12 +163,12 @@ async def parse_google_weather(page_content):
     element = span.select('span#wob_dc')[0]
     condition = element.text
 
-    div_sub = seg_temp.select('div#wob_d')[0]
+    div_sub = seg_temp.select('div#wob_d')[0]   # Second Segment
 
     element = div_sub.select('span#wob_tm')[0]
     temp = element.text
 
-    div_sub = seg_temp.find('div', class_='vk_gy vk_sh wob-dtl')
+    div_sub = seg_temp.find('div', class_='vk_gy vk_sh wob-dtl') # Second Sub
 
     element = div_sub.select('span#wob_hm')[0]
     humidity = element.text
@@ -181,14 +181,14 @@ async def parse_google_weather(page_content):
 
     # fetch low and high temperature for the day
     high = low = temp
-    div_forecast = seg_temp.find('div', class_='wob_df wob_ds')
-    div_sub = div_forecast.find('div', class_='vk_gy')
-    span = div_sub.select('span')[0]
-    high = span.text
-
-    div_sub = div_forecast.find_all('div')[4]
-    span = div_sub.select('span')[0]
-    low = span.text
+    # div_forecast = seg_temp.find('div', class_='wob_df wob_ds') # Third Segment
+    # div_sub = div_forecast.find('div', class_='vk_gy')
+    # span = div_sub.select('span')[0]
+    # high = span.text
+    #
+    # div_sub = div_forecast.find_all('div')[4]
+    # span = div_sub.select('span')[0]
+    # low = span.text
 
     weatherInfo = WeatherInfo.WeatherInfo(temp, low, high, as_of, condition, location, precipitation)
     weatherInfo.set_humidity(humidity)
