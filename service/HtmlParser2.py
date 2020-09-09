@@ -55,7 +55,10 @@ async def get_weather(future):
     try:
         async with ClientSession() as session:
             html = await fetch(session, weather_url)
+            LOGGER.info(f'content fetch in {time.time() - start} secs.')
+            parse_start = time.time()
             info = await parse_weather(html)
+            LOGGER.info(f'parsing took {time.time() - parse_start} secs.')
     except ClientConnectorError as ex:
         LOGGER.error(f'Unable to connect Weather API : {repr(ex)}')
         info = WeatherInfo.WeatherInfo('0', "0", "0", "00:00", "", "", "")
@@ -75,7 +78,10 @@ async def get_gold_price(future):
     try:
         async with ClientSession() as session:
             html = await fetch(session, gold_url)
+            LOGGER.info(f'content fetch in {time.time() - start} secs.')
+            parse_start = time.time()
             info = await parse_gold_info(html)
+            LOGGER.info(f'parsing took {time.time() - parse_start} secs.')
     except ClientConnectorError as ex:
         LOGGER.error(f'Unable to connect Gold API : {repr(ex)}')
         info = RateInfo.RateInfo('0', '0', '0.0', "", "")
@@ -96,7 +102,10 @@ async def get_fuel_price(future):
     try:
         async with aiohttp.ClientSession() as session:
             html = await fetch(session, fuel_url)
+            LOGGER.info(f'content fetch in {time.time() - start} secs.')
+            parse_start = time.time()
             info = await parse_fuel_info(html)
+            LOGGER.info(f'parsing took {time.time() - parse_start} secs.')
     except ClientConnectorError as ex:
         LOGGER.error(f'Unable to connect Fuel API : {repr(ex)}')
         info = FuelInfo.FuelInfo('0', '0', "", "")
@@ -123,7 +132,10 @@ async def get_google_weather(future, location):
     try:
         async with ClientSession() as session:
             html = await fetch(session, url)
+            LOGGER.info(f'content fetch in {time.time() - start} secs.')
+            parse_start = time.time()
             info = await parse_google_weather(html)
+            LOGGER.info(f'parsing took {time.time() - parse_start} secs.')
     except BaseException as ex:
         LOGGER.error(f'Unable to connect Weather API : {repr(ex)}')
         info = WeatherInfo.WeatherInfo('0', "0", "0", "00:00", "", "", "")
@@ -228,7 +240,13 @@ async def parse_weather(page_content):
     else:
         preciption = ''
 
+    seg_temp = soup.find_all('div', {'class': '_-_-node_modules-@wxu-components-src-molecule-WeatherDetailsListItem-WeatherDetailsListItem--WeatherDetailsListItem--3w7Gx'})[2]
+    humidity = seg_temp.find('div',
+                               class_='_-_-node_modules-@wxu-components-src-molecule-WeatherDetailsListItem-WeatherDetailsListItem--wxData--23DP5')
+    humidity = str(humidity.text).strip()
+
     weatherInfo = WeatherInfo.WeatherInfo(temp, low, high, as_of, condition, location, preciption)
+    weatherInfo.set_humidity(humidity)
     weatherInfo.set_error(None)
     LOGGER.info(str(weatherInfo))
 
@@ -395,22 +413,4 @@ jobqueue = Queue()
 # if __name__ == '__main__':
 #     LOGGER.info (f"Parser starts ... args: {len(sys.argv)}")
 #
-#     location = None
-#     if len(sys.argv) > 1:
-#         location = sys.argv[1]
-#
-#     schedule.every(1).seconds.do(jobqueue.put, (call_weather_api, [location]))
-#     schedule.every(5).seconds.do(jobqueue.put, (call_gold_api, []))
-#
-#     worker_thread = threading.Thread(target=worker_main)
-#     worker_thread.start()
-#
-#     while True:
-#         try:
-#             schedule.run_pending()
-#             time.sleep(1)
-#         except Exception as e:
-#             print (e)
-#             sys.exit()
-
-    # test_async_future(location)
+#     call_weather_api(None)
