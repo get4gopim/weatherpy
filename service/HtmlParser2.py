@@ -157,8 +157,9 @@ async def parse_google_weather(page_content):
     element = span.select('div#wob_loc')[0]
     location = element.text
 
-    element = span.select('div#wob_dts')[0]
-    as_of = element.text
+    as_of = ''
+    # element = span.select('div#wob_dts')[0]
+    # as_of = element.text
 
     element = span.select('span#wob_dc')[0]
     condition = element.text
@@ -332,6 +333,7 @@ async def parse_fuel_info(page_content):
     # print(rows)
     last_updated = rows[0].find_all('td', {'id': 'subcell'})[0]
     last_updated = last_updated.find_all('div')[3]
+
     # print (last_updated.text)
     last_updated = last_updated.text
     idx = util.index_of(last_updated, 'from ')
