@@ -146,7 +146,7 @@ async def get_google_weather(future, location):
 
 
 async def parse_google_weather(page_content):
-    soup = BeautifulSoup(page_content, 'html.parser')
+    soup = BeautifulSoup(page_content, 'lxml')
 
     # seg_temp = soup.find_all('div#wob_wc')
     seg_temp = soup.find('div', class_='vk_c card-section')
@@ -433,7 +433,7 @@ def worker_main():
 
 jobqueue = Queue()
 
-# if __name__ == '__main__':
-#     LOGGER.info (f"Parser starts ... args: {len(sys.argv)}")
-#
-#     call_weather_api('thalambur')
+if __name__ == '__main__':
+    LOGGER.info (f"Parser starts ... args: {len(sys.argv)}")
+
+    call_weather_api('thalambur')
