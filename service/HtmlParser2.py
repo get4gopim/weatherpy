@@ -55,10 +55,10 @@ async def get_weather(future):
     try:
         async with ClientSession() as session:
             html = await fetch(session, weather_url)
-            LOGGER.info(f'content fetch in {time.time() - start} secs.')
+            LOGGER.info(f'weather content fetch in {time.time() - start} secs.')
             parse_start = time.time()
             info = await parse_weather(html)
-            LOGGER.info(f'parsing took {time.time() - parse_start} secs.')
+            LOGGER.info(f'weather parsing took {time.time() - parse_start} secs.')
     except ClientConnectorError as ex:
         LOGGER.error(f'Unable to connect Weather API : {repr(ex)}')
         info = WeatherInfo.WeatherInfo('0', "0", "0", "00:00", "", "", "")
@@ -78,10 +78,10 @@ async def get_gold_price(future):
     try:
         async with ClientSession() as session:
             html = await fetch(session, gold_url)
-            LOGGER.info(f'content fetch in {time.time() - start} secs.')
+            LOGGER.info(f'gold content fetch in {time.time() - start} secs.')
             parse_start = time.time()
             info = await parse_gold_info(html)
-            LOGGER.info(f'parsing took {time.time() - parse_start} secs.')
+            LOGGER.info(f'gold parsing took {time.time() - parse_start} secs.')
     except ClientConnectorError as ex:
         LOGGER.error(f'Unable to connect Gold API : {repr(ex)}')
         info = RateInfo.RateInfo('0', '0', '0.0', "", "")
@@ -102,10 +102,10 @@ async def get_fuel_price(future):
     try:
         async with aiohttp.ClientSession() as session:
             html = await fetch(session, fuel_url)
-            LOGGER.info(f'content fetch in {time.time() - start} secs.')
+            LOGGER.info(f'fuel content fetch in {time.time() - start} secs.')
             parse_start = time.time()
             info = await parse_fuel_info(html)
-            LOGGER.info(f'parsing took {time.time() - parse_start} secs.')
+            LOGGER.info(f'fuel parsing took {time.time() - parse_start} secs.')
     except ClientConnectorError as ex:
         LOGGER.error(f'Unable to connect Fuel API : {repr(ex)}')
         info = FuelInfo.FuelInfo('0', '0', "", "")
@@ -132,10 +132,10 @@ async def get_google_weather(future, location):
     try:
         async with ClientSession() as session:
             html = await fetch(session, url)
-            LOGGER.info(f'content fetch in {time.time() - start} secs.')
+            LOGGER.info(f'g-weather content fetch in {time.time() - start} secs.')
             parse_start = time.time()
             info = await parse_google_weather(html)
-            LOGGER.info(f'parsing took {time.time() - parse_start} secs.')
+            LOGGER.info(f'g-weather parsing took {time.time() - parse_start} secs.')
     except BaseException as ex:
         LOGGER.error(f'Unable to connect Weather API : {repr(ex)}')
         info = WeatherInfo.WeatherInfo('0', "0", "0", "00:00", "", "", "")
