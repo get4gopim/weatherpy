@@ -41,11 +41,11 @@ def call_apis_async(location):
     f2.add_done_callback(callback_gold)
     # f3.add_done_callback(callback_fuel)
 
-    tasks = [HtmlParser2.get_gold_price(f2), HtmlParser2.get_fuel_price(f3)]
+    tasks = [HtmlParser2.get_gold_price(f2)]
     if location is not None:
-        tasks.append([HtmlParser2.get_google_weather(f1, location)])
+        tasks.append(HtmlParser2.get_google_weather(f1, location))
     else:
-        tasks.append([HtmlParser2.get_weather(f1)])
+        tasks.append(HtmlParser2.get_weather(f1))
 
     loop.run_until_complete(asyncio.wait(tasks))
 
@@ -65,11 +65,11 @@ def call_weather_api(location):
 
     f1.add_done_callback(callback_weather)
 
-    tasks = None
+    tasks = []
     if location is not None:
-        tasks.append([HtmlParser2.get_google_weather(f1, location)])
+        tasks.append(HtmlParser2.get_google_weather(f1, location))
     else:
-        tasks.append([HtmlParser2.get_weather(f1)])
+        tasks.append(HtmlParser2.get_weather(f1))
 
     loop.run_until_complete(asyncio.wait(tasks))
 
@@ -268,6 +268,12 @@ def worker_main():
         jobqueue.task_done()
 
 
+def run_threaded(job_vars):
+    job_func, job_args = job_vars
+    job_thread = threading.Thread(target=job_func, args=job_args)
+    job_thread.start()
+
+
 def welcome_date_month():
     current_time = get_time()
     day = current_time.strftime("%d")
@@ -287,7 +293,7 @@ def add_scheduler(location):
     schedule.every(1).seconds.do(jobqueue.put, every_second)
 
     # Update weather every 15 mins once every day
-    schedule.every(15).minutes.do(jobqueue.put, call_weather_api, location)
+    schedule.every(.5).minutes.do(run_threaded, (call_weather_api, [location]))
 
     # Update gold rate every 1 hour except sunday from 10 AM to 5 PM
     gold_times = ["10:00", "11:00", "12:00", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "17:00"]
