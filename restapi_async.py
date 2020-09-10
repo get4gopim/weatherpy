@@ -339,6 +339,7 @@ def add_scheduler(location):
 
     # Update weather every 15 mins once every day
     schedule.every(1).minutes.do(run_threaded, (call_weather_api, [location]))
+    schedule.every(1).minutes.do(run_threaded, (call_gold_api, []))
 
     # Update gold rate every 1 hour except sunday from 10 AM to 5 PM
     gold_times = ["09:30", "10:00", "11:00", "12:00", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "17:00"]
