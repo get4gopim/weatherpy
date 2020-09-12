@@ -13,18 +13,24 @@ import logging
 import os
 from fonts import *
 
-IMG_LOCATION = './images/'
+picdir = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'weatherpy/images')
+fontdir = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'weatherpy/fonts')
+print(picdir)
+print(fontdir)
+
+IMG_LOCATION = picdir
 DISPLAY_LENGTH = 20
 # Initialize and Clear the display
 epd = epd2in13.EPD()
 
-font_path = './fonts/CarterOne-Regular.ttf'
+font_path = os.path.join(fontdir, 'CarterOne-Regular.ttf')
+print(font_path)
 assert os.path.isfile(font_path)
 
-fontTemperature = ImageFont.truetype('./fonts/CarterOne-Regular.ttf', 20)  # Bold
-fontWeekDay = ImageFont.truetype('./fonts/Roboto-Black.ttf', 16)
-fontTime = ImageFont.truetype('./fonts/Roboto-Black.ttf', 24)
-fontLocation = ImageFont.truetype('./fonts/Roboto-Medium.ttf', 18)
+fontTemperature = ImageFont.truetype(os.path.join(fontdir, 'CarterOne-Regular.ttf'), 20)  # Bold
+fontWeekDay = ImageFont.truetype(os.path.join(fontdir, 'Roboto-Black.ttf'), 16)
+fontTime = ImageFont.truetype(os.path.join(fontdir, 'Roboto-Black.ttf'), 24)
+fontLocation = ImageFont.truetype(os.path.join(fontdir, 'Roboto-Medium.ttf'), 18)
 
 
 
@@ -101,7 +107,7 @@ def get_weather_image():
         else:
             file_name = 'cloudy.bmp'
 
-    file_name = IMG_LOCATION + file_name
+    file_name = os.path.join(IMG_LOCATION, file_name)
     LOGGER.info("Weather Image: " + file_name)
     return file_name
 
