@@ -17,6 +17,11 @@ DISPLAY_LENGTH = 20
 # Initialize and Clear the display
 epd = epd2in13.EPD()
 
+fontTemperature = ImageFont.truetype('../CarterOne-Regular.ttf', 20)  # Bold
+fontWeekDay = ImageFont.truetype('../Roboto-Black.ttf', 16)
+fontTime = ImageFont.truetype('../Roboto-Black.ttf', 24)
+fontLocation = ImageFont.truetype('../Roboto-Medium.ttf', 18)
+
 
 def weekday():
     current_time = datetime.datetime.now()
@@ -161,10 +166,6 @@ def update_weather_location_line2():
     return line2
 
 
-fontTemperature = ImageFont.truetype('/usr/share/fonts/truetype/google/CarterOne-Regular.ttf', 20)  # Bold
-fontWeekDay = ImageFont.truetype('/home/pi/fonts/Roboto-Black.ttf', 16)
-fontTime = ImageFont.truetype('/home/pi/fonts/Roboto-Black.ttf', 24)
-fontLocation = ImageFont.truetype('/home/pi/fonts/Roboto-Medium.ttf', 18)
 
 
 def display_elink():
