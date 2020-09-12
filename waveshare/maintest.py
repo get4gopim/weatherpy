@@ -1,21 +1,16 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
 
-from waveshare import epd2in13
+from epddriver import epd2in13
 import time
 import datetime
 from PIL import Image, ImageDraw, ImageFont
 from service import HtmlParser2
 from utility import util
-from model import WeatherInfo
-import traceback
 import sys
-import threading
 import asyncio
 import logging
 import os
-import schedule
-
 
 IMG_LOCATION = '../images/'
 DISPLAY_LENGTH = 20

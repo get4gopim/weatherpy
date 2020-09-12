@@ -1,5 +1,4 @@
-
-from waveshare import epd2in13
+from epddriver import epd2in13
 import time
 import datetime
 from PIL import Image, ImageDraw, ImageFont

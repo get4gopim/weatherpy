@@ -1,4 +1,4 @@
-from waveshare import epd2in13
+from epddriver import epd2in13
 
 try:
     print ('Clearing ...')
