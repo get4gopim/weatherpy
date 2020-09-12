@@ -11,7 +11,6 @@ import sys
 import asyncio
 import logging
 import os
-from fonts import *
 
 IMG_LOCATION = '../images/'
 DISPLAY_LENGTH = 20
@@ -177,7 +176,6 @@ def display_elink():
     # partial update
     epd.init(epd.PART_UPDATE)
     epd.Clear(0xFF)
-    font = ImageFont.truetype('/usr/share/fonts/truetype/wqy/wqy-microhei.ttc', 20)
     image = Image.new('1', (epd2in13.EPD_HEIGHT, epd2in13.EPD_WIDTH), 255)
     draw = ImageDraw.Draw(image)
 
