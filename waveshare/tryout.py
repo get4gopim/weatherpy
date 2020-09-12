@@ -3,6 +3,7 @@ import time
 import datetime
 from PIL import Image, ImageDraw, ImageFont
 import traceback
+import os
 
 
 def welcome_date_month():
@@ -34,6 +35,9 @@ def get_time():
     return current_time.strftime('%H:%M')
 
 try:
+    font_path = '../fonts/CarterOne-Regular.ttf'
+    assert os.path.isfile(font_path)
+
     epd = epd2in13.EPD()
     epd.init(epd.FULL_UPDATE)
     epd.Clear(0xFF)
@@ -53,10 +57,10 @@ try:
 
     fontCater20 = ImageFont.truetype('/usr/share/fonts/truetype/google/CarterOne-Regular.ttf', 20)
 
-    fontTemperature = ImageFont.truetype('/usr/share/fonts/truetype/google/CarterOne-Regular.ttf', 24)  # Bold
-    fontWeekDay = ImageFont.truetype('/home/pi/fonts/Roboto-Black.ttf', 18)
-    fontTime = ImageFont.truetype('/home/pi/fonts/Roboto-Black.ttf', 16)
-    fontLocation = ImageFont.truetype('/home/pi/fonts/Roboto-Regular.ttf', 18)
+    fontTemperature = ImageFont.truetype('../fonts/CarterOne-Regular.ttf', 24)  # Bold
+    fontWeekDay = ImageFont.truetype('../fonts/Roboto-Black.ttf', 18)
+    fontTime = ImageFont.truetype('../fonts/Roboto-Black.ttf', 16)
+    fontLocation = ImageFont.truetype('../fonts/Roboto-Regular.ttf', 18)
 
     # Vertical Middle Line
     draw.line([(160, 5), (160, 118)], fill=0, width=0)
