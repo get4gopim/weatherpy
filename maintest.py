@@ -12,15 +12,15 @@ import asyncio
 import logging
 import os
 
-IMG_LOCATION = '../images/'
+IMG_LOCATION = './images/'
 DISPLAY_LENGTH = 20
 # Initialize and Clear the display
 epd = epd2in13.EPD()
 
-fontTemperature = ImageFont.truetype('../fonts/CarterOne-Regular.ttf', 20)  # Bold
-fontWeekDay = ImageFont.truetype('../fonts/Roboto-Black.ttf', 16)
-fontTime = ImageFont.truetype('../fonts/Roboto-Black.ttf', 24)
-fontLocation = ImageFont.truetype('../fonts/Roboto-Medium.ttf', 18)
+fontTemperature = ImageFont.truetype('./fonts/CarterOne-Regular.ttf', 20)  # Bold
+fontWeekDay = ImageFont.truetype('./fonts/Roboto-Black.ttf', 16)
+fontTime = ImageFont.truetype('./fonts/Roboto-Black.ttf', 24)
+fontLocation = ImageFont.truetype('./fonts/Roboto-Medium.ttf', 18)
 
 
 def weekday():
