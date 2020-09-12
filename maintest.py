@@ -18,7 +18,7 @@ DISPLAY_LENGTH = 20
 # Initialize and Clear the display
 epd = epd2in13.EPD()
 
-font_path = 'fonts/CarterOne-Regular.ttf'
+font_path = './fonts/CarterOne-Regular.ttf'
 assert os.path.isfile(font_path)
 
 fontTemperature = ImageFont.truetype('./fonts/CarterOne-Regular.ttf', 20)  # Bold
