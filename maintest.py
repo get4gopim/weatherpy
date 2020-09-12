@@ -13,7 +13,7 @@ import logging
 import os
 from fonts import *
 
-IMG_LOCATION = '../images/'
+IMG_LOCATION = './images/'
 DISPLAY_LENGTH = 20
 # Initialize and Clear the display
 epd = epd2in13.EPD()
