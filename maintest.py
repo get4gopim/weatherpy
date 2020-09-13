@@ -36,12 +36,12 @@ fontLocation = ImageFont.truetype(os.path.join(fontdir, 'Roboto-Medium.ttf'), 18
 
 def weekday():
     current_time = datetime.datetime.now()
-    return current_time.strftime("%A")
+    return current_time.strftime("%A").ljust(9, ' ')
 
 
 def day_month():
     current_time = datetime.datetime.now()
-    return current_time.strftime("%b %d")
+    return current_time.strftime("%b %d").ljust(9, ' ')
 
 
 def get_time():
@@ -210,10 +210,10 @@ def display_elink():
     draw.text((165, 55), update_weather_high_low(), font=fontTemperature, fill=0)
 
     # Horizontal Line with Padding 5
-    draw.line([(165, 78), (245, 80)], fill=0, width=0)
+    draw.line([(165, 80), (245, 80)], fill=0, width=0)
 
-    draw.text((170, 85), weekday(), font=fontWeekDay, fill=0)
-    draw.text((180, 105), day_month(), font=fontWeekDay, fill=0)
+    draw.text((165, 85), weekday(), font=fontWeekDay, fill=0)
+    draw.text((165, 105), day_month(), font=fontWeekDay, fill=0)
 
     epd.display(epd.getbuffer(image))
     time.sleep(2)
