@@ -36,12 +36,12 @@ fontLocation = ImageFont.truetype(os.path.join(fontdir, 'Roboto-Medium.ttf'), 18
 
 def weekday():
     current_time = datetime.datetime.now()
-    return current_time.strftime("%A").center(9, ' ')
+    return current_time.strftime("%A").center(9, '-')
 
 
 def day_month():
     current_time = datetime.datetime.now()
-    return current_time.strftime("%b %d").center(9, ' ')
+    return current_time.strftime("%b %d").center(9, '-')
 
 
 def get_time():
