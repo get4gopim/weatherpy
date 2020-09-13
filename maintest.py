@@ -92,13 +92,13 @@ def get_weather_image():
     if weather is not None:
         if 'Cloudy' in weather.get_condition():
             file_name = 'cloudy.bmp'
+        elif 'Shower' in weather.get_condition():
+            file_name = 'drizzle.bmp'
         elif 'Rain' in weather.get_condition():
-            file_name = 'rainy.bmp'
+            file_name = 'drizzle.bmp'
         elif 'Fog' in weather.get_condition():
             file_name = 'foggy.bmp'
         elif 'Driz' in weather.get_condition():
-            file_name = 'drizzle.bmp'
-        elif 'Shower' in weather.get_condition():
             file_name = 'drizzle.bmp'
         elif 'Clear' in weather.get_condition():
             file_name = 'clear_sky.bmp'
