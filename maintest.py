@@ -207,13 +207,13 @@ def display_elink():
     weather_img = Image.open(get_weather_image())
     image.paste(weather_img, (180, 2))
 
-    draw.text((165, 60), update_weather_high_low(), font=fontTemperature, fill=0)
+    draw.text((165, 55), update_weather_high_low(), font=fontTemperature, fill=0)
 
     # Horizontal Line with Padding 5
-    draw.line([(165, 80), (245, 80)], fill=0, width=0)
+    draw.line([(165, 75), (245, 80)], fill=0, width=0)
 
-    draw.text((170, 90), weekday(), font=fontWeekDay, fill=0)
-    draw.text((180, 110), day_month(), font=fontWeekDay, fill=0)
+    draw.text((170, 85), weekday(), font=fontWeekDay, fill=0)
+    draw.text((180, 95), day_month(), font=fontWeekDay, fill=0)
 
     epd.display(epd.getbuffer(image))
     time.sleep(2)
