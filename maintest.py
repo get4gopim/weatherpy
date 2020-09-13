@@ -217,7 +217,7 @@ def display_elink():
 
     # read bmp file
     weather_img = Image.open(get_weather_image())
-    image.paste(weather_img, (180, 5))
+    image.paste(weather_img, (175, 5))
     epd.display(epd.getbuffer(image))
     time.sleep(2)
     # ---------------- Right side content ends here --------------------
