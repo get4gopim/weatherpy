@@ -98,6 +98,8 @@ def get_weather_image():
             file_name = 'foggy.bmp'
         elif 'Driz' in weather.get_condition():
             file_name = 'drizzle.bmp'
+        elif 'Shower' in weather.get_condition():
+            file_name = 'drizzle.bmp'
         elif 'Clear' in weather.get_condition():
             file_name = 'clear_sky.bmp'
         elif 'Haze' in weather.get_condition():
@@ -105,7 +107,7 @@ def get_weather_image():
         elif 'Thunder' in weather.get_condition():
             file_name = 'thunder_storm.bmp'
         else:
-            file_name = 'cloudy.bmp'
+            file_name = 'sun.bmp'
 
     file_name = os.path.join(IMG_LOCATION, file_name)
     LOGGER.info("Weather Image: " + file_name)
