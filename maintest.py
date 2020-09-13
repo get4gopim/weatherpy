@@ -35,9 +35,11 @@ epd = epd2in13.EPD()
 # assert os.path.isfile(font_path)
 
 fontTemperature = ImageFont.truetype(os.path.join(fontdir, 'CarterOne-Regular.ttf'), 20)  # Bold
-fontWeekDay = ImageFont.truetype(os.path.join(fontdir, 'Roboto-Black.ttf'), 16)
-fontTime = ImageFont.truetype(os.path.join(fontdir, 'Roboto-Black.ttf'), 24)
-fontLocation = ImageFont.truetype(os.path.join(fontdir, 'Roboto-Medium.ttf'), 18)
+fontWeekDay = ImageFont.truetype(os.path.join(fontdir, 'CarterOne-Regular.ttf'), 16)
+fontTime = ImageFont.truetype(os.path.join(fontdir, 'Bungee-Regular.ttf'), 26)
+fontLocation = ImageFont.truetype(os.path.join(fontdir, 'RussoOne-Regular.ttf'), 18)
+fontCondition = ImageFont.truetype(os.path.join(fontdir, 'Overlock-Black.ttf'), 18)
+fontPreciption = ImageFont.truetype(os.path.join(fontdir, 'Overlock-Black.ttf'), 18)
 
 job_queue = Queue()
 
@@ -249,8 +251,6 @@ def display_elink():
     draw.line([(165, 82), (245, 82)], fill=0, width=2)
 
     display_date_info()
-    # draw.text((165, 85), weekday(), font=fontWeekDay, fill=0)
-    # draw.text((165, 105), day_month(), font=fontWeekDay, fill=0)
 
     epd.display(epd.getbuffer(image))
     time.sleep(2)
@@ -267,15 +267,16 @@ def clear_display():
     epd.init(epd.FULL_UPDATE)
     epd.Clear(0xFF)
     epd.Clear(0xFF)
+    time.sleep(5)
 
 
 def every_sec():
     LOGGER.info ('Time partial update')
     epd.init(epd.PART_UPDATE)
     epd.Clear(0xFF)
-    draw.rectangle((5, 5, 80, 30), fill=255)
+    draw.rectangle((5, 5, 90, 30), fill=255)
     draw.text((5, 5), get_time(), font=fontTime, fill=0)
-    crop_image = image.crop([5, 5, 80, 30])
+    crop_image = image.crop([5, 5, 90, 30])
     image.paste(crop_image, (5, 5))
     epd.displayPartial(epd.getbuffer(image))
 
@@ -288,8 +289,8 @@ def display_date_info():
     epd.Clear(0xFF)
     draw.rectangle((165, 85, 250, 122), fill=255)
 
-    draw.text((165, 85), weekday(), font=fontWeekDay, fill=0)
-    draw.text((165, 105), day_month(), font=fontWeekDay, fill=0)
+    draw.text((165, 82), weekday(), font=fontWeekDay, fill=0)
+    draw.text((165, 98), day_month(), font=fontWeekDay, fill=0)
 
     crop_image = image.crop([165, 85, 250, 122])
     image.paste(crop_image, (165, 85))
@@ -305,9 +306,9 @@ def display_weather_info():
     draw.rectangle((5, 60, 158, 120), fill=255)
 
     start_y_pos = 40
-    draw.text((5, start_y_pos + 20), update_weather_temp_line2(), font=fontLocation, fill=0)
-    draw.text((5, start_y_pos + 40), update_weather_preciption_line2(), font=fontLocation, fill=0)
-    draw.text((5, start_y_pos + 60), update_weather_updated(), font=fontLocation, fill=0)
+    draw.text((5, start_y_pos + 20), update_weather_temp_line2(), font=fontCondition, fill=0)
+    draw.text((5, start_y_pos + 40), update_weather_preciption_line2(), font=fontPreciption, fill=0)
+    draw.text((5, start_y_pos + 60), update_weather_updated(), font=fontPreciption, fill=0)
 
     crop_image = image.crop([5, 60, 158, 120])
     image.paste(crop_image, (5, 60))
