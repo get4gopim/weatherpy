@@ -19,12 +19,13 @@ from utility import util
 from bs4 import BeautifulSoup
 from aiohttp import ClientSession, ClientConnectorError
 
-weather_url = 'https://weather.com/en-IN/weather/today/l/4ef51d4289943c7792cbe77dee741bff9216f591eed796d7a5d598c38828957d'
+weather_url = 'https://weather.com/en-IN/weather/today/l/'
 gold_url = 'http://www.livechennai.com/gold_silverrate.asp'
 fuel_url = 'https://www.livechennai.com/petrol_price.asp'
 
 google_weather_url = 'https://www.google.com/search?q=weather'
 default_location = 'chennai'
+DEFAULT_LOC_UUID = '4ef51d4289943c7792cbe77dee741bff9216f591eed796d7a5d598c38828957d'
 
 logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO"), format='%(asctime)s %(message)s')
 LOGGER = logging.getLogger(__name__)
@@ -47,14 +48,21 @@ async def fetch(session, url):
         info.set_error(ex)
 
 
-async def get_weather(future):
+async def get_weather(future, location):
     start = time.time()
+
+    if location is not None:
+        url = weather_url + location
+    else:
+        url = weather_url + DEFAULT_LOC_UUID
+
+    url = weather_url + location
     info = None
-    LOGGER.info(weather_url)
+    LOGGER.info(url)
 
     try:
         async with ClientSession() as session:
-            html = await fetch(session, weather_url)
+            html = await fetch(session, url)
             LOGGER.info(f'weather content fetch in {time.time() - start} secs.')
             parse_start = time.time()
             info = await parse_weather(html)

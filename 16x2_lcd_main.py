@@ -8,19 +8,19 @@ import schedule
 import datetime
 import time
 
-from lcddriver import lcddriver
-
-from service import HtmlParser2
+from lcddriver import lcddriver_16x2
 from utility import util
+from service import HtmlParser2
 
 from queue import Queue
 
 # Load the driver and set it to "display"
 # If you use something from the driver library use the "display." prefix first
-display = lcddriver.lcd()
+display = lcddriver_16x2.lcd()
 
-lcd_disp_length = 20
+lcd_disp_length = 16
 service_start_time_in_secs = 10
+DEFAULT_LOC_UUID = '4ef51d4289943c7792cbe77dee741bff9216f591eed796d7a5d598c38828957d'
 
 jobqueue = Queue()
 
@@ -36,17 +36,17 @@ def call_apis_async(location):
 
     f1 = asyncio.Future()
     f2 = asyncio.Future()
-    f3 = asyncio.Future()
+    # f3 = asyncio.Future()
 
     f1.add_done_callback(callback_weather)
     f2.add_done_callback(callback_gold)
-    f3.add_done_callback(callback_fuel)
+    # f3.add_done_callback(callback_fuel)
 
-    tasks = [HtmlParser2.get_gold_price(f2), HtmlParser2.get_fuel_price(f3)]
-    if location is not None:
-        tasks.append(HtmlParser2.get_google_weather(f1, location))
+    tasks = [HtmlParser2.get_gold_price(f2)]
+    if util.is_uuid(location):
+        tasks.append(HtmlParser2.get_weather(f1, location))
     else:
-        tasks.append(HtmlParser2.get_weather(f1))
+        tasks.append(HtmlParser2.get_google_weather(f1, location))
 
     loop.run_until_complete(asyncio.wait(tasks))
 
@@ -59,26 +59,23 @@ def call_apis_async(location):
 def call_weather_api(location):
     LOGGER.info("call_weather_api")
 
-    try:
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
 
-        f1 = asyncio.Future()
+    f1 = asyncio.Future()
 
-        f1.add_done_callback(callback_weather)
+    f1.add_done_callback(callback_weather)
 
-        tasks = []
-        if location is not None:
-            tasks.append(HtmlParser2.get_google_weather(f1, location))
-        else:
-            tasks.append(HtmlParser2.get_weather(f1))
+    tasks = []
+    if util.is_uuid(location):
+        tasks.append(HtmlParser2.get_weather(f1, location))
+    else:
+        tasks.append(HtmlParser2.get_google_weather(f1, location))
 
-        loop.run_until_complete(asyncio.wait(tasks))
+    loop.run_until_complete(asyncio.wait(tasks))
 
-        loop.close()
-        print()
-    except Exception as ex:
-        LOGGER.error(f'call_weather_api : {repr(ex)}')
+    loop.close()
+    print()
 
 
 def call_gold_api():
@@ -162,22 +159,6 @@ def update_weather_location_line2():
     line2 = line2.ljust(lcd_disp_length, ' ')
 
 
-# update humidity line strings
-def update_weather_humidity_line2():
-    global line2
-
-    if weather.get_humidity() is not None:
-        # Make string right justified of length 4 by padding 3 spaces to left
-        justl = lcd_disp_length - 4
-        humidity ='Humidity'
-        humidity = humidity.ljust(justl, ' ')
-        line2 = humidity + ' ' + str(weather.get_humidity())
-
-        line2 = line2.ljust(lcd_disp_length, ' ')
-    else:
-        update_weather_temp_line2()
-
-
 # update preciption line strings
 def update_weather_preciption_line2():
     global line2
@@ -187,8 +168,9 @@ def update_weather_preciption_line2():
         idx = util.index_of(preciption, 'until')
         if idx > 0:
             preciption = preciption[0:idx]
+            preciption = preciption.replace(' of', '', 1).strip()
 
-        # Make string 20 chars only and left justify with space if length is less.
+            # Make string 20 chars only and left justify with space if length is less.
         line2 = preciption[0:lcd_disp_length]
         line2 = line2.ljust(lcd_disp_length, ' ')
     else:
@@ -197,15 +179,15 @@ def update_weather_preciption_line2():
 
 # update display line rate strings
 def update_rate_line_3_4():
-    global line3
-    global line4
+    global line2
 
     just = lcd_disp_length - 5
-    prefix_p = 'Gold'
-    prefix_d = 'Silver'
+    prefix_p = 'G'
+    prefix_d = 'S'
 
-    line3 = prefix_p.ljust(just, ' ') + ' ' + str(rate_info.get_gold22())
-    line4 = prefix_d.ljust(just, ' ') + str(rate_info.get_silver())
+    # line3 = prefix_p.ljust(just, ' ') + ' ' + str(rate_info.get_gold22())
+    line2 = prefix_p + ' ' + str(rate_info.get_gold22()) + ' | ' + prefix_d + ' ' +  str(rate_info.get_silver())
+    line2 = line2.ljust(lcd_disp_length, ' ')
 
 
 # update display fuel price line
@@ -214,17 +196,16 @@ def update_fuel_line_3_4():
     global line6
 
     just = lcd_disp_length - 5
-    prefix_p = 'Petrol'
-    prefix_d = 'Diesel'
+    prefix_p = 'P'
+    prefix_d = 'D'
 
-    line6 = prefix_p.ljust(just, ' ') + str(fuel_info.get_petrol())
-    line5 = prefix_d.ljust(just, ' ') + str(fuel_info.get_diesel())
+    line2 = prefix_p + ' ' + str(rate_info.get_gold22()) + ' | ' + str(rate_info.get_silver())
 
 
 def update_time_line1(currentTime):
     global line1
 
-    line1 = currentTime.strftime("%d.%m  %a  %H:%M:%S")
+    line1 = currentTime.strftime("%d.%b  %H:%M:%S")
 
 
 def print_line1():
@@ -234,20 +215,6 @@ def print_line1():
 def print_line2():
     if weather.get_error() is None:
         display.lcd_display_string(line2, 2)
-
-
-# print line 3 and 4
-def print_line3_and_4_rate():
-    if rate_info.get_error() is None:
-        display.lcd_display_string(line3, 3)
-        display.lcd_display_string(line4, 4)
-
-
-# print line 3 and 4
-def print_line3_and_4_fuel():
-    if fuel_info.get_error() is None:
-        display.lcd_display_string(line5, 3)
-        display.lcd_display_string(line6, 4)
 
 
 def every_second():
@@ -261,21 +228,16 @@ def every_second():
 
     if counter == 0:
         print_line2()
-        print_line3_and_4_rate()
         counter = counter + 1
         return
 
     change_every_x_secs = 20
     if counter % change_every_x_secs == 0:
         if _bool_20:
-            update_weather_location_line2()
-            update_rate_line_3_4()
-            print_line3_and_4_rate()
+            update_weather_temp_line2()
             _bool_20 = False
         else:
-            update_weather_humidity_line2()
-            update_fuel_line_3_4()
-            print_line3_and_4_fuel()
+            update_weather_preciption_line2()
             _bool_20 = True
         print_line2()
         counter = counter + 1
@@ -285,14 +247,11 @@ def every_second():
     # change display line2 every x seconds
     if counter % change_every_x_secs == 0:
         if rand_bool:
-            update_weather_temp_line2()
-            update_rate_line_3_4()
-            print_line3_and_4_rate()
+            update_weather_location_line2()
             rand_bool = False
         else:
-            update_weather_preciption_line2()
-            update_fuel_line_3_4()
-            print_line3_and_4_fuel()
+            # update_weather_preciption_line2()
+            update_rate_line_3_4()
             rand_bool = True
         print_line2()
 
@@ -305,18 +264,21 @@ def every_second():
 
 def worker_main():
     while 1:
-        try:
-            job_func, job_args = jobqueue.get()
-            job_func(*job_args)
-            jobqueue.task_done()
-        except BaseException as ex:
-            LOGGER.error(f'worker_main : {repr(ex)}')
+        job_func = jobqueue.get()
+        job_func()
+        jobqueue.task_done()
+
+
+def run_threaded(job_vars):
+    job_func, job_args = job_vars
+    job_thread = threading.Thread(target=job_func, args=job_args)
+    job_thread.start()
 
 
 def welcome_date_month():
     current_time = get_time()
     day = current_time.strftime("%d")
-    month = current_time.strftime("%B")
+    month = current_time.strftime("%b")
     week_day = current_time.strftime("%A")
 
     if current_time.month == 9 and current_time.weekday() in [2, 3, 5]:
@@ -329,30 +291,30 @@ def welcome_date_month():
 
 def add_scheduler(location):
     # Update time every second
-    schedule.every(1).seconds.do(jobqueue.put, (every_second, []))
+    schedule.every(1).seconds.do(jobqueue.put, every_second)
 
     # Update weather every 15 mins once every day
-    schedule.every(15).minutes.do(jobqueue.put, (call_weather_api, [location]))
+    schedule.every(.5).minutes.do(run_threaded, (call_weather_api, [location]))
 
     # Update gold rate every 1 hour except sunday from 10 AM to 5 PM
-    gold_times = ["09:30", "10:00", "11:00", "12:00", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "17:00"]
+    gold_times = ["10:00", "11:00", "12:00", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "17:00"]
     for x in gold_times:
-        schedule.every().monday.at(x).do(jobqueue.put, (call_gold_api, []))
-        schedule.every().tuesday.at(x).do(jobqueue.put, (call_gold_api, []))
-        schedule.every().wednesday.at(x).do(jobqueue.put, (call_gold_api, []))
-        schedule.every().thursday.at(x).do(jobqueue.put, (call_gold_api, []))
-        schedule.every().friday.at(x).do(jobqueue.put, (call_gold_api, []))
-        schedule.every().saturday.at(x).do(jobqueue.put, (call_gold_api, []))
+        schedule.every().monday.at(x).do(call_gold_api)
+        schedule.every().tuesday.at(x).do(call_gold_api)
+        schedule.every().wednesday.at(x).do(call_gold_api)
+        schedule.every().thursday.at(x).do(call_gold_api)
+        schedule.every().friday.at(x).do(call_gold_api)
+        schedule.every().saturday.at(x).do(call_gold_api)
 
     # Update fuel rate from 6 to 8 AM except sunday
     fuel_times = ["06:00", "06:30", "07:00", "07:30", "08:00"]
     for x in fuel_times:
-        schedule.every().monday.at(x).do(jobqueue.put, (call_fuel_api, []))
-        schedule.every().tuesday.at(x).do(jobqueue.put, (call_fuel_api, []))
-        schedule.every().wednesday.at(x).do(jobqueue.put, (call_fuel_api, []))
-        schedule.every().thursday.at(x).do(jobqueue.put, (call_fuel_api, []))
-        schedule.every().friday.at(x).do(jobqueue.put, (call_fuel_api, []))
-        schedule.every().saturday.at(x).do(jobqueue.put, (call_fuel_api, []))
+        schedule.every().monday.at(x).do(call_fuel_api)
+        schedule.every().tuesday.at(x).do(call_fuel_api)
+        schedule.every().wednesday.at(x).do(call_fuel_api)
+        schedule.every().thursday.at(x).do(call_fuel_api)
+        schedule.every().friday.at(x).do(call_fuel_api)
+        schedule.every().saturday.at(x).do(call_fuel_api)
 
 
 # main starts here
@@ -368,7 +330,7 @@ if __name__ == '__main__':
     display.lcd_display_string(welcome_date_month(), 2)
     display.lcd_display_string("Starting Now ...".center(lcd_disp_length, ' '), 4)
 
-    location = None
+    location = DEFAULT_LOC_UUID
     if len(sys.argv) > 1:
         location = sys.argv[1]
 
@@ -384,8 +346,7 @@ if __name__ == '__main__':
         call_apis_async(location)
 
         update_weather_location_line2()
-        update_rate_line_3_4()
-        update_fuel_line_3_4()
+        # update_fuel_line_3_4()
 
         add_scheduler(location)
 
