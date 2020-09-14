@@ -227,7 +227,7 @@ def update_fuel_line_3_4():
 def update_time_line1(currentTime):
     global line1
 
-    line1 = currentTime.strftime("%d.%m  %a  %H:%M:%S")
+    line1 = currentTime.strftime("%b %d %a  %H:%M:%S")
 
 
 def print_line1():
