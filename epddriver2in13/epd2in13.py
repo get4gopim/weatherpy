@@ -46,7 +46,7 @@
 #
 
 
-from epddriver import epdconfig
+from epddriver2in13 import epdconfig
 from PIL import Image
 import RPi.GPIO as GPIO
 # import numpy as np

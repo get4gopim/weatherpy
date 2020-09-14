@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
 
-from epddriver import epd2in13
+from epddriver2in13 import epd2in13
 from queue import Queue
 
 import time

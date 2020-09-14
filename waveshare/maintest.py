@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
 
-from epddriver import epd2in13
+from epddriver2in13 import epd2in13
 import time
 import datetime
 from PIL import Image, ImageDraw, ImageFont
@@ -24,7 +24,6 @@ fontTemperature = ImageFont.truetype('../fonts/CarterOne-Regular.ttf', 20)  # Bo
 fontWeekDay = ImageFont.truetype('../fonts/Roboto-Black.ttf', 16)
 fontTime = ImageFont.truetype('../fonts/Roboto-Black.ttf', 24)
 fontLocation = ImageFont.truetype('../fonts/Roboto-Medium.ttf', 18)
-
 
 
 def weekday():
@@ -64,10 +63,10 @@ def call_apis_async(location):
     print()
 
 
-
 def callback_weather(future):
     global weather
     weather = future.result()
+
 
 # update display line strings
 def update_weather_high_low():
@@ -77,6 +76,7 @@ def update_weather_high_low():
         line2 = weather.get_low() + '~' + weather.get_high() + "°c"
 
     return line2
+
 
 # update display line strings
 def get_weather_image():
@@ -104,6 +104,7 @@ def get_weather_image():
     LOGGER.info("Weather Image: " + file_name)
     return file_name
 
+
 # update display line strings
 def update_weather_temp_line2():
     line2 = ''
@@ -116,6 +117,7 @@ def update_weather_temp_line2():
         line2 = line2.ljust(DISPLAY_LENGTH, ' ')
 
     return line2
+
 
 # update preciption line strings
 def update_weather_preciption_line2():
@@ -154,6 +156,7 @@ def update_weather_updated():
 
     return line2
 
+
 # update display line strings
 def update_weather_location_line2():
     line2 = ''
@@ -168,8 +171,6 @@ def update_weather_location_line2():
     line2 = line2.ljust(DISPLAY_LENGTH, ' ')
 
     return line2
-
-
 
 
 def display_elink():
@@ -204,7 +205,6 @@ def display_elink():
     draw.text((165, 50), update_weather_high_low(), font=fontTemperature, fill=0)
     draw.text((170, 80), weekday(), font=fontWeekDay, fill=0)
     draw.text((180, 100), day_month(), font=fontWeekDay, fill=0)
-
 
     # read bmp file
     weather_img = Image.open(get_weather_image())
@@ -247,4 +247,3 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         LOGGER.info('Cleaning up !')
         exit()
-
