@@ -21,6 +21,7 @@ display = lcddriver.lcd()
 
 lcd_disp_length = 20
 service_start_time_in_secs = 10
+DEFAULT_LOC_UUID = '4ef51d4289943c7792cbe77dee741bff9216f591eed796d7a5d598c38828957d'
 
 jobqueue = Queue()
 
@@ -43,10 +44,10 @@ def call_apis_async(location):
     f3.add_done_callback(callback_fuel)
 
     tasks = [HtmlParser2.get_gold_price(f2), HtmlParser2.get_fuel_price(f3)]
-    if location is not None:
-        tasks.append(HtmlParser2.get_google_weather(f1, location))
+    if util.is_uuid(location):
+        tasks.append(HtmlParser2.get_weather(f1), location)
     else:
-        tasks.append(HtmlParser2.get_weather(f1))
+        tasks.append(HtmlParser2.get_google_weather(f1, location))
 
     loop.run_until_complete(asyncio.wait(tasks))
 
@@ -68,10 +69,10 @@ def call_weather_api(location):
         f1.add_done_callback(callback_weather)
 
         tasks = []
-        if location is not None:
-            tasks.append(HtmlParser2.get_google_weather(f1, location))
+        if util.is_uuid(location):
+            tasks.append(HtmlParser2.get_weather(f1), location)
         else:
-            tasks.append(HtmlParser2.get_weather(f1))
+            tasks.append(HtmlParser2.get_google_weather(f1, location))
 
         loop.run_until_complete(asyncio.wait(tasks))
 
@@ -135,31 +136,33 @@ def callback_fuel(future):
 
 
 # update display line strings
-def update_weather_temp_line2():
+def update_weather_cond_line2():
     global line2
 
     if weather is not None:
         # Make string right justified of length 4 by padding 3 spaces to left
-        justl = lcd_disp_length - 4
-        temperature = str(weather.get_condition())[0:justl]
-        temperature = temperature.ljust(justl, ' ')
-        line2 = temperature + ' ' + str(weather.get_temp()) + 'c'
-
-        line2 = line2.ljust(lcd_disp_length, ' ')
+        condition = str(weather.get_condition())[0:lcd_disp_length]
+        line2 = condition.ljust(lcd_disp_length, ' ')
 
 
 # update display line strings
 def update_weather_location_line2():
     global line2
 
-    location = weather.get_location()
-    delimiter_idx = util.index_of(location, ',')
-    if delimiter_idx > 0:
-        location = location[0:delimiter_idx]
+    if weather is not None:
+        location = weather.get_location()
+        delimiter_idx = util.index_of(location, ',')
+        if delimiter_idx > 0:
+            location = location[0:delimiter_idx]
 
-    # Make string 16 chars only and left justify with space if length is less.
-    line2 = location[0:lcd_disp_length]
-    line2 = line2.ljust(lcd_disp_length, ' ')
+        # Make string 20 chars only and left justify with space if length is less.
+        line2 = location[0:lcd_disp_length]
+        # Make string right justified of length 4 by padding 3 spaces to left
+        justl = lcd_disp_length - 4
+        location = location[0:justl]
+        location = location.ljust(justl, ' ')
+        line2 = location + ' ' + str(weather.get_temp()) + 'c'
+        # line2 = line2.ljust(lcd_disp_length, ' ')
 
 
 # update humidity line strings
@@ -175,7 +178,7 @@ def update_weather_humidity_line2():
 
         line2 = line2.ljust(lcd_disp_length, ' ')
     else:
-        update_weather_temp_line2()
+        update_weather_cond_line2()
 
 
 # update preciption line strings
@@ -285,7 +288,7 @@ def every_second():
     # change display line2 every x seconds
     if counter % change_every_x_secs == 0:
         if rand_bool:
-            update_weather_temp_line2()
+            update_weather_cond_line2()
             update_rate_line_3_4()
             print_line3_and_4_rate()
             rand_bool = False
@@ -380,7 +383,7 @@ if __name__ == '__main__':
     display.lcd_display_string(welcome_date_month(), 2)
     display.lcd_display_string("Starting Now ...".center(lcd_disp_length, ' '), 4)
 
-    location = None
+    location = DEFAULT_LOC_UUID
     if len(sys.argv) > 1:
         location = sys.argv[1]
 
