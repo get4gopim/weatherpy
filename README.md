@@ -1,3 +1,7 @@
+# Weather PY Application is designed for two main displays
+- LCD Display (20x4 and 16x2) Screen
+- E Paper Display Screen
+
 # Python Forecast Application designed for LCD 20x4 and 16x2 I2C Display
 
 Tested this application in Raspberry Pi Zero W, Raspberry Pi 3B+, Raspberry Pi 4B Models.
