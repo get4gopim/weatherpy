@@ -9,7 +9,7 @@ echo "$JAVA_HOME/bin"
 
 echo 'Starting python lcd script'
 
-python3 /home/pi/workspace/weatherpy/restapi_async.py > /home/pi/i2c_lcd.log 2>&1 &
+python3 /home/pi/workspace/weatherpy/20x4_lcd_main.py > /home/pi/i2c_lcd.log 2>&1 &
 
 # sleep and try the below after 10 mins to pickup the changes from git
 
