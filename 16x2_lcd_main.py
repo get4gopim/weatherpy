@@ -20,6 +20,7 @@ display = lcddriver_16x2.lcd()
 
 lcd_disp_length = 16
 service_start_time_in_secs = 10
+DEFAULT_LOC_UUID = '4ef51d4289943c7792cbe77dee741bff9216f591eed796d7a5d598c38828957d'
 
 jobqueue = Queue()
 
@@ -42,10 +43,10 @@ def call_apis_async(location):
     # f3.add_done_callback(callback_fuel)
 
     tasks = [HtmlParser2.get_gold_price(f2)]
-    if location is not None:
-        tasks.append(HtmlParser2.get_google_weather(f1, location))
+    if util.is_uuid(location):
+        tasks.append(HtmlParser2.get_weather(f1, location))
     else:
-        tasks.append(HtmlParser2.get_weather(f1))
+        tasks.append(HtmlParser2.get_google_weather(f1, location))
 
     loop.run_until_complete(asyncio.wait(tasks))
 
@@ -66,10 +67,10 @@ def call_weather_api(location):
     f1.add_done_callback(callback_weather)
 
     tasks = []
-    if location is not None:
-        tasks.append(HtmlParser2.get_google_weather(f1, location))
+    if util.is_uuid(location):
+        tasks.append(HtmlParser2.get_weather(f1, location))
     else:
-        tasks.append(HtmlParser2.get_weather(f1))
+        tasks.append(HtmlParser2.get_google_weather(f1, location))
 
     loop.run_until_complete(asyncio.wait(tasks))
 
@@ -329,7 +330,7 @@ if __name__ == '__main__':
     display.lcd_display_string(welcome_date_month(), 2)
     display.lcd_display_string("Starting Now ...".center(lcd_disp_length, ' '), 4)
 
-    location = None
+    location = DEFAULT_LOC_UUID
     if len(sys.argv) > 1:
         location = sys.argv[1]
 

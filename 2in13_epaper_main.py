@@ -24,6 +24,7 @@ print(fontdir)
 
 IMG_LOCATION = picdir
 DISPLAY_LENGTH = 20
+DEFAULT_LOC_UUID = '4ef51d4289943c7792cbe77dee741bff9216f591eed796d7a5d598c38828957d'
 
 # Initialize and Clear the display
 epd = epd2in13.EPD()
@@ -38,7 +39,7 @@ fontTemperature = ImageFont.truetype(os.path.join(fontdir, 'CarterOne-Regular.tt
 fontWeekDay = ImageFont.truetype(os.path.join(fontdir, 'CarterOne-Regular.ttf'), 16)
 fontTime = ImageFont.truetype(os.path.join(fontdir, 'Bungee-Regular.ttf'), 26)
 fontLocation = ImageFont.truetype(os.path.join(fontdir, 'RussoOne-Regular.ttf'), 18)
-fontCondition = ImageFont.truetype(os.path.join(fontdir, 'Overlock-Black.ttf'), 18)
+fontCondition = ImageFont.truetype(os.path.join(fontdir, 'Overlock-Black.ttf'), 16)
 fontPreciption = ImageFont.truetype(os.path.join(fontdir, 'Overlock-Black.ttf'), 18)
 
 job_queue = Queue()
@@ -68,10 +69,10 @@ def call_apis_async(location):
     f1.add_done_callback(callback_weather)
 
     tasks = []
-    if location is not None:
-        tasks.append(HtmlParser2.get_google_weather(f1, location))
+    if util.is_uuid(location):
+        tasks.append(HtmlParser2.get_weather(f1, location))
     else:
-        tasks.append(HtmlParser2.get_weather(f1))
+        tasks.append(HtmlParser2.get_google_weather(f1, location))
 
     loop.run_until_complete(asyncio.wait(tasks))
 
@@ -93,10 +94,10 @@ def call_weather_api(location):
         f1.add_done_callback(callback_weather)
 
         tasks = []
-        if location is not None:
-            tasks.append(HtmlParser2.get_google_weather(f1, location))
+        if util.is_uuid(location):
+            tasks.append(HtmlParser2.get_weather(f1, location))
         else:
-            tasks.append(HtmlParser2.get_weather(f1))
+            tasks.append(HtmlParser2.get_google_weather(f1, location))
 
         loop.run_until_complete(asyncio.wait(tasks))
 
@@ -377,7 +378,7 @@ if __name__ == '__main__':
 
     LOGGER = logging.getLogger(__name__)
 
-    location = None
+    location = DEFAULT_LOC_UUID
     if len(sys.argv) > 1:
         location = sys.argv[1]
 
