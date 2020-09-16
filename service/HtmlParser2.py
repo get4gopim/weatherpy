@@ -13,7 +13,7 @@ import time
 import aiohttp
 import schedule
 
-from model import FuelInfo, RateInfo, WeatherInfo
+from model import FuelInfo, RateInfo, WeatherInfo, WeatherForecast
 from utility import util
 
 from bs4 import BeautifulSoup
@@ -56,7 +56,6 @@ async def get_weather(future, location):
     else:
         url = weather_url + DEFAULT_LOC_UUID
 
-    url = weather_url + location
     info = None
     LOGGER.info(url)
 
@@ -75,6 +74,35 @@ async def get_weather(future, location):
         LOGGER.error(f'Unable to connect Weather API : {repr(ex)}')
         info = WeatherInfo.WeatherInfo('0', "0", "0", "00:00", "", "", "")
         info.set_error(ex)
+
+    LOGGER.info (f'Weather Time Taken {time.time() - start}')
+    future.set_result(info)
+
+
+async def get_weather_forecast(future, location):
+    start = time.time()
+
+    if location is not None:
+        url = weather_url + location
+    else:
+        url = weather_url + DEFAULT_LOC_UUID
+
+    info = None
+    LOGGER.info(url)
+
+    try:
+        async with ClientSession() as session:
+            html = await fetch(session, url)
+            LOGGER.info(f'weather content fetch in {time.time() - start} secs.')
+            parse_start = time.time()
+            info = await parse_weather_forecast(html)
+            LOGGER.info(f'weather parsing took {time.time() - parse_start} secs.')
+    except ClientConnectorError as ex:
+        LOGGER.error(f'Unable to connect Weather API : {repr(ex)}')
+        info = []
+    except BaseException as ex:
+        LOGGER.error(f'Unable to connect Weather API : {repr(ex)}')
+        info = []
 
     LOGGER.info (f'Weather Time Taken {time.time() - start}')
     future.set_result(info)
@@ -283,6 +311,62 @@ async def parse_weather(page_content):
     return weatherInfo
 
 
+async def parse_weather_forecast(page_content):
+    soup = BeautifulSoup(page_content, 'lxml') # html.parser # lxml # html5lib
+
+    seg_temp = soup.find_all('div', {'id' : 'WxuDailyWeatherCard-main-bb1a17e7-dc20-421a-b1b8-c117308c6626'})[0]
+    # print(seg_temp.text)
+
+    location = seg_temp.find('div', class_='_-_-node_modules-@wxu-components-src-organism-DailyWeatherCard-DailyWeatherCard--TableWrapper--12r1N')
+    # print(location.text)
+
+    day = location.find_all('li',
+                             class_='_-_-node_modules-@wxu-components-src-molecule-WeatherTable-Column-Column--column--2bRa6')
+    print('\n')
+
+    list = []
+    for element in day:
+        next_day = element.find('h3',
+                                  class_='_-_-node_modules-@wxu-components-src-molecule-WeatherTable-Column-Column--label--L3RrD _-_-node_modules-@wxu-components-src-molecule-WeatherTable-Column-Column--small--3Qnmn')
+        # print(next_day.text)
+
+        next_day_temp = element.find('div',
+                              class_='_-_-node_modules-@wxu-components-src-molecule-WeatherTable-Column-Column--temp--2v_go')
+        # print(next_day_temp.text)
+
+        next_day_low = element.find('div',
+                                   class_='_-_-node_modules-@wxu-components-src-molecule-WeatherTable-Column-Column--tempLo--19O32')
+        # print(next_day_low.text)
+
+        next_day_preciption = element.find('div',
+                                  class_='_-_-node_modules-@wxu-components-src-molecule-WeatherTable-Column-Column--precip--2H5Iw')
+        # print(next_day_preciption.text)
+
+        condition = "Cloudy"
+        next_day_condition = element.find('div',
+                                    class_='_-_-node_modules-@wxu-components-src-molecule-WeatherTable-Column-Column--icon--1fMZT _-_-node_modules-@wxu-components-src-molecule-WeatherTable-Column-Column--small--3Qnmn')
+
+        if next_day_condition is not None:
+            next_day_condition = next_day_condition.find('svg')
+
+            if next_day_condition is not None:
+                next_day_condition = next_day_condition.find('mask')
+
+                if next_day_condition is not None:
+                    condition = next_day_condition.get('id')
+
+        # print(next_day.text + ' ' + next_day_temp.text + ' ' + next_day_low.text + ' ' + next_day_preciption.text + ' ' + next_day_condition)
+
+        forecast = WeatherForecast.WeatherForecast(next_day.text, next_day_temp.text , next_day_low.text, condition, next_day_preciption.text)
+        forecast.set_error(None)
+        list.append(forecast)
+        LOGGER.info(str(forecast))
+
+    print (len(list))
+
+    return list
+
+
 async def parse_gold_info(page_content):
     soup = BeautifulSoup(page_content, 'lxml')
 
@@ -400,10 +484,7 @@ def call_weather_api(location):
     f1.add_done_callback(callback)
 
     tasks = []
-    if location is not None:
-        tasks.append(get_google_weather(f1, location))
-    else:
-        tasks.append(get_weather(f1))
+    tasks.append(get_weather_forecast(f1, location))
 
     loop.run_until_complete(asyncio.wait(tasks))
 
@@ -444,4 +525,4 @@ jobqueue = Queue()
 if __name__ == '__main__':
     LOGGER.info (f"Parser starts ... args: {len(sys.argv)}")
 
-    call_weather_api('thalambur')
+    call_weather_api(None)
