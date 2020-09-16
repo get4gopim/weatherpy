@@ -1,9 +1,9 @@
-from epddriver2in13 import epd2in13
+from epddriver2in9 import epd2in9
 
 try:
     print ('Clearing ...')
-    epd = epd2in13.EPD()
-    epd.init(epd.FULL_UPDATE)
+    epd = epd2in9.EPD()
+    epd.init(epd.lut_full_update)
     epd.Clear(0xFF)
     epd.Clear(0xFF)
 
