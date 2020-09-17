@@ -73,10 +73,12 @@ def call_apis_async(location):
     loop = asyncio.get_event_loop()
 
     f1 = asyncio.Future()
+    f2 = asyncio.Future()
 
     f1.add_done_callback(callback_weather)
+    f2.add_done_callback(callback_weather_forecast)
 
-    tasks = []
+    tasks = [HtmlParser2.get_weather_forecast(f2, location)]
     if util.is_uuid(location):
         tasks.append(HtmlParser2.get_weather(f1, location))
     else:
@@ -99,7 +101,7 @@ def call_weather_api(location):
 
         f1 = asyncio.Future()
 
-        f1.add_done_callback(callback_weather_init)
+        f1.add_done_callback(callback_weather)
 
         tasks = []
         if util.is_uuid(location):
@@ -126,6 +128,34 @@ def callback_weather(future):
     weather = future.result()
 
 
+def callback_weather_forecast(future):
+    global forecast
+    forecast = future.result()
+
+
+def call_weather_forecast(location):
+    LOGGER.info("call_weather_forecast")
+
+    try:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+
+        f1 = asyncio.Future()
+
+        f1.add_done_callback(callback_weather_forecast)
+
+        tasks = []
+        if util.is_uuid(location):
+            tasks.append(HtmlParser2.get_weather_forecast(f1, location))
+
+        loop.run_until_complete(asyncio.wait(tasks))
+
+        loop.close()
+        print()
+    except Exception as ex:
+        LOGGER.error(f'call_weather_forecast : {repr(ex)}')
+
+
 # update display line strings
 def update_weather_high_low():
     line2 = ''
@@ -137,25 +167,27 @@ def update_weather_high_low():
 
 
 # update display line strings
-def get_weather_image():
+def get_weather_image(condition):
     file_name = 'cloudy.bmp'
 
-    if weather is not None:
-        if 'Cloudy' in weather.get_condition():
+    condition = condition.lower()
+
+    if condition is not None:
+        if 'cloudy' in condition:
             file_name = 'mostlycloudy.bmp'
-        elif 'Shower' in weather.get_condition():
+        elif 'shower' in condition:
             file_name = 'shower.bmp'
-        elif 'Rain' in weather.get_condition():
+        elif 'rain' in condition:
             file_name = 'rainy.bmp'
-        elif 'Fog' in weather.get_condition():
+        elif 'fog' in condition:
             file_name = 'foggy.bmp'
-        elif 'Driz' in weather.get_condition():
+        elif 'driz' in condition:
             file_name = 'drizzle.bmp'
-        elif 'Clear' in weather.get_condition():
+        elif 'clear' in condition:
             file_name = 'clear_sky.bmp'
-        elif 'Haze' in weather.get_condition():
+        elif 'haze' in condition:
             file_name = 'haze_2.bmp'
-        elif 'Thunder' in weather.get_condition():
+        elif 'thunder' in condition:
             file_name = 'thunder_storm.bmp'
         else:
             file_name = 'sun.bmp'
@@ -312,7 +344,7 @@ def display_weather_main():
 
     draw.rectangle((0, 0, 118, epd.width), fill=255)
 
-    bmp = Image.open(get_weather_image())
+    bmp = Image.open(get_weather_image(weather.get_condition()))
     image.paste(bmp, (30, 5))
 
     draw.text((5, 20), 'Hi', font=font14, fill=0)
@@ -354,27 +386,25 @@ def display_weather_forecast():
 
     draw.rectangle((122, 32, epd.height, epd.width), fill=255)
 
-    draw.text((145, 32), 'Wed', font=font14, fill=0)
-    # image
-    bmp = Image.open(os.path.join(picdir, 'w_rain.bmp'))
-    image.paste(bmp, (140, 50))
-    epd.display(epd.getbuffer(image))
-    # time.sleep(2)
-    draw.text((140, 105), '22-29°c', font=font14, fill=0)
-    draw.text((230, 105), '23-39°c', font=font14, fill=0)
+    display_day(forecast[1], 130, 32, 140, 50, 140, 105)
 
     # Vertical Middle Line
     draw.line([(210, 35), (210, epd.width - 5)], fill=0, width=1)
 
-    draw.text((245, 32), 'Thu', font=font14, fill=0)
-    # image
-    bmp = Image.open(os.path.join(picdir, 'foggy.bmp'))
-    image.paste(bmp, (230, 50))
-    epd.display(epd.getbuffer(image))
+    display_day(forecast[2], 215, 32, 230, 50, 230, 105)
 
     crop_image = image.crop([122, 32, epd.height, epd.width])
     image.paste(crop_image, (122, 32, epd.height, epd.width))
     epd.display(epd.getbuffer(image))
+
+
+def display_day(daycast, dx, dy, ix, iy, tx, ty):
+    draw.text((dx, dy), daycast.get_next_day() + ' (' + daycast.get_preciption() + ')', font=font14, fill=0)
+    # image
+    bmp = Image.open(get_weather_image(daycast.get_condition()))
+    image.paste(bmp, (ix, iy))
+    epd.display(epd.getbuffer(image))
+    draw.text((tx, ty), daycast.get_low() + "-" + daycast.get_temp() + 'c', font=font14, fill=0)
 
 
 def worker_main():
@@ -395,19 +425,18 @@ def run_weather_thread(job_vars):
 
 def add_scheduler(location):
     # Update time every minutes
-    schedule.every(30).seconds.do(job_queue.put, (every_sec, []))
+    schedule.every().minute.at(":00").do(job_queue.put, (every_sec, []))
 
     # Update weather every 13 mins once
-    schedule.every(1).minutes.do(run_weather_thread, (call_weather_api, [location]))
+    schedule.every(14).minutes.do(run_weather_thread, (call_weather_api, [location]))
+    schedule.every(15).minutes.do(job_queue.put, (display_weather_main, []))
 
-    # Update weather every 15 mins once
-    schedule.every(1.5).minutes.do(job_queue.put, (display_weather_main, []))
-
-    # Update weather every 17 mins once
-    # schedule.every(17).minutes.do(job_queue.put, (display_weather_forecast, []))
+    # Update weather every 1 hour once
+    schedule.every().hour.at(":00").do(run_weather_thread, (call_weather_forecast, [location]))
+    schedule.every().hour.at(":02").do(job_queue.put, (display_weather_forecast, []))
 
     # Update day info every day starts
-    schedule.every().days.at('00:00').do(job_queue.put, (display_date_info, []))
+    schedule.every(15).days.at('00:00').do(job_queue.put, (display_date_info, []))
 
 # main starts here
 if __name__ == '__main__':

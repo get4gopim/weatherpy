@@ -362,7 +362,7 @@ async def parse_weather_forecast(page_content):
         list.append(forecast)
         LOGGER.info(str(forecast))
 
-    print (len(list))
+    # print (len(list))
 
     return list
 
