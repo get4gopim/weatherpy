@@ -78,11 +78,13 @@ def call_apis_async(location):
     f1.add_done_callback(callback_weather)
     f2.add_done_callback(callback_weather_forecast)
 
-    tasks = [HtmlParser2.get_weather_forecast(f2, location)]
+    tasks = []
     if util.is_uuid(location):
         tasks.append(HtmlParser2.get_weather(f1, location))
+        tasks.append(HtmlParser2.get_weather_forecast(f2, location))
     else:
         tasks.append(HtmlParser2.get_google_weather(f1, location))
+        tasks.append(HtmlParser2.get_google_forecast(f2, location))
 
     loop.run_until_complete(asyncio.wait(tasks))
 
@@ -147,6 +149,8 @@ def call_weather_forecast(location):
         tasks = []
         if util.is_uuid(location):
             tasks.append(HtmlParser2.get_weather_forecast(f1, location))
+        else:
+            tasks.append(HtmlParser2.get_google_forecast(f1, location))
 
         loop.run_until_complete(asyncio.wait(tasks))
 
@@ -329,7 +333,8 @@ def display_date_info():
     # epd.init(epd.lut_partial_update)
     # epd.Clear(0xFF)
     draw.rectangle((125, 5, 235, 28), fill=255)
-    draw.text((125, 5), time.strftime("%b %d, %A"), font=font12, fill=0)
+    draw.text((130, 0), time.strftime("%b %d, %A"), font=font12, fill=0)
+    draw.text((130, 13), time.strftime(update_weather_location_line2()), font=font12, fill=0)
     crop_image = image.crop([125, 5, 235, 28])
     image.paste(crop_image, (125, 5))
     epd.display(epd.getbuffer(image))
@@ -378,33 +383,37 @@ def display_weather_main():
 def display_weather_forecast():
     global random_bool
 
-    LOGGER.info ('Image partial update')
+    LOGGER.info ('Forecast update')
     # epd.init(epd.lut_partial_update)
     # epd.Clear(0xFF)
     # epd.Clear(0xFF)  draw.line([(120, 5), (120, epd.width - 5)], fill=0, width=1)
     # time.sleep(2)
 
-    draw.rectangle((122, 32, epd.height, epd.width), fill=255)
+    if len(forecast) > 1:
+        draw.rectangle((122, 32, epd.height, epd.width), fill=255)
 
-    display_day(forecast[1], 130, 32, 140, 50, 140, 105)
+        display_day(forecast[1], 150, 32, 140, 50, 140, 105)
 
-    # Vertical Middle Line
-    draw.line([(210, 35), (210, epd.width - 5)], fill=0, width=1)
+        # Vertical Middle Line
+        draw.line([(210, 35), (210, epd.width - 5)], fill=0, width=1)
 
-    display_day(forecast[2], 215, 32, 230, 50, 230, 105)
+        display_day(forecast[2], 240, 32, 230, 50, 230, 105)
 
-    crop_image = image.crop([122, 32, epd.height, epd.width])
-    image.paste(crop_image, (122, 32, epd.height, epd.width))
-    epd.display(epd.getbuffer(image))
+        crop_image = image.crop([122, 32, epd.height, epd.width])
+        image.paste(crop_image, (122, 32, epd.height, epd.width))
+        epd.display(epd.getbuffer(image))
+    else:
+        LOGGER.warn('Weather Forecast List Empty')
 
 
 def display_day(daycast, dx, dy, ix, iy, tx, ty):
-    draw.text((dx, dy), daycast.get_next_day() + ' (' + daycast.get_preciption() + ')', font=font14, fill=0)
+    # draw.text((dx, dy), daycast.get_next_day() + ' (' + daycast.get_preciption() + ')', font=font14, fill=0)
+    draw.text((dx, dy), daycast.get_next_day(), font=font14, fill=0)
     # image
     bmp = Image.open(get_weather_image(daycast.get_condition()))
     image.paste(bmp, (ix, iy))
     epd.display(epd.getbuffer(image))
-    draw.text((tx, ty), daycast.get_low() + "-" + daycast.get_temp() + 'c', font=font14, fill=0)
+    draw.text((tx, ty), daycast.get_low() + "-" + daycast.get_temp() + '°c', font=font14, fill=0)
 
 
 def worker_main():
