@@ -37,7 +37,8 @@ epd = epd2in9.EPD()
 
 fontTemperature = ImageFont.truetype(os.path.join(fontdir, 'CarterOne-Regular.ttf'), 20)  # Bold
 fontWeekDay = ImageFont.truetype(os.path.join(fontdir, 'CarterOne-Regular.ttf'), 16)
-# fontTime = ImageFont.truetype(os.path.join(fontdir, 'Bungee-Regular.ttf'), 26)
+# fontTime = ImageFont.truetype(os.path.join(fontdir, 'Bungee-Regular.ttf'), 20)
+fontTime = ImageFont.truetype(os.path.join(fontdir, 'digital-7.ttf'), 26)
 fontLocation = ImageFont.truetype(os.path.join(fontdir, 'RussoOne-Regular.ttf'), 18)
 fontCondition = ImageFont.truetype(os.path.join(fontdir, 'Overlock-Black.ttf'), 16)
 fontPreciption = ImageFont.truetype(os.path.join(fontdir, 'Overlock-Black.ttf'), 18)
@@ -46,7 +47,6 @@ font8 = ImageFont.truetype(os.path.join(fontdir, 'Ubuntu-Light.ttf'), 12)
 font14 = ImageFont.truetype(os.path.join(fontdir, 'Ubuntu-Light.ttf'), 14)
 font12 = ImageFont.truetype(os.path.join(fontdir, 'Ubuntu-Light.ttf'), 12)
 fontHiLow= ImageFont.truetype(os.path.join(fontdir, 'digital-7.ttf'), 20)
-fontTime = ImageFont.truetype(os.path.join(fontdir, 'digital-7.ttf'), 26)
 fontTemp = ImageFont.truetype(os.path.join(fontdir, 'digital-7.ttf'), 26)
 fontTemp18 = ImageFont.truetype(os.path.join(fontdir, 'ThunderDemo.ttf'), 36)
 
@@ -320,10 +320,11 @@ def every_sec():
     # LOGGER.info ('Time partial update')
     # epd.init(epd.lut_partial_update)
     # epd.Clear(0xFF)
-    draw.rectangle((240, 5, epd.height, 28), fill=255)
-    draw.text((240, 5), time.strftime('%H:%M'), font=fontTime, fill=0)
-    crop_image = image.crop([240, 5, epd.height, 28])
-    image.paste(crop_image, (240, 5))
+    x = 240
+    draw.rectangle((x, 5, epd.height, 28), fill=255)
+    draw.text((x, 5), time.strftime('%H:%M'), font=fontTime, fill=0)
+    crop_image = image.crop([x, 5, epd.height, 28])
+    image.paste(crop_image, (x, 5))
     epd.display(epd.getbuffer(image))
 
 
@@ -332,10 +333,10 @@ def display_date_info():
     LOGGER.info ('Date partial update')
     # epd.init(epd.lut_partial_update)
     # epd.Clear(0xFF)
-    draw.rectangle((125, 5, 235, 28), fill=255)
+    draw.rectangle((125, 5, 230, 28), fill=255)
     draw.text((130, 0), time.strftime("%b %d, %A"), font=font12, fill=0)
     draw.text((130, 13), time.strftime(update_weather_location_line2()), font=font12, fill=0)
-    crop_image = image.crop([125, 5, 235, 28])
+    crop_image = image.crop([125, 5, 230, 28])
     image.paste(crop_image, (125, 5))
     epd.display(epd.getbuffer(image))
 
