@@ -268,7 +268,7 @@ def display_elink():
     global image
     global draw
 
-    LOGGER.info("display_elink")
+    # LOGGER.info("display_elink")
     clear_display()
 
     # partial update
@@ -317,7 +317,7 @@ def clear_display():
 
 
 def every_sec():
-    LOGGER.info ('Time partial update')
+    # LOGGER.info ('Time partial update')
     # epd.init(epd.lut_partial_update)
     # epd.Clear(0xFF)
     draw.rectangle((240, 5, epd.height, 28), fill=255)

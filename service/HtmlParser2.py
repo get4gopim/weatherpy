@@ -294,6 +294,9 @@ async def parse_weather(page_content):
     div_cond = div_ele.find_all('div', recursive=False)[0]
     element = div_cond.find('span')
     temp = element.text
+    if len(temp) == 3:
+        temp = temp[0:2]
+
     element = div_cond.find('div')
     condition = element.text
 
@@ -306,6 +309,12 @@ async def parse_weather(page_content):
 
     if high == '--':
         high = temp
+
+    if len(high) == 3:
+        high = high[0:2]
+
+    if len(low) == 3:
+        low = low[0:2]
 
     preciption = seg_temp.find_all('div', recursive=False)[2]
     if preciption is not None:
@@ -396,10 +405,14 @@ async def parse_weather_forecast(page_content):
         div_ele = element.find_all('div')
 
         next_day_temp = div_ele[0]
-        # print(next_day_temp)
+        next_day_temp = next_day_temp.text
+        if len(next_day_temp) == 3:
+            next_day_temp = next_day_temp[0:2]
 
         next_day_low = div_ele[1]
-        # print(next_day_low)
+        next_day_low = next_day_low.text
+        if len(next_day_low) == 3:
+            next_day_low = next_day_low[0:2]
 
         condition = "Cloudy"
         next_day_condition = div_ele[2]
@@ -418,7 +431,7 @@ async def parse_weather_forecast(page_content):
 
         # print(next_day.text + ' ' + next_day_temp.text + ' ' + next_day_low.text + ' ' + next_day_preciption.text + ' ' + next_day_condition)
 
-        forecast = WeatherForecast.WeatherForecast(next_day.text, next_day_temp.text , next_day_low.text, condition, next_day_preciption.text)
+        forecast = WeatherForecast.WeatherForecast(next_day.text, next_day_temp , next_day_low, condition, next_day_preciption.text)
         forecast.set_error(None)
         list.append(forecast)
         LOGGER.info(str(forecast))
@@ -547,8 +560,8 @@ def call_weather_api(location):
     tasks = []
     # tasks.append(get_google_forecast(f1, location))
     # tasks.append(get_google_weather(f1, location))
-    # tasks.append(get_weather(f1, location))
-    tasks.append(get_weather_forecast(f1, location))
+    tasks.append(get_weather(f1, location))
+    # tasks.append(get_weather_forecast(f1, location))
 
     loop.run_until_complete(asyncio.wait(tasks))
 
