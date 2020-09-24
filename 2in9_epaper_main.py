@@ -450,7 +450,7 @@ def add_scheduler(location):
     schedule.every().hour.at(':02').do(job_queue.put, (display_weather_forecast, []))
 
     # Update day info every day starts
-    schedule.every(15).day.at('00:00').do(job_queue.put, (display_date_info, []))
+    schedule.every().day.at('00:00').do(job_queue.put, (display_date_info, []))
 
 
 def welcome_screen():
