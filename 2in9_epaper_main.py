@@ -462,7 +462,7 @@ def welcome_screen():
     draw = ImageDraw.Draw(image)
 
     draw.text((80, 0), 'Welcome', font=fontTemp18, fill=0)
-    draw.text((20, 50), '2.9" epaper display', font=fontTemp18, fill=0)
+    draw.text((10, 50), '2.9" epaper display', font=fontTemp18, fill=0)
 
     epd.display(epd.getbuffer(image))
 
