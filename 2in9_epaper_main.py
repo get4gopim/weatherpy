@@ -464,6 +464,8 @@ def welcome_screen():
     draw.text((10, 50), 'Welcome', font=fontTemp18, fill=0)
     draw.text((10, 90), 'epaper display', font=fontTemp18, fill=0)
 
+    epd.display(epd.getbuffer(image))
+
 
 # main starts here
 if __name__ == '__main__':
