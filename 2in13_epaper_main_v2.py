@@ -363,7 +363,7 @@ def add_scheduler(location):
     schedule.every(17).minutes.do(job_queue.put, (display_weather_info, []))
 
     # Update day info every day starts
-    schedule.every().days.at('00:00').do(job_queue.put, (display_date_info, []))
+    schedule.every().day.at('00:00').do(job_queue.put, (display_date_info, []))
 
 
 # main starts here

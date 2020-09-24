@@ -370,7 +370,8 @@ def display_weather_main():
         bmp = Image.open(os.path.join(picdir, 'humidity.bmp'))
         image.paste(bmp, (5, 103))
         epd.display(epd.getbuffer(image))
-        draw.text((22, 105), weather.get_humidity(), font=font14, fill=0)
+        if weather.get_humidity() is not None:
+            draw.text((22, 105), weather.get_humidity(), font=font14, fill=0)
 
         bmp = Image.open(os.path.join(picdir, 'preciption.bmp'))  # preciption
         image.paste(bmp, (65, 103))
