@@ -449,6 +449,13 @@ def add_scheduler(location):
     # Update day info every day starts
     schedule.every(15).days.at('00:00').do(job_queue.put, (display_date_info, []))
 
+
+def welcome_screen():
+    clear_display()
+    draw.text((10, 50), 'Welcome', font=fontTemp18, fill=0)
+    draw.text((10, 90), 'epaper display', font=fontTemp18, fill=0)
+
+
 # main starts here
 if __name__ == '__main__':
     logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO"), format='%(asctime)s %(message)s')
@@ -464,7 +471,7 @@ if __name__ == '__main__':
 
     try:
         LOGGER.info("Initializing Display")
-        # clear_display()
+        welcome_screen()
 
         worker_thread = threading.Thread(target=worker_main)
         worker_thread.start()
