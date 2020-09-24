@@ -438,7 +438,7 @@ def run_weather_thread(job_vars):
 
 def add_scheduler(location):
     # Update time every minutes
-    schedule.every().minute.at(':00').do(job_queue.put, (every_sec, []))
+    schedule.every().minutes.at(':00').do(job_queue.put, (every_sec, []))
     # schedule.every(30).seconds.do(job_queue.put, (every_sec, []))
 
     # Update weather every 13 mins once

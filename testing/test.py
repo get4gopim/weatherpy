@@ -19,7 +19,7 @@ def worker_main():
 
 def add_scheduler():
     # Update time every minutes
-    schedule.every().minute.at(":00").do(job_queue.put, (every_sec, []))
+    schedule.every().minutes.at(':00').do(job_queue.put, (every_sec, []))
 
 def every_sec():
     LOGGER.info ('Time partial update')
