@@ -455,9 +455,7 @@ def welcome_screen():
     global draw
 
     LOGGER.info("welcome screen")
-
     clear_display()
-
     image = Image.new('1', (epd.height, epd.width), 255)
     draw = ImageDraw.Draw(image)
 
