@@ -405,7 +405,7 @@ def display_weather_forecast():
         image.paste(crop_image, (122, 32, epd.height, epd.width))
         epd.display(epd.getbuffer(image))
     else:
-        LOGGER.warn('Weather Forecast List Empty')
+        LOGGER.warning('Weather Forecast List Empty')
 
 
 def display_day(daycast, dx, dy, ix, iy, tx, ty):
@@ -449,7 +449,7 @@ def add_scheduler(location):
     schedule.every().hour.at(':02').do(job_queue.put, (display_weather_forecast, []))
 
     # Update day info every day starts
-    schedule.every(15).days.at('00:00').do(job_queue.put, (display_date_info, []))
+    schedule.every(15).day.at('00:00').do(job_queue.put, (display_date_info, []))
 
 
 def welcome_screen():
