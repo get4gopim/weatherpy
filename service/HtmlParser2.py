@@ -560,11 +560,15 @@ def call_weather_api(location):
     tasks = []
     # tasks.append(get_google_forecast(f1, location))
     # tasks.append(get_google_weather(f1, location))
-    tasks.append(get_weather(f1, location))
+    # tasks.append(get_weather(f1, location))
     # tasks.append(get_weather_forecast(f1, location))
 
-    loop.run_until_complete(asyncio.wait(tasks))
+    if util.is_uuid(location):
+        tasks.append(get_weather_forecast(f1, location))
+    else:
+        tasks.append(get_google_forecast(f1, location))
 
+    loop.run_until_complete(asyncio.wait(tasks))
     loop.close()
     print()
 
@@ -602,4 +606,4 @@ jobqueue = Queue()
 if __name__ == '__main__':
     LOGGER.info (f"Parser starts ... args: {len(sys.argv)}")
 
-    call_weather_api(None) # 'thalambur'
+    call_weather_api('kolathur+salem') # 'thalambur'
