@@ -350,35 +350,36 @@ def display_weather_main():
 
     draw.rectangle((0, 0, 118, epd.width), fill=255)
 
-    bmp = Image.open(get_weather_image(weather.get_condition()))
-    image.paste(bmp, (30, 5))
+    if weather is not None:
+        bmp = Image.open(get_weather_image(weather.get_condition()))
+        image.paste(bmp, (30, 5))
 
-    draw.text((5, 20), 'Hi', font=font14, fill=0)
-    draw.text((5, 40), weather.get_high(), font=fontHiLow, fill=0)
+        draw.text((5, 20), 'Hi', font=font14, fill=0)
+        draw.text((5, 40), weather.get_high(), font=fontHiLow, fill=0)
 
-    # bmp = Image.open(os.path.join(picdir, 'thermo_sun.bmp'))
-    # image.paste(bmp, (30, 60))
-    draw.text((40, 60), weather.get_temp(), font=fontTemp, fill=0)
-    draw.text((65, 60), '°c', font=font8, fill=0)
+        # bmp = Image.open(os.path.join(picdir, 'thermo_sun.bmp'))
+        # image.paste(bmp, (30, 60))
+        draw.text((40, 60), weather.get_temp(), font=fontTemp, fill=0)
+        draw.text((65, 60), '°c', font=font8, fill=0)
 
-    draw.text((97, 20), 'Lo', font=font14, fill=0)
-    draw.text((97, 40), weather.get_low(), font=fontHiLow, fill=0)
+        draw.text((97, 20), 'Lo', font=font14, fill=0)
+        draw.text((97, 40), weather.get_low(), font=fontHiLow, fill=0)
 
-    draw.text((5, 82), weather.get_condition() + ' ', font=font14, fill=0)
+        draw.text((5, 82), weather.get_condition() + ' ', font=font14, fill=0)
 
-    bmp = Image.open(os.path.join(picdir, 'humidity.bmp'))
-    image.paste(bmp, (5, 103))
-    epd.display(epd.getbuffer(image))
-    draw.text((22, 105), weather.get_humidity(), font=font14, fill=0)
+        bmp = Image.open(os.path.join(picdir, 'humidity.bmp'))
+        image.paste(bmp, (5, 103))
+        epd.display(epd.getbuffer(image))
+        draw.text((22, 105), weather.get_humidity(), font=font14, fill=0)
 
-    bmp = Image.open(os.path.join(picdir, 'preciption.bmp'))  # preciption
-    image.paste(bmp, (65, 103))
-    epd.display(epd.getbuffer(image))
-    draw.text((88, 105), get_preciption(), font=font14, fill=0)
+        bmp = Image.open(os.path.join(picdir, 'preciption.bmp'))  # preciption
+        image.paste(bmp, (65, 103))
+        epd.display(epd.getbuffer(image))
+        draw.text((88, 105), get_preciption(), font=font14, fill=0)
 
-    crop_image = image.crop([0, 0, 118, epd.width])
-    image.paste(crop_image, (0, 0))
-    epd.display(epd.getbuffer(image))
+        crop_image = image.crop([0, 0, 118, epd.width])
+        image.paste(crop_image, (0, 0))
+        epd.display(epd.getbuffer(image))
 
 
 def display_weather_forecast():
@@ -408,13 +409,14 @@ def display_weather_forecast():
 
 
 def display_day(daycast, dx, dy, ix, iy, tx, ty):
-    # draw.text((dx, dy), daycast.get_next_day() + ' (' + daycast.get_preciption() + ')', font=font14, fill=0)
-    draw.text((dx, dy), daycast.get_next_day(), font=font14, fill=0)
-    # image
-    bmp = Image.open(get_weather_image(daycast.get_condition()))
-    image.paste(bmp, (ix, iy))
-    epd.display(epd.getbuffer(image))
-    draw.text((tx, ty), daycast.get_low() + "-" + daycast.get_temp() + '°c', font=font14, fill=0)
+    if daycast is not None:
+        # draw.text((dx, dy), daycast.get_next_day() + ' (' + daycast.get_preciption() + ')', font=font14, fill=0)
+        draw.text((dx, dy), daycast.get_next_day(), font=font14, fill=0)
+        # image
+        bmp = Image.open(get_weather_image(daycast.get_condition()))
+        image.paste(bmp, (ix, iy))
+        draw.text((tx, ty), daycast.get_low() + "-" + daycast.get_temp() + '°c', font=font14, fill=0)
+        epd.display(epd.getbuffer(image))
 
 
 def worker_main():
