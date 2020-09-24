@@ -334,7 +334,7 @@ def display_date_info():
     # epd.init(epd.lut_partial_update)
     # epd.Clear(0xFF)
     draw.rectangle((125, 5, 240, 28), fill=255)
-    draw.text((125, 0), time.strftime("%b %d, %A %Y"), font=font12, fill=0)
+    draw.text((125, 0), time.strftime("%b %d, %A "), font=font12, fill=0)
     draw.text((125, 13), time.strftime(update_weather_location_line2()), font=font12, fill=0)
     crop_image = image.crop([125, 5, 240, 28])
     image.paste(crop_image, (125, 5))
@@ -364,7 +364,7 @@ def display_weather_main():
     draw.text((97, 20), 'Lo', font=font14, fill=0)
     draw.text((97, 40), weather.get_low(), font=fontHiLow, fill=0)
 
-    draw.text((5, 82), weather.get_condition(), font=font14, fill=0)
+    draw.text((5, 82), weather.get_condition() + ' ', font=font14, fill=0)
 
     bmp = Image.open(os.path.join(picdir, 'humidity.bmp'))
     image.paste(bmp, (5, 103))
