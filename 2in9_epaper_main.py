@@ -451,7 +451,16 @@ def add_scheduler(location):
 
 
 def welcome_screen():
+    global image
+    global draw
+
+    LOGGER.info("welcome screen")
+
     clear_display()
+
+    image = Image.new('1', (epd.height, epd.width), 255)
+    draw = ImageDraw.Draw(image)
+
     draw.text((10, 50), 'Welcome', font=fontTemp18, fill=0)
     draw.text((10, 90), 'epaper display', font=fontTemp18, fill=0)
 
