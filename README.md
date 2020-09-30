@@ -26,7 +26,7 @@ The following libraries can be installed via a sudo apt install python command o
 - python3-smbus
 - python3-aiohttp
 - python3-bs4
-- python3-schedule
+- python3-schedule (sudo pip3 install schedule==0.6.0)
 
 > Example: sudo apt install python3-aiohttp
 
