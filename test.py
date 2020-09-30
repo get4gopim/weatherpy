@@ -38,9 +38,9 @@ if __name__ == '__main__':
     worker_thread = threading.Thread(target=worker_main)
     worker_thread.start()
 
-    # add_scheduler()
+    add_scheduler()
 
-    HtmlParser2.call_weather_api('4ef51d4289943c7792cbe77dee741bff9216f591eed796d7a5d598c38828957d')
+    # HtmlParser2.call_weather_api('4ef51d4289943c7792cbe77dee741bff9216f591eed796d7a5d598c38828957d')
 
     while 1:
         schedule.run_pending()

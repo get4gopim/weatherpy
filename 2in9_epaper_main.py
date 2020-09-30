@@ -354,16 +354,16 @@ def display_weather_main():
         bmp = Image.open(get_weather_image(weather.get_condition()))
         image.paste(bmp, (30, 5))
 
-        draw.text((5, 20), 'Hi', font=font14, fill=0)
-        draw.text((5, 40), weather.get_high(), font=fontHiLow, fill=0)
+        draw.text((5, 20), 'Lo', font=font14, fill=0)
+        draw.text((5, 40), weather.get_low(), font=fontHiLow, fill=0)
 
         # bmp = Image.open(os.path.join(picdir, 'thermo_sun.bmp'))
         # image.paste(bmp, (30, 60))
         draw.text((40, 60), weather.get_temp(), font=fontTemp, fill=0)
         draw.text((65, 60), '°c', font=font8, fill=0)
 
-        draw.text((97, 20), 'Lo', font=font14, fill=0)
-        draw.text((97, 40), weather.get_low(), font=fontHiLow, fill=0)
+        draw.text((97, 20), 'Hi', font=font14, fill=0)
+        draw.text((97, 40), weather.get_high(), font=fontHiLow, fill=0)
 
         draw.text((5, 82), weather.get_condition() + ' ', font=font14, fill=0)
 
@@ -438,8 +438,8 @@ def run_weather_thread(job_vars):
 
 def add_scheduler(location):
     # Update time every minutes
-    # schedule.every().minutes.at(':00').do(job_queue.put, (every_sec, []))
-    schedule.every(30).seconds.do(job_queue.put, (every_sec, []))
+    schedule.every().minutes.at(':00').do(job_queue.put, (every_sec, []))
+    # schedule.every(30).seconds.do(job_queue.put, (every_sec, []))
 
     # Update weather every 13 mins once
     schedule.every(14).minutes.do(run_weather_thread, (call_weather_api, [location]))
