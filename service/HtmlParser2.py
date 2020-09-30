@@ -68,10 +68,12 @@ async def get_weather(future, location):
             LOGGER.info(f'weather parsing took {time.time() - parse_start} secs.')
     except ClientConnectorError as ex:
         LOGGER.error(f'Unable to connect Weather API : {repr(ex)}')
+        LOGGER.error(ex)
         info = WeatherInfo.WeatherInfo('0', "0", "0", "00:00", "", "", "")
         info.set_error(ex)
     except BaseException as ex:
-        LOGGER.error(f'Unable to connect Weather API : {repr(ex)}')
+        LOGGER.error(f'Unable to connect Weather API :- {repr(ex)}')
+        LOGGER.error(ex)
         info = WeatherInfo.WeatherInfo('0', "0", "0", "00:00", "", "", "")
         info.set_error(ex)
 
