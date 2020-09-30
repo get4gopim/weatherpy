@@ -564,9 +564,9 @@ def call_weather_api(location):
     # tasks.append(get_weather_forecast(f1, location))
 
     if util.is_uuid(location):
-        tasks.append(get_weather_forecast(f1, location))
+        tasks.append(get_weather(f1, location))
     else:
-        tasks.append(get_google_forecast(f1, location))
+        tasks.append(get_weather(f1, location))
 
     loop.run_until_complete(asyncio.wait(tasks))
     loop.close()
