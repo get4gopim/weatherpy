@@ -22,7 +22,7 @@ def worker_main():
 
 def add_scheduler():
     # Update time every minutes
-    schedule.every().minute.at(':00').do(job_queue.put, (every_sec, []))
+    schedule.every().minute.at(':01').do(job_queue.put, (every_sec, []))
 
 
 def every_sec():
