@@ -441,9 +441,11 @@ def add_scheduler(location):
     schedule.every().minute.at(':00').do(job_queue.put, (every_sec, []))
     # schedule.every(30).seconds.do(job_queue.put, (every_sec, []))
 
-    # Update weather every 13 mins once
-    schedule.every(14).minutes.do(run_weather_thread, (call_weather_api, [location]))
-    schedule.every(15).minutes.do(job_queue.put, (display_weather_main, []))
+    # Update weather every 30 mins once
+    schedule.every().hour.at(':30').do(run_weather_thread, (call_weather_api, [location]))
+    schedule.every().hour.at(':31').do(job_queue.put, (display_weather_main, []))
+    schedule.every().hour.at(':00').do(run_weather_thread, (call_weather_api, [location]))
+    schedule.every().hour.at(':01').do(job_queue.put, (display_weather_main, []))
 
     # Update weather every 1 hour once
     schedule.every().hour.at(':00').do(run_weather_thread, (call_weather_forecast, [location]))

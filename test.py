@@ -21,26 +21,15 @@ def worker_main():
 
 
 def add_scheduler():
-    schedule.every().start_day = 'monday'
-
     # Update time every minutes
-    schedule.every().minutes.at(':00').do(job_queue.put, (every_sec, []))
+    # schedule.every().minute.at(':00').do(job_queue.put, (every_sec, [0]))
+    schedule.every().hour.at(':07').do(job_queue.put, (every_sec, [7]))
+    schedule.every().hour.at(':15').do(job_queue.put, (every_sec, [15]))
     # schedule.every(30).seconds.do(job_queue.put, (every_sec, []))
 
-    # Update weather every 13 mins once
-    schedule.every(14).minutes.do(job_queue.put, (every_sec, []))
-    schedule.every(15).minutes.do(job_queue.put, (every_sec, []))
 
-    # Update weather every 1 hour once
-    schedule.every().hour.at(':00').do(job_queue.put, (every_sec, []))
-    schedule.every().hour.at(':02').do(job_queue.put, (every_sec, []))
-
-    # Update day info every day starts
-    schedule.every().day.at('00:00').do(job_queue.put, (every_sec, []))
-
-
-def every_sec():
-    LOGGER.info ('Time partial update')
+def every_sec(x):
+    LOGGER.info ('Time partial update : ' + str(x))
 
 
 if __name__ == '__main__':
