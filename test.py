@@ -21,8 +21,22 @@ def worker_main():
 
 
 def add_scheduler():
+    schedule.every().start_day = 'monday'
+
     # Update time every minutes
-    schedule.every(1).minutes.at(':00').do(job_queue.put, (every_sec, []))
+    schedule.every().minutes.at(':00').do(job_queue.put, (every_sec, []))
+    # schedule.every(30).seconds.do(job_queue.put, (every_sec, []))
+
+    # Update weather every 13 mins once
+    schedule.every(14).minutes.do(job_queue.put, (every_sec, []))
+    schedule.every(15).minutes.do(job_queue.put, (every_sec, []))
+
+    # Update weather every 1 hour once
+    schedule.every().hour.at(':00').do(job_queue.put, (every_sec, []))
+    schedule.every().hour.at(':02').do(job_queue.put, (every_sec, []))
+
+    # Update day info every day starts
+    schedule.every().day.at('00:00').do(job_queue.put, (every_sec, []))
 
 
 def every_sec():
