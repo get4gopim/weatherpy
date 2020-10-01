@@ -236,7 +236,7 @@ async def parse_google_weather(page_content):
     element = div_sub.select('span#wob_tm')[0]
     temp = element.text
 
-    div_sub = seg_temp.find('div', class_='vk_gy vk_sh wob-dtl') # Second Sub
+    div_sub = seg_temp.find_all('div', class_='vk_gy vk_sh')[1] # Second Sub
 
     element = div_sub.select('span#wob_hm')[0]
     humidity = element.text
@@ -583,7 +583,30 @@ def call_weather_api(location):
 
     loop.run_until_complete(asyncio.wait(tasks))
     loop.close()
-    print()
+
+    return f1.result()
+
+
+def call_weather_forecast(location):
+    LOGGER.info("call_weather_forecast")
+
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
+    f1 = asyncio.Future()
+
+    f1.add_done_callback(callback)
+
+    tasks = []
+    if util.is_uuid(location):
+        tasks.append(get_weather_forecast(f1, location))
+    else:
+        tasks.append(get_google_forecast(f1, location))
+
+    loop.run_until_complete(asyncio.wait(tasks))
+    loop.close()
+
+    return f1.result()
 
 
 def call_gold_api():
