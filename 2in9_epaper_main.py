@@ -7,7 +7,7 @@ from queue import Queue
 import time
 import datetime
 from PIL import Image, ImageDraw, ImageFont
-from service import HtmlParser2
+from service import Forecast
 from utility import util
 import sys
 import asyncio
@@ -37,7 +37,8 @@ epd = epd2in9.EPD()
 
 fontTemperature = ImageFont.truetype(os.path.join(fontdir, 'CarterOne-Regular.ttf'), 20)  # Bold
 fontWeekDay = ImageFont.truetype(os.path.join(fontdir, 'CarterOne-Regular.ttf'), 16)
-# fontTime = ImageFont.truetype(os.path.join(fontdir, 'Bungee-Regular.ttf'), 26)
+# fontTime = ImageFont.truetype(os.path.join(fontdir, 'Bungee-Regular.ttf'), 20)
+fontTime = ImageFont.truetype(os.path.join(fontdir, 'digital-7.ttf'), 26)
 fontLocation = ImageFont.truetype(os.path.join(fontdir, 'RussoOne-Regular.ttf'), 18)
 fontCondition = ImageFont.truetype(os.path.join(fontdir, 'Overlock-Black.ttf'), 16)
 fontPreciption = ImageFont.truetype(os.path.join(fontdir, 'Overlock-Black.ttf'), 18)
@@ -46,7 +47,6 @@ font8 = ImageFont.truetype(os.path.join(fontdir, 'Ubuntu-Light.ttf'), 12)
 font14 = ImageFont.truetype(os.path.join(fontdir, 'Ubuntu-Light.ttf'), 14)
 font12 = ImageFont.truetype(os.path.join(fontdir, 'Ubuntu-Light.ttf'), 12)
 fontHiLow= ImageFont.truetype(os.path.join(fontdir, 'digital-7.ttf'), 20)
-fontTime = ImageFont.truetype(os.path.join(fontdir, 'digital-7.ttf'), 26)
 fontTemp = ImageFont.truetype(os.path.join(fontdir, 'digital-7.ttf'), 26)
 fontTemp18 = ImageFont.truetype(os.path.join(fontdir, 'ThunderDemo.ttf'), 36)
 
@@ -80,11 +80,11 @@ def call_apis_async(location):
 
     tasks = []
     if util.is_uuid(location):
-        tasks.append(HtmlParser2.get_weather(f1, location))
-        tasks.append(HtmlParser2.get_weather_forecast(f2, location))
+        tasks.append(Forecast.get_weather(f1, location))
+        tasks.append(Forecast.get_weather_forecast(f2, location))
     else:
-        tasks.append(HtmlParser2.get_google_weather(f1, location))
-        tasks.append(HtmlParser2.get_google_forecast(f2, location))
+        tasks.append(Forecast.get_google_weather(f1, location))
+        tasks.append(Forecast.get_google_forecast(f2, location))
 
     loop.run_until_complete(asyncio.wait(tasks))
 
@@ -107,9 +107,9 @@ def call_weather_api(location):
 
         tasks = []
         if util.is_uuid(location):
-            tasks.append(HtmlParser2.get_weather(f1, location))
+            tasks.append(Forecast.get_weather(f1, location))
         else:
-            tasks.append(HtmlParser2.get_google_weather(f1, location))
+            tasks.append(Forecast.get_google_weather(f1, location))
 
         loop.run_until_complete(asyncio.wait(tasks))
 
@@ -148,9 +148,9 @@ def call_weather_forecast(location):
 
         tasks = []
         if util.is_uuid(location):
-            tasks.append(HtmlParser2.get_weather_forecast(f1, location))
+            tasks.append(Forecast.get_weather_forecast(f1, location))
         else:
-            tasks.append(HtmlParser2.get_google_forecast(f1, location))
+            tasks.append(Forecast.get_google_forecast(f1, location))
 
         loop.run_until_complete(asyncio.wait(tasks))
 
@@ -312,18 +312,19 @@ def clear_display():
     LOGGER.info('Clear Display')
     epd.init(epd.lut_full_update)
     epd.Clear(0xFF)
-    epd.Clear(0xFF)
-    time.sleep(5)
+    # epd.Clear(0xFF)
+    time.sleep(2)
 
 
 def every_sec():
     # LOGGER.info ('Time partial update')
     # epd.init(epd.lut_partial_update)
     # epd.Clear(0xFF)
-    draw.rectangle((240, 5, epd.height, 28), fill=255)
-    draw.text((240, 5), time.strftime('%H:%M'), font=fontTime, fill=0)
-    crop_image = image.crop([240, 5, epd.height, 28])
-    image.paste(crop_image, (240, 5))
+    x = 245
+    draw.rectangle((x, 5, epd.height, 28), fill=255)
+    draw.text((x, 5), time.strftime('%H:%M'), font=fontTime, fill=0)
+    crop_image = image.crop([x, 5, epd.height, 28])
+    image.paste(crop_image, (x, 5))
     epd.display(epd.getbuffer(image))
 
 
@@ -332,10 +333,10 @@ def display_date_info():
     LOGGER.info ('Date partial update')
     # epd.init(epd.lut_partial_update)
     # epd.Clear(0xFF)
-    draw.rectangle((125, 5, 235, 28), fill=255)
-    draw.text((130, 0), time.strftime("%b %d, %A"), font=font12, fill=0)
-    draw.text((130, 13), time.strftime(update_weather_location_line2()), font=font12, fill=0)
-    crop_image = image.crop([125, 5, 235, 28])
+    draw.rectangle((125, 5, 240, 28), fill=255)
+    draw.text((125, 0), time.strftime("%b %d, %A "), font=font12, fill=0)
+    draw.text((125, 13), time.strftime(update_weather_location_line2()), font=font12, fill=0)
+    crop_image = image.crop([125, 5, 240, 28])
     image.paste(crop_image, (125, 5))
     epd.display(epd.getbuffer(image))
 
@@ -349,35 +350,37 @@ def display_weather_main():
 
     draw.rectangle((0, 0, 118, epd.width), fill=255)
 
-    bmp = Image.open(get_weather_image(weather.get_condition()))
-    image.paste(bmp, (30, 5))
+    if weather is not None:
+        bmp = Image.open(get_weather_image(weather.get_condition()))
+        image.paste(bmp, (30, 5))
 
-    draw.text((5, 20), 'Hi', font=font14, fill=0)
-    draw.text((5, 40), weather.get_high(), font=fontHiLow, fill=0)
+        draw.text((5, 20), 'Lo', font=font14, fill=0)
+        draw.text((5, 40), weather.get_low(), font=fontHiLow, fill=0)
 
-    # bmp = Image.open(os.path.join(picdir, 'thermo_sun.bmp'))
-    # image.paste(bmp, (30, 60))
-    draw.text((40, 60), weather.get_temp(), font=fontTemp, fill=0)
-    draw.text((65, 60), '°c', font=font8, fill=0)
+        # bmp = Image.open(os.path.join(picdir, 'thermo_sun.bmp'))
+        # image.paste(bmp, (30, 60))
+        draw.text((40, 60), weather.get_temp(), font=fontTemp, fill=0)
+        draw.text((65, 60), '°c', font=font8, fill=0)
 
-    draw.text((97, 20), 'Lo', font=font14, fill=0)
-    draw.text((97, 40), weather.get_low(), font=fontHiLow, fill=0)
+        draw.text((97, 20), 'Hi', font=font14, fill=0)
+        draw.text((97, 40), weather.get_high(), font=fontHiLow, fill=0)
 
-    draw.text((5, 82), weather.get_condition(), font=font14, fill=0)
+        draw.text((5, 82), weather.get_condition() + ' ', font=font14, fill=0)
 
-    bmp = Image.open(os.path.join(picdir, 'humidity.bmp'))
-    image.paste(bmp, (5, 103))
-    epd.display(epd.getbuffer(image))
-    draw.text((22, 105), weather.get_humidity(), font=font14, fill=0)
+        bmp = Image.open(os.path.join(picdir, 'humidity.bmp'))
+        image.paste(bmp, (5, 103))
+        epd.display(epd.getbuffer(image))
+        if weather.get_humidity() is not None:
+            draw.text((22, 105), weather.get_humidity(), font=font14, fill=0)
 
-    bmp = Image.open(os.path.join(picdir, 'preciption.bmp'))  # preciption
-    image.paste(bmp, (65, 103))
-    epd.display(epd.getbuffer(image))
-    draw.text((88, 105), get_preciption(), font=font14, fill=0)
+        bmp = Image.open(os.path.join(picdir, 'preciption.bmp'))  # preciption
+        image.paste(bmp, (65, 103))
+        epd.display(epd.getbuffer(image))
+        draw.text((88, 105), get_preciption(), font=font14, fill=0)
 
-    crop_image = image.crop([0, 0, 118, epd.width])
-    image.paste(crop_image, (0, 0))
-    epd.display(epd.getbuffer(image))
+        crop_image = image.crop([0, 0, 118, epd.width])
+        image.paste(crop_image, (0, 0))
+        epd.display(epd.getbuffer(image))
 
 
 def display_weather_forecast():
@@ -403,17 +406,18 @@ def display_weather_forecast():
         image.paste(crop_image, (122, 32, epd.height, epd.width))
         epd.display(epd.getbuffer(image))
     else:
-        LOGGER.warn('Weather Forecast List Empty')
+        LOGGER.warning('Weather Forecast List Empty')
 
 
 def display_day(daycast, dx, dy, ix, iy, tx, ty):
-    # draw.text((dx, dy), daycast.get_next_day() + ' (' + daycast.get_preciption() + ')', font=font14, fill=0)
-    draw.text((dx, dy), daycast.get_next_day(), font=font14, fill=0)
-    # image
-    bmp = Image.open(get_weather_image(daycast.get_condition()))
-    image.paste(bmp, (ix, iy))
-    epd.display(epd.getbuffer(image))
-    draw.text((tx, ty), daycast.get_low() + "-" + daycast.get_temp() + '°c', font=font14, fill=0)
+    if daycast is not None:
+        # draw.text((dx, dy), daycast.get_next_day() + ' (' + daycast.get_preciption() + ')', font=font14, fill=0)
+        draw.text((dx, dy), daycast.get_next_day(), font=font14, fill=0)
+        # image
+        bmp = Image.open(get_weather_image(daycast.get_condition()))
+        image.paste(bmp, (ix, iy))
+        draw.text((tx, ty), daycast.get_low() + "-" + daycast.get_temp() + '°c', font=font14, fill=0)
+        epd.display(epd.getbuffer(image))
 
 
 def worker_main():
@@ -434,18 +438,37 @@ def run_weather_thread(job_vars):
 
 def add_scheduler(location):
     # Update time every minutes
-    schedule.every().minute.at(":00").do(job_queue.put, (every_sec, []))
+    schedule.every().minute.at(':00').do(job_queue.put, (every_sec, []))
+    # schedule.every(30).seconds.do(job_queue.put, (every_sec, []))
 
-    # Update weather every 13 mins once
-    schedule.every(14).minutes.do(run_weather_thread, (call_weather_api, [location]))
-    schedule.every(15).minutes.do(job_queue.put, (display_weather_main, []))
+    # Update weather every 30 mins once
+    schedule.every().hour.at(':30').do(run_weather_thread, (call_weather_api, [location]))
+    schedule.every().hour.at(':31').do(job_queue.put, (display_weather_main, []))
+    schedule.every().hour.at(':00').do(run_weather_thread, (call_weather_api, [location]))
+    schedule.every().hour.at(':01').do(job_queue.put, (display_weather_main, []))
 
     # Update weather every 1 hour once
-    schedule.every().hour.at(":00").do(run_weather_thread, (call_weather_forecast, [location]))
-    schedule.every().hour.at(":02").do(job_queue.put, (display_weather_forecast, []))
+    schedule.every().hour.at(':00').do(run_weather_thread, (call_weather_forecast, [location]))
+    schedule.every().hour.at(':02').do(job_queue.put, (display_weather_forecast, []))
 
     # Update day info every day starts
-    schedule.every(15).days.at('00:00').do(job_queue.put, (display_date_info, []))
+    schedule.every().day.at('00:00').do(job_queue.put, (display_date_info, []))
+
+
+def welcome_screen():
+    global image
+    global draw
+
+    LOGGER.info("welcome screen")
+    clear_display()
+    image = Image.new('1', (epd.height, epd.width), 255)
+    draw = ImageDraw.Draw(image)
+
+    draw.text((80, 0), 'Welcome', font=fontTemp18, fill=0)
+    draw.text((10, 50), '2.9" epaper display', font=fontTemp18, fill=0)
+
+    epd.display(epd.getbuffer(image))
+
 
 # main starts here
 if __name__ == '__main__':
@@ -462,7 +485,7 @@ if __name__ == '__main__':
 
     try:
         LOGGER.info("Initializing Display")
-        # clear_display()
+        welcome_screen()
 
         worker_thread = threading.Thread(target=worker_main)
         worker_thread.start()

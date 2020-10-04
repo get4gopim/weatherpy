@@ -17,7 +17,7 @@ from model import FuelInfo, RateInfo, WeatherInfo, WeatherForecast
 from utility import util
 
 from bs4 import BeautifulSoup
-from aiohttp import ClientSession, ClientConnectorError
+from aiohttp import ClientSession, ClientConnectorError, TCPConnector
 
 weather_url = 'https://weather.com/en-IN/weather/today/l/'
 gold_url = 'http://www.livechennai.com/gold_silverrate.asp'
@@ -44,8 +44,7 @@ async def fetch(session, url):
                     raise Exception(f'Response Status {response.status} is not OK')
     except asyncio.TimeoutError as ex:
         LOGGER.error(f'Unable to connect remote API : {url} - {repr(ex)}')
-        info = WeatherInfo.WeatherInfo('0', "0", "0", "00:00", "", "", "")
-        info.set_error(ex)
+        raise ex
 
 
 async def get_weather(future, location):
@@ -60,7 +59,7 @@ async def get_weather(future, location):
     LOGGER.info(url)
 
     try:
-        async with ClientSession() as session:
+        async with ClientSession(connector=TCPConnector(ssl=False)) as session:
             html = await fetch(session, url)
             LOGGER.info(f'weather content fetch in {time.time() - start} secs.')
             parse_start = time.time()
@@ -68,10 +67,12 @@ async def get_weather(future, location):
             LOGGER.info(f'weather parsing took {time.time() - parse_start} secs.')
     except ClientConnectorError as ex:
         LOGGER.error(f'Unable to connect Weather API : {repr(ex)}')
+        LOGGER.error(ex)
         info = WeatherInfo.WeatherInfo('0', "0", "0", "00:00", "", "", "")
         info.set_error(ex)
     except BaseException as ex:
-        LOGGER.error(f'Unable to connect Weather API : {repr(ex)}')
+        LOGGER.error(f'Unable to connect Weather API :- {repr(ex)}')
+        LOGGER.error(ex)
         info = WeatherInfo.WeatherInfo('0', "0", "0", "00:00", "", "", "")
         info.set_error(ex)
 
@@ -91,7 +92,7 @@ async def get_weather_forecast(future, location):
     LOGGER.info(url)
 
     try:
-        async with ClientSession() as session:
+        async with ClientSession(connector=TCPConnector(ssl=False)) as session:
             html = await fetch(session, url)
             LOGGER.info(f'weather content fetch in {time.time() - start} secs.')
             parse_start = time.time()
@@ -120,7 +121,7 @@ async def get_google_forecast(future, location):
     LOGGER.info(url)
 
     try:
-        async with ClientSession() as session:
+        async with ClientSession(connector=TCPConnector(ssl=False)) as session:
             html = await fetch(session, url)
             LOGGER.info(f'weather content fetch in {time.time() - start} secs.')
             parse_start = time.time()
@@ -195,7 +196,7 @@ async def get_google_weather(future, location):
     LOGGER.info (url)
 
     try:
-        async with ClientSession() as session:
+        async with ClientSession(connector=TCPConnector(ssl=False)) as session:
             html = await fetch(session, url)
             LOGGER.info(f'g-weather content fetch in {time.time() - start} secs.')
             parse_start = time.time()
@@ -213,9 +214,10 @@ async def get_google_weather(future, location):
 async def parse_google_weather(page_content):
     soup = BeautifulSoup(page_content, 'lxml')
 
+    seg_temp = soup.find_all('div', {'id': 'wob_wc'})[0]
+    # print(seg_temp.text)
     # seg_temp = soup.find_all('div#wob_wc')
-    seg_temp = soup.find('div', class_='vk_c card-section')
-
+    # seg_temp = soup.find('div', class_='vk_c card-section')
     # print (seg_temp)
 
     span = seg_temp.select('span')[0]       # First Segment
@@ -234,7 +236,7 @@ async def parse_google_weather(page_content):
     element = div_sub.select('span#wob_tm')[0]
     temp = element.text
 
-    div_sub = seg_temp.find('div', class_='vk_gy vk_sh wob-dtl') # Second Sub
+    div_sub = seg_temp.find_all('div', class_='vk_gy vk_sh')[1] # Second Sub
 
     element = div_sub.select('span#wob_hm')[0]
     humidity = element.text
@@ -291,7 +293,9 @@ async def parse_weather(page_content):
         as_of = as_of[idx+6:idx_ist]
 
     div_ele = seg_temp.find_all('div', recursive=False)[1]
+    # print(div_ele)
     div_cond = div_ele.find_all('div', recursive=False)[0]
+    # print(div_cond)
     element = div_cond.find('span')
     temp = element.text
     if len(temp) == 3:
@@ -317,19 +321,27 @@ async def parse_weather(page_content):
         low = low[0:2]
 
     preciption = seg_temp.find_all('div', recursive=False)[2]
+    # print(preciption)
     if preciption is not None:
         preciption = preciption.text
     else:
         preciption = ''
 
-    seg_temp = soup.find_all('div', {'id': 'WxuTodayDetails-main-fd88de85-7aa1-455f-832a-eacb037c140a'})[0]
-    div_ele = seg_temp.find('section')
-    div_ele = div_ele.find_all('div', recursive=False)[1]
-    div_node = div_ele.find_all('div', recursive=False)[2]
-    # div_ele = div_node.find_all('div', recursive=False)[0]
-    # print(div_ele.text)
-    div_ele = div_node.find_all('div', recursive=False)[1]
-    humidity = div_ele.text
+    seg_temp = soup.find_all('div', {'id': 'todayDetails'})
+    # seg_temp = soup.find_all('div', {'id': 'WxuTodayDetails-main-fd88de85-7aa1-455f-832a-eacb037c140a'})
+    if seg_temp is not None and len(seg_temp) > 0:
+        seg_temp = seg_temp[0]
+        # print(seg_temp)
+        div_ele = seg_temp.find('section')
+        div_ele = div_ele.find_all('div', recursive=False)[1]
+        div_node = div_ele.find_all('div', recursive=False)[2]
+        # div_ele = div_node.find_all('div', recursive=False)[0]
+        # print(div_ele.text)
+        div_ele = div_node.find_all('div', recursive=False)[1]
+        # print(div_ele)
+        humidity = div_ele.text
+    else:
+        humidity = '0'
 
     weatherInfo = WeatherInfo.WeatherInfo(temp, low, high, as_of, condition, location, preciption)
     weatherInfo.set_humidity(humidity)
@@ -342,8 +354,9 @@ async def parse_weather(page_content):
 async def parse_google_forecast(page_content):
     soup = BeautifulSoup(page_content, 'lxml') # html.parser # lxml # html5lib
 
+    seg_temp = soup.find_all('div', {'id': 'wob_wc'})[0]
     # seg_temp = soup.find_all('div#wob_wc')
-    seg_temp = soup.find('div', class_='vk_c card-section')
+    # seg_temp = soup.find('div', class_='vk_c card-section')
     # print (seg_temp)
 
     # div_section = seg_temp.find_all('div')
@@ -560,13 +573,40 @@ def call_weather_api(location):
     tasks = []
     # tasks.append(get_google_forecast(f1, location))
     # tasks.append(get_google_weather(f1, location))
-    tasks.append(get_weather(f1, location))
+    # tasks.append(get_weather(f1, location))
     # tasks.append(get_weather_forecast(f1, location))
 
-    loop.run_until_complete(asyncio.wait(tasks))
+    if util.is_uuid(location):
+        tasks.append(get_weather(f1, location))
+    else:
+        tasks.append(get_google_weather(f1, location))
 
+    loop.run_until_complete(asyncio.wait(tasks))
     loop.close()
-    print()
+
+    return f1.result()
+
+
+def call_weather_forecast(location):
+    LOGGER.info("call_weather_forecast")
+
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
+    f1 = asyncio.Future()
+
+    f1.add_done_callback(callback)
+
+    tasks = []
+    if util.is_uuid(location):
+        tasks.append(get_weather_forecast(f1, location))
+    else:
+        tasks.append(get_google_forecast(f1, location))
+
+    loop.run_until_complete(asyncio.wait(tasks))
+    loop.close()
+
+    return f1.result()
 
 
 def call_gold_api():
@@ -602,4 +642,5 @@ jobqueue = Queue()
 if __name__ == '__main__':
     LOGGER.info (f"Parser starts ... args: {len(sys.argv)}")
 
-    call_weather_api(None) # 'thalambur'
+    call_weather_api('thalambur')
+    # call_weather_api('4ef51d4289943c7792cbe77dee741bff9216f591eed796d7a5d598c38828957d')

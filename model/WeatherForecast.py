@@ -40,3 +40,13 @@ class WeatherForecast:
 
     def __str__(self):
         return "WeatherInfo: [next_day: " + str(self.__next_day) + ", temp: " + str(self.__temp) + ", low: " + str(self.__low) + ", condition: " + str(self.__condition) + ", preciption: " + str(self.__preciption) + ", humidity: " + str(self.__humidity) + "]"
+
+    def serialize(self):
+        return {
+            'next_day': self.__next_day,
+            'temperature': self.__temp,
+            'humidity': self.__humidity,
+            'condition': self.__condition,
+            'low': self.__low,
+            'preciption': self.__preciption,
+        }

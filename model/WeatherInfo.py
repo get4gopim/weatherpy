@@ -48,3 +48,15 @@ class WeatherInfo:
 
     def __str__(self):
         return "WeatherInfo: [location: " + str(self.__location) + ", temp: " + str(self.__temp) + ", low: " + str(self.__low) + ", high: " + str(self.__high) + ", condition: " + str(self.__condition) + ", preciption: " + str(self.__preciption) + ", humidity: " + str(self.__humidity) + ", asof: " + str(self.__asof) + "]"
+
+    def serialize(self):
+        return {
+            'location': self.__location,
+            'temperature': self.__temp,
+            'low': self.__low,
+            'high': self.__high,
+            'humidity': self.__humidity,
+            'condition': self.__condition,
+            'asof': self.__asof,
+            'preciption': self.__preciption,
+        }
