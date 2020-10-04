@@ -10,7 +10,7 @@ import time
 
 from lcddriver import lcddriver
 
-from service import HtmlParser2
+from service import Forecast
 from utility import util
 
 from queue import Queue
@@ -43,12 +43,7 @@ def call_apis_async(location):
     f2.add_done_callback(callback_gold)
     f3.add_done_callback(callback_fuel)
 
-    tasks = [HtmlParser2.get_gold_price(f2), HtmlParser2.get_fuel_price(f3)]
-    if util.is_uuid(location):
-        tasks.append(HtmlParser2.get_weather(f1, location))
-    else:
-        tasks.append(HtmlParser2.get_google_weather(f1, location))
-
+    tasks = [Forecast.get_weather(f1, location), Forecast.get_gold_price(f2), Forecast.get_fuel_price(f3)]
     loop.run_until_complete(asyncio.wait(tasks))
 
     loop.close()
@@ -68,12 +63,7 @@ def call_weather_api(location):
 
         f1.add_done_callback(callback_weather)
 
-        tasks = []
-        if util.is_uuid(location):
-            tasks.append(HtmlParser2.get_weather(f1, location))
-        else:
-            tasks.append(HtmlParser2.get_google_weather(f1, location))
-
+        tasks = [Forecast.get_weather(f1, location)]
         loop.run_until_complete(asyncio.wait(tasks))
 
         loop.close()
@@ -92,7 +82,7 @@ def call_gold_api():
 
     f1.add_done_callback(callback_gold)
 
-    tasks = [HtmlParser2.get_gold_price(f1)]
+    tasks = [Forecast.get_gold_price(f1)]
     loop.run_until_complete(asyncio.wait(tasks))
 
     loop.close()
@@ -109,7 +99,7 @@ def call_fuel_api():
 
     f1.add_done_callback(callback_fuel)
 
-    tasks = [HtmlParser2.get_fuel_price(f1)]
+    tasks = [Forecast.get_fuel_price(f1)]
     loop.run_until_complete(asyncio.wait(tasks))
 
     loop.close()
@@ -346,8 +336,11 @@ def add_scheduler(location):
     # Update time every second
     schedule.every(1).seconds.do(jobqueue.put, (every_second, []))
 
-    # Update weather every 15 mins once every day
-    schedule.every(15).minutes.do(run_weather_thread, (call_weather_api, [location]))
+    # Update weather every 15 mins once
+    schedule.every().hour.at(':00').do(run_weather_thread, (call_weather_api, [location]))
+    schedule.every().hour.at(':15').do(run_weather_thread, (call_weather_api, [location]))
+    schedule.every().hour.at(':30').do(run_weather_thread, (call_weather_api, [location]))
+    schedule.every().hour.at(':45').do(run_weather_thread, (call_weather_api, [location]))
 
     # Update gold rate every 1 hour except sunday from 10 AM to 5 PM
     gold_times = ["09:30", "10:00", "11:00", "12:00", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "17:00"]

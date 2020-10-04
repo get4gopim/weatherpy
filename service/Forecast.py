@@ -16,12 +16,13 @@ from aiohttp import ClientSession, ClientConnectorError, TCPConnector
 base_url = 'https://rryf2kws46.execute-api.ap-south-1.amazonaws.com'
 weather_url = '/dev/api/v1/weather'
 gold_rate_url = '/dev/api/v1/gold'
+fuel_rate_url = '/dev/api/v1/fuel'
 
 logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO"), format='%(asctime)s %(message)s')
 LOGGER = logging.getLogger(__name__)
 
 
-def get_weather(location):
+def get_weather_sync(location):
     url = base_url + weather_url + '/' + location
     print(url)
     weather_response = requests.get(url)
@@ -53,14 +54,14 @@ async def fetch(session, url):
 
 
 def parse_weather(weather_json):
-    print (weather_json)
+    print(weather_json)
     x = json.loads(weather_json, object_hook=lambda d: namedtuple('x', d.keys())(*d.values()))
     weather_info = WeatherInfo.WeatherInfo(x.temperature, x.low, x.high, x.asof, x.condition, x.location, x.preciption)
     weather_info.set_humidity(x.humidity)
     return weather_info
 
 
-async def get_weather_async(future, location):
+async def get_weather(future, location):
     start = time.time()
 
     url = base_url + weather_url + '/' + location
@@ -88,19 +89,25 @@ async def get_weather_async(future, location):
     future.set_result(info)
 
 
-def parse_weather_forecast(weather_json):
-    # print(weather_json)
-    list = json.loads(weather_json)
-    # print(list)
-
+def parse_weather_forecast(response):
+    w_list = json.loads(response)
     list_days = []
-    for text in list:
-        print(text)
-        x = json.loads(text, object_hook=lambda d: namedtuple('x', d.keys())(*d.values()))
-        info = WeatherForecast.WeatherForecast(x.next_day, x.temperature, x.low, x.condition, x.preciption)
-        list_days.append(info)
+
+    for x in w_list:
+        info = dict_to_object(x)
+        # print(info)
+        day = WeatherForecast.WeatherForecast(info.next_day, info.temperature, info.low, info.condition, info.preciption)
+        day.set_humidity(info.humidity)
+        list_days.append(day)
 
     return list_days
+
+
+def dict_to_object(d):
+    for k,v in d.items():
+        if isinstance(v, dict):
+            d[k] = dict_to_object(v)
+    return namedtuple('WeatherForecast', d.keys())(*d.values())
 
 
 async def get_weather_forecast(future, location):
@@ -124,6 +131,72 @@ async def get_weather_forecast(future, location):
         LOGGER.error(f'Unable to parse Weather forecast API : {repr(ex)}')
         info = []
 
+    future.set_result(info)
+
+
+def parse_gold_info(response):
+    print(response)
+    x = json.loads(response, object_hook=lambda d: namedtuple('x', d.keys())(*d.values()))
+    info = RateInfo.RateInfo(x.gold22, x.gold24, x.silver, x.date, x.lastUpdated)
+    return info
+
+
+async def get_gold_price(future):
+    start = time.time()
+    info = None
+    url = base_url + gold_rate_url
+    LOGGER.info(url)
+
+    try:
+        async with ClientSession() as session:
+            html = await fetch(session, url)
+            LOGGER.info(f'gold content fetch in {time.time() - start} secs.')
+            parse_start = time.time()
+            info = parse_gold_info(html)
+            LOGGER.info(f'gold parsing took {time.time() - parse_start} secs.')
+    except ClientConnectorError as ex:
+        LOGGER.error(f'Unable to connect Gold API : {repr(ex)}')
+        info = RateInfo.RateInfo('0', '0', '0.0', "", "")
+        info.set_error(ex)
+    except BaseException as ex:
+        LOGGER.error(f'Unable to connect Gold API : {repr(ex)}')
+        info = RateInfo.RateInfo('0', '0', '0.0', "", "")
+        info.set_error(ex)
+
+    LOGGER.info(f'Gold Time Taken {time.time() - start}')
+    future.set_result(info)
+
+
+def parse_fuel_info(response):
+    print(response)
+    x = json.loads(response, object_hook=lambda d: namedtuple('x', d.keys())(*d.values()))
+    info = FuelInfo.FuelInfo(x.petrol, x.diesel, x.date, x.lastUpdated)
+    return info
+
+
+async def get_fuel_price(future):
+    start = time.time()
+    info = None
+    url = base_url + fuel_rate_url
+    LOGGER.info(url)
+
+    try:
+        async with ClientSession() as session:
+            html = await fetch(session, url)
+            LOGGER.info(f'fuel content fetch in {time.time() - start} secs.')
+            parse_start = time.time()
+            info = parse_fuel_info(html)
+            LOGGER.info(f'fuel parsing took {time.time() - parse_start} secs.')
+    except ClientConnectorError as ex:
+        LOGGER.error(f'Unable to connect Fuel API : {repr(ex)}')
+        info = FuelInfo.FuelInfo('0', '0', "", "")
+        info.set_error(ex)
+    except BaseException as ex:
+        LOGGER.error(f'Unable to connect Weather API : {repr(ex)}')
+        info = FuelInfo.FuelInfo('0', '0', "", "")
+        info.set_error(ex)
+
+    LOGGER.info(f'Fuel Time Taken {time.time() - start}')
     future.set_result(info)
 
 
@@ -167,6 +240,43 @@ def call_weather_forecast(location):
     return f1.result()
 
 
+def call_gold_api():
+    LOGGER.info("call_weather_forecast")
+
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
+    f1 = asyncio.Future()
+
+    f1.add_done_callback(callback)
+
+    tasks = [get_gold_price(f1)]
+
+    loop.run_until_complete(asyncio.wait(tasks))
+    loop.close()
+
+    return f1.result()
+
+
+def call_fuel_api():
+    LOGGER.info("call_fuel_api")
+
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
+    f1 = asyncio.Future()
+
+    f1.add_done_callback(callback)
+
+    tasks = [get_fuel_price(f1)]
+
+    loop.run_until_complete(asyncio.wait(tasks))
+    loop.close()
+
+    return f1.result()
+
+
 if __name__ == '__main__':
     # call_weather_api('4ef51d4289943c7792cbe77dee741bff9216f591eed796d7a5d598c38828957d')
     call_weather_forecast('4ef51d4289943c7792cbe77dee741bff9216f591eed796d7a5d598c38828957d')
+    # call_fuel_api()

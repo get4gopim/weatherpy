@@ -7,7 +7,7 @@ from queue import Queue
 import time
 import datetime
 from PIL import Image, ImageDraw, ImageFont
-from service import HtmlParser2
+from service import Forecast
 from utility import util
 import sys
 import asyncio
@@ -80,11 +80,11 @@ def call_apis_async(location):
 
     tasks = []
     if util.is_uuid(location):
-        tasks.append(HtmlParser2.get_weather(f1, location))
-        tasks.append(HtmlParser2.get_weather_forecast(f2, location))
+        tasks.append(Forecast.get_weather(f1, location))
+        tasks.append(Forecast.get_weather_forecast(f2, location))
     else:
-        tasks.append(HtmlParser2.get_google_weather(f1, location))
-        tasks.append(HtmlParser2.get_google_forecast(f2, location))
+        tasks.append(Forecast.get_google_weather(f1, location))
+        tasks.append(Forecast.get_google_forecast(f2, location))
 
     loop.run_until_complete(asyncio.wait(tasks))
 
@@ -107,9 +107,9 @@ def call_weather_api(location):
 
         tasks = []
         if util.is_uuid(location):
-            tasks.append(HtmlParser2.get_weather(f1, location))
+            tasks.append(Forecast.get_weather(f1, location))
         else:
-            tasks.append(HtmlParser2.get_google_weather(f1, location))
+            tasks.append(Forecast.get_google_weather(f1, location))
 
         loop.run_until_complete(asyncio.wait(tasks))
 
@@ -148,9 +148,9 @@ def call_weather_forecast(location):
 
         tasks = []
         if util.is_uuid(location):
-            tasks.append(HtmlParser2.get_weather_forecast(f1, location))
+            tasks.append(Forecast.get_weather_forecast(f1, location))
         else:
-            tasks.append(HtmlParser2.get_google_forecast(f1, location))
+            tasks.append(Forecast.get_google_forecast(f1, location))
 
         loop.run_until_complete(asyncio.wait(tasks))
 
