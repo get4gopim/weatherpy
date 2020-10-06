@@ -78,13 +78,7 @@ def call_apis_async(location):
     f1.add_done_callback(callback_weather)
     f2.add_done_callback(callback_weather_forecast)
 
-    tasks = []
-    if util.is_uuid(location):
-        tasks.append(Forecast.get_weather(f1, location))
-        tasks.append(Forecast.get_weather_forecast(f2, location))
-    else:
-        tasks.append(Forecast.get_google_weather(f1, location))
-        tasks.append(Forecast.get_google_forecast(f2, location))
+    tasks = [Forecast.get_weather(f1, location), Forecast.get_weather_forecast(f2, location)]
 
     loop.run_until_complete(asyncio.wait(tasks))
 
@@ -105,11 +99,7 @@ def call_weather_api(location):
 
         f1.add_done_callback(callback_weather)
 
-        tasks = []
-        if util.is_uuid(location):
-            tasks.append(Forecast.get_weather(f1, location))
-        else:
-            tasks.append(Forecast.get_google_weather(f1, location))
+        tasks = [Forecast.get_weather(f1, location)]
 
         loop.run_until_complete(asyncio.wait(tasks))
 
@@ -146,11 +136,7 @@ def call_weather_forecast(location):
 
         f1.add_done_callback(callback_weather_forecast)
 
-        tasks = []
-        if util.is_uuid(location):
-            tasks.append(Forecast.get_weather_forecast(f1, location))
-        else:
-            tasks.append(Forecast.get_google_forecast(f1, location))
+        tasks = [Forecast.get_weather_forecast(f1, location)]
 
         loop.run_until_complete(asyncio.wait(tasks))
 
