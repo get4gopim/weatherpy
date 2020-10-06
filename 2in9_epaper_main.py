@@ -320,7 +320,7 @@ def every_sec():
     # LOGGER.info ('Time partial update')
     # epd.init(epd.lut_partial_update)
     # epd.Clear(0xFF)
-    x = 245
+    x = 240
     draw.rectangle((x, 5, epd.height, 28), fill=255)
     draw.text((x, 5), time.strftime('%H:%M'), font=fontTime, fill=0)
     crop_image = image.crop([x, 5, epd.height, 28])
@@ -333,10 +333,10 @@ def display_date_info():
     LOGGER.info ('Date partial update')
     # epd.init(epd.lut_partial_update)
     # epd.Clear(0xFF)
-    draw.rectangle((125, 5, 240, 28), fill=255)
+    draw.rectangle((125, 5, 238, 28), fill=255)
     draw.text((125, 0), time.strftime("%b %d, %A "), font=font12, fill=0)
     draw.text((125, 13), time.strftime(update_weather_location_line2()), font=font12, fill=0)
-    crop_image = image.crop([125, 5, 240, 28])
+    crop_image = image.crop([125, 5, 238, 28])
     image.paste(crop_image, (125, 5))
     epd.display(epd.getbuffer(image))
 
