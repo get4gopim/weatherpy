@@ -336,7 +336,7 @@ def display_weather_main():
 
     draw.rectangle((0, 0, 118, epd.width), fill=255)
 
-    if weather is not None:
+    if weather.get_error() is None:
         bmp = Image.open(get_weather_image(weather.get_condition()))
         image.paste(bmp, (30, 5))
 
