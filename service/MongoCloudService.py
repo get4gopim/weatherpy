@@ -6,8 +6,8 @@ import datetime
 # mongodb+srv://<username>:<password>@cluster0.zwfud.mongodb.net/<dbname>?retryWrites=true&w=majority
 # read only user: configuser password: configpwd
 
-connection_url = 'mongodb+srv://cloud:mongoadmin@cluster0.zwfud.mongodb.net/test?retryWrites=true&w=majority'
-# connection_url = 'mongodb+srv://configuser:configpwd@cluster0.zwfud.mongodb.net/test?retryWrites=true&w=majority'
+# connection_url = 'mongodb+srv://cloud:mongoadmin@cluster0.zwfud.mongodb.net/test?retryWrites=true&w=majority'
+connection_url = 'mongodb+srv://configuser:configpwd@cluster0.zwfud.mongodb.net/test?retryWrites=true&w=majority'
 
 client = pymongo.MongoClient(connection_url)
 
@@ -62,30 +62,3 @@ if __name__ == '__main__':
 
     get_attr_config(queryObject)
 
-    # for x in Database.list_collections():
-    #     print(x)
-    #
-    # print('\n')
-    #
-    # movie_collection = Database.get_collection('api_config')
-    # query = movie_collection.find()
-    #
-    # for x in query:
-    #     print(x)
-    #
-    # queryObject = {'attr_name': 'aws_weather_uri'}
-    # query = movie_collection.find_one(queryObject)
-    # if query is not None:
-    #     print(query.pop('attr_value'))
-    #
-    #     # update value
-    #
-    #     updateObject = {'attr_value': 'https://rryf2kws46.execute-api.ap-south-1.amazonaws.com/dev'}
-    #     query = movie_collection.update_one(queryObject, {'$set': updateObject})
-    #     if query.acknowledged:
-    #         print("Update Successful")
-    #     else:
-    #         print("Update Unsuccessful")
-    #
-    #     query = movie_collection.find_one(queryObject)
-    #     print(query.pop('attr_value'))
