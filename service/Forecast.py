@@ -214,7 +214,7 @@ def call_weather_api(location):
 
     f1.add_done_callback(callback)
 
-    tasks = [get_weather_async(f1, location)]
+    tasks = [get_weather(f1, location)]
 
     loop.run_until_complete(asyncio.wait(tasks))
     loop.close()
@@ -277,6 +277,6 @@ def call_fuel_api():
 
 
 if __name__ == '__main__':
-    # call_weather_api('4ef51d4289943c7792cbe77dee741bff9216f591eed796d7a5d598c38828957d')
-    call_weather_forecast('4ef51d4289943c7792cbe77dee741bff9216f591eed796d7a5d598c38828957d')
+    call_weather_api('thalambur')
+    # call_weather_forecast('4ef51d4289943c7792cbe77dee741bff9216f591eed796d7a5d598c38828957d')
     # call_fuel_api()
