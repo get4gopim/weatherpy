@@ -28,7 +28,7 @@ def get_attr_config(query_str):
             attr_name = str(query.pop('attr_name'))
             attr_value = str(query.pop('attr_value'))
             last_updated = str(query.pop('last_updated'))
-            LOGGER.info('attr_name [' + attr_name + ' : ' + attr_value + '] updated : ' + last_updated)
+            LOGGER.info('attr_name [' + attr_name + ' : ' + attr_value + '] last_updated : ' + last_updated)
             LOGGER.info(f'time taken {time.time() - start} secs.')
             return attr_value
     except BaseException as ex:
