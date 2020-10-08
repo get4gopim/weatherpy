@@ -55,10 +55,10 @@ if __name__ == '__main__':
     queryObject = {'attr_name': 'aws_weather_uri'}
     print(get_attr_config(queryObject))
 
-    print (datetime.datetime.now())
-
-    updateObject = {'attr_value': 'https://rryf2kws46.execute-api.ap-south-1.amazonaws.com/dev', 'last_updated': datetime.datetime.now()}
-    update_config(queryObject, updateObject)
-
-    get_attr_config(queryObject)
+    # print (datetime.datetime.now())
+    #
+    # updateObject = {'attr_value': 'https://rryf2kws46.execute-api.ap-south-1.amazonaws.com/dev', 'last_updated': datetime.datetime.now()}
+    # update_config(queryObject, updateObject)
+    #
+    # get_attr_config(queryObject)
 
