@@ -330,9 +330,11 @@ def display_date_info():
 def display_weather_main():
     # global random_bool
 
-    LOGGER.info ('Info partial update: ' + weather.get_error())
+    LOGGER.info('Info partial update: ')
     # epd.init(epd.lut_partial_update)
     # epd.Clear(0xFF)
+    if weather.get_error() is not None:
+        LOGGER.info('Unable to partial weather update: ' + weather.get_error())
 
     if weather.get_error() is None:
         draw.rectangle((0, 0, 118, epd.width), fill=255)
