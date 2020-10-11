@@ -78,13 +78,7 @@ def call_apis_async(location):
     f1.add_done_callback(callback_weather)
     f2.add_done_callback(callback_weather_forecast)
 
-    tasks = []
-    if util.is_uuid(location):
-        tasks.append(Forecast.get_weather(f1, location))
-        tasks.append(Forecast.get_weather_forecast(f2, location))
-    else:
-        tasks.append(Forecast.get_google_weather(f1, location))
-        tasks.append(Forecast.get_google_forecast(f2, location))
+    tasks = [Forecast.get_weather(f1, location), Forecast.get_weather_forecast(f2, location)]
 
     loop.run_until_complete(asyncio.wait(tasks))
 
@@ -105,11 +99,7 @@ def call_weather_api(location):
 
         f1.add_done_callback(callback_weather)
 
-        tasks = []
-        if util.is_uuid(location):
-            tasks.append(Forecast.get_weather(f1, location))
-        else:
-            tasks.append(Forecast.get_google_weather(f1, location))
+        tasks = [Forecast.get_weather(f1, location)]
 
         loop.run_until_complete(asyncio.wait(tasks))
 
@@ -146,11 +136,7 @@ def call_weather_forecast(location):
 
         f1.add_done_callback(callback_weather_forecast)
 
-        tasks = []
-        if util.is_uuid(location):
-            tasks.append(Forecast.get_weather_forecast(f1, location))
-        else:
-            tasks.append(Forecast.get_google_forecast(f1, location))
+        tasks = [Forecast.get_weather_forecast(f1, location)]
 
         loop.run_until_complete(asyncio.wait(tasks))
 
@@ -320,7 +306,7 @@ def every_sec():
     # LOGGER.info ('Time partial update')
     # epd.init(epd.lut_partial_update)
     # epd.Clear(0xFF)
-    x = 245
+    x = 240
     draw.rectangle((x, 5, epd.height, 28), fill=255)
     draw.text((x, 5), time.strftime('%H:%M'), font=fontTime, fill=0)
     crop_image = image.crop([x, 5, epd.height, 28])
@@ -333,10 +319,10 @@ def display_date_info():
     LOGGER.info ('Date partial update')
     # epd.init(epd.lut_partial_update)
     # epd.Clear(0xFF)
-    draw.rectangle((125, 5, 240, 28), fill=255)
+    draw.rectangle((125, 5, 238, 28), fill=255)
     draw.text((125, 0), time.strftime("%b %d, %A "), font=font12, fill=0)
     draw.text((125, 13), time.strftime(update_weather_location_line2()), font=font12, fill=0)
-    crop_image = image.crop([125, 5, 240, 28])
+    crop_image = image.crop([125, 5, 238, 28])
     image.paste(crop_image, (125, 5))
     epd.display(epd.getbuffer(image))
 
@@ -344,13 +330,15 @@ def display_date_info():
 def display_weather_main():
     # global random_bool
 
-    LOGGER.info ('Info partial update')
+    LOGGER.info('Info partial update: ')
     # epd.init(epd.lut_partial_update)
     # epd.Clear(0xFF)
+    if weather.get_error() is not None:
+        LOGGER.info('Unable to partial weather update: ' + weather.get_error())
 
-    draw.rectangle((0, 0, 118, epd.width), fill=255)
+    if weather.get_error() is None:
+        draw.rectangle((0, 0, 118, epd.width), fill=255)
 
-    if weather is not None:
         bmp = Image.open(get_weather_image(weather.get_condition()))
         image.paste(bmp, (30, 5))
 
@@ -442,10 +430,14 @@ def add_scheduler(location):
     # schedule.every(30).seconds.do(job_queue.put, (every_sec, []))
 
     # Update weather every 30 mins once
-    schedule.every().hour.at(':30').do(run_weather_thread, (call_weather_api, [location]))
-    schedule.every().hour.at(':31').do(job_queue.put, (display_weather_main, []))
     schedule.every().hour.at(':00').do(run_weather_thread, (call_weather_api, [location]))
     schedule.every().hour.at(':01').do(job_queue.put, (display_weather_main, []))
+    schedule.every().hour.at(':15').do(run_weather_thread, (call_weather_api, [location]))
+    schedule.every().hour.at(':16').do(job_queue.put, (display_weather_main, []))
+    schedule.every().hour.at(':30').do(run_weather_thread, (call_weather_api, [location]))
+    schedule.every().hour.at(':31').do(job_queue.put, (display_weather_main, []))
+    schedule.every().hour.at(':45').do(run_weather_thread, (call_weather_api, [location]))
+    schedule.every().hour.at(':46').do(job_queue.put, (display_weather_main, []))
 
     # Update weather every 1 hour once
     schedule.every().hour.at(':00').do(run_weather_thread, (call_weather_forecast, [location]))

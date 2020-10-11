@@ -11,19 +11,28 @@ import time
 from model import WeatherInfo, WeatherForecast, RateInfo, FuelInfo
 from collections import namedtuple
 from aiohttp import ClientSession, ClientConnectorError, TCPConnector
+from service import MongoCloudService
 
 
-base_url = 'https://rryf2kws46.execute-api.ap-south-1.amazonaws.com'
-weather_url = '/dev/api/v1/weather'
-gold_rate_url = '/dev/api/v1/gold'
-fuel_rate_url = '/dev/api/v1/fuel'
+query_str = {'attr_name': 'aws_weather_uri'}
+default_url = 'https://rryf2kws46.execute-api.ap-south-1.amazonaws.com/dev'
+weather_url = '/api/v1/weather'
+gold_rate_url = '/api/v1/gold'
+fuel_rate_url = '/api/v1/fuel'
 
 logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO"), format='%(asctime)s %(message)s')
 LOGGER = logging.getLogger(__name__)
 
 
+def get_base_aws_uri():
+    aws_base_url = MongoCloudService.get_attr_config(query_str)
+    if aws_base_url is None:
+        aws_base_url = default_url
+    return aws_base_url
+
+
 def get_weather_sync(location):
-    url = base_url + weather_url + '/' + location
+    url = get_base_aws_uri() + weather_url + '/' + location
     print(url)
     weather_response = requests.get(url)
     print(weather_response)
@@ -64,7 +73,7 @@ def parse_weather(weather_json):
 async def get_weather(future, location):
     start = time.time()
 
-    url = base_url + weather_url + '/' + location
+    url = get_base_aws_uri() + weather_url + '/' + location
     info = None
     LOGGER.info(url)
 
@@ -113,22 +122,22 @@ def dict_to_object(d):
 async def get_weather_forecast(future, location):
     start = time.time()
 
-    url = base_url + weather_url + '/' + location + '/forecast'
+    url = get_base_aws_uri() + weather_url + '/' + location + '/forecast'
     info = None
     LOGGER.info(url)
 
     try:
         async with ClientSession(connector=TCPConnector(ssl=False)) as session:
             html = await fetch(session, url)
-            LOGGER.info(f'weather content fetch in {time.time() - start} secs.')
+            LOGGER.info(f'weather forecast content fetch in {time.time() - start} secs.')
             parse_start = time.time()
             info = parse_weather_forecast(html)
-            LOGGER.info(f'weather parsing took {time.time() - parse_start} secs.')
+            LOGGER.info(f'weather forecast parsing took {time.time() - parse_start} secs.')
     except ClientConnectorError as ex:
-        LOGGER.error(f'Unable to parse Weather forecast API : {repr(ex)}')
+        LOGGER.error(f'Unable to forecast parse Weather forecast API : {repr(ex)}')
         info = []
     except BaseException as ex:
-        LOGGER.error(f'Unable to parse Weather forecast API : {repr(ex)}')
+        LOGGER.error(f'Unable to forecast parse Weather forecast API : {repr(ex)}')
         info = []
 
     future.set_result(info)
@@ -144,7 +153,7 @@ def parse_gold_info(response):
 async def get_gold_price(future):
     start = time.time()
     info = None
-    url = base_url + gold_rate_url
+    url = get_base_aws_uri() + gold_rate_url
     LOGGER.info(url)
 
     try:
@@ -177,7 +186,7 @@ def parse_fuel_info(response):
 async def get_fuel_price(future):
     start = time.time()
     info = None
-    url = base_url + fuel_rate_url
+    url = get_base_aws_uri() + fuel_rate_url
     LOGGER.info(url)
 
     try:
@@ -214,7 +223,7 @@ def call_weather_api(location):
 
     f1.add_done_callback(callback)
 
-    tasks = [get_weather_async(f1, location)]
+    tasks = [get_weather(f1, location)]
 
     loop.run_until_complete(asyncio.wait(tasks))
     loop.close()
@@ -277,6 +286,7 @@ def call_fuel_api():
 
 
 if __name__ == '__main__':
-    # call_weather_api('4ef51d4289943c7792cbe77dee741bff9216f591eed796d7a5d598c38828957d')
-    call_weather_forecast('4ef51d4289943c7792cbe77dee741bff9216f591eed796d7a5d598c38828957d')
+    call_weather_api('thalambur')
+    # call_weather_forecast('4ef51d4289943c7792cbe77dee741bff9216f591eed796d7a5d598c38828957d')
+    # call_gold_api()
     # call_fuel_api()
