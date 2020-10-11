@@ -330,13 +330,13 @@ def display_date_info():
 def display_weather_main():
     # global random_bool
 
-    LOGGER.info ('Info partial update')
+    LOGGER.info ('Info partial update: ' + weather.get_error())
     # epd.init(epd.lut_partial_update)
     # epd.Clear(0xFF)
 
-    draw.rectangle((0, 0, 118, epd.width), fill=255)
-
     if weather.get_error() is None:
+        draw.rectangle((0, 0, 118, epd.width), fill=255)
+
         bmp = Image.open(get_weather_image(weather.get_condition()))
         image.paste(bmp, (30, 5))
 
@@ -428,10 +428,14 @@ def add_scheduler(location):
     # schedule.every(30).seconds.do(job_queue.put, (every_sec, []))
 
     # Update weather every 30 mins once
-    schedule.every().hour.at(':30').do(run_weather_thread, (call_weather_api, [location]))
-    schedule.every().hour.at(':31').do(job_queue.put, (display_weather_main, []))
     schedule.every().hour.at(':00').do(run_weather_thread, (call_weather_api, [location]))
     schedule.every().hour.at(':01').do(job_queue.put, (display_weather_main, []))
+    schedule.every().hour.at(':15').do(run_weather_thread, (call_weather_api, [location]))
+    schedule.every().hour.at(':16').do(job_queue.put, (display_weather_main, []))
+    schedule.every().hour.at(':30').do(run_weather_thread, (call_weather_api, [location]))
+    schedule.every().hour.at(':31').do(job_queue.put, (display_weather_main, []))
+    schedule.every().hour.at(':45').do(run_weather_thread, (call_weather_api, [location]))
+    schedule.every().hour.at(':46').do(job_queue.put, (display_weather_main, []))
 
     # Update weather every 1 hour once
     schedule.every().hour.at(':00').do(run_weather_thread, (call_weather_forecast, [location]))
