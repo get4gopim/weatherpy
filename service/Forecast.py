@@ -129,15 +129,15 @@ async def get_weather_forecast(future, location):
     try:
         async with ClientSession(connector=TCPConnector(ssl=False)) as session:
             html = await fetch(session, url)
-            LOGGER.info(f'weather content fetch in {time.time() - start} secs.')
+            LOGGER.info(f'weather forecast content fetch in {time.time() - start} secs.')
             parse_start = time.time()
             info = parse_weather_forecast(html)
-            LOGGER.info(f'weather parsing took {time.time() - parse_start} secs.')
+            LOGGER.info(f'weather forecast parsing took {time.time() - parse_start} secs.')
     except ClientConnectorError as ex:
-        LOGGER.error(f'Unable to parse Weather forecast API : {repr(ex)}')
+        LOGGER.error(f'Unable to forecast parse Weather forecast API : {repr(ex)}')
         info = []
     except BaseException as ex:
-        LOGGER.error(f'Unable to parse Weather forecast API : {repr(ex)}')
+        LOGGER.error(f'Unable to forecast parse Weather forecast API : {repr(ex)}')
         info = []
 
     future.set_result(info)
