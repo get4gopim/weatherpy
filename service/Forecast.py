@@ -213,7 +213,7 @@ async def get_fuel_price(future):
 def parse_fund_info(response):
     print(response)
     x = json.loads(response, object_hook=lambda d: namedtuple('x', d.keys())(*d.values()))
-    info = FundInfo.FundInfo(x.scheme, x.nav, x.purchase_value, x.change_value, x.last_updated_time)
+    info = FundInfo.FundInfo(x.scheme, x.nav, x.purchase_value, x.change_value, x.lastUpdated)
     return info
 
 
