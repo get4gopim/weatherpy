@@ -8,7 +8,7 @@ import async_timeout
 import requests
 import time
 
-from model import WeatherInfo, WeatherForecast, RateInfo, FuelInfo
+from model import WeatherInfo, WeatherForecast, RateInfo, FuelInfo, FundInfo
 from collections import namedtuple
 from aiohttp import ClientSession, ClientConnectorError, TCPConnector
 from service import MongoCloudService
@@ -19,6 +19,7 @@ default_url = 'https://zj6n6pb7e9.execute-api.ap-south-1.amazonaws.com/dev'
 weather_url = '/api/v1/weather'
 gold_rate_url = '/api/v1/gold'
 fuel_rate_url = '/api/v1/fuel'
+fund_rate_url = '/api/v1/hdfcbond'
 
 logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO"), format='%(asctime)s %(message)s')
 LOGGER = logging.getLogger(__name__)
@@ -201,11 +202,44 @@ async def get_fuel_price(future):
         info = FuelInfo.FuelInfo('0', '0', "", "")
         info.set_error(ex)
     except BaseException as ex:
-        LOGGER.error(f'Unable to connect Weather API : {repr(ex)}')
+        LOGGER.error(f'Unable to connect Fuel API : {repr(ex)}')
         info = FuelInfo.FuelInfo('0', '0', "", "")
         info.set_error(ex)
 
     LOGGER.info(f'Fuel Time Taken {time.time() - start}')
+    future.set_result(info)
+
+
+def parse_fund_info(response):
+    print(response)
+    x = json.loads(response, object_hook=lambda d: namedtuple('x', d.keys())(*d.values()))
+    info = FundInfo.FundInfo(x.scheme, x.nav, x.purchase_value, x.change_value, x.last_updated_time)
+    return info
+
+
+async def get_fund_price(future):
+    start = time.time()
+    info = None
+    url = get_base_aws_uri() + fund_rate_url
+    LOGGER.info(url)
+
+    try:
+        async with ClientSession() as session:
+            html = await fetch(session, url)
+            LOGGER.info(f'fund content fetch in {time.time() - start} secs.')
+            parse_start = time.time()
+            info = parse_fund_info(html)
+            LOGGER.info(f'fund parsing took {time.time() - parse_start} secs.')
+    except ClientConnectorError as ex:
+        LOGGER.error(f'Unable to connect fund API : {repr(ex)}')
+        info = FundInfo.FundInfo("", '0', '0', "", "")
+        info.set_error(ex)
+    except BaseException as ex:
+        LOGGER.error(f'Unable to connect fund API : {repr(ex)}')
+        info = FundInfo.FundInfo("", '0', '0', "", "")
+        info.set_error(ex)
+
+    LOGGER.info(f'Fund Time Taken {time.time() - start}')
     future.set_result(info)
 
 
@@ -278,6 +312,24 @@ def call_fuel_api():
     f1.add_done_callback(callback)
 
     tasks = [get_fuel_price(f1)]
+
+    loop.run_until_complete(asyncio.wait(tasks))
+    loop.close()
+
+    return f1.result()
+
+
+def call_fund_api():
+    LOGGER.info("call_fund_api")
+
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
+    f1 = asyncio.Future()
+
+    f1.add_done_callback(callback)
+
+    tasks = [get_fund_price(f1)]
 
     loop.run_until_complete(asyncio.wait(tasks))
     loop.close()

@@ -40,10 +40,11 @@ def call_apis_async(location):
     f3 = asyncio.Future()
 
     f1.add_done_callback(callback_weather)
-    f2.add_done_callback(callback_gold)
+    # f2.add_done_callback(callback_gold)
+    f2.add_done_callback(callback_fund)
     f3.add_done_callback(callback_fuel)
 
-    tasks = [Forecast.get_weather(f1, location), Forecast.get_gold_price(f2), Forecast.get_fuel_price(f3)]
+    tasks = [Forecast.get_weather(f1, location), Forecast.get_fund_price(f2), Forecast.get_fuel_price(f3)]
     loop.run_until_complete(asyncio.wait(tasks))
 
     loop.close()
@@ -89,6 +90,23 @@ def call_gold_api():
     print()
 
 
+def call_fund_api():
+    LOGGER.info("call_fund_api")
+
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
+    f1 = asyncio.Future()
+
+    f1.add_done_callback(callback_gold)
+
+    tasks = [Forecast.get_fund_price(f1)]
+    loop.run_until_complete(asyncio.wait(tasks))
+
+    loop.close()
+    print()
+
+
 def call_fuel_api():
     LOGGER.info("call_fuel_api")
 
@@ -117,6 +135,12 @@ def callback_gold(future):
     global rate_info
     rate_info = future.result()
     update_rate_line_3_4()
+
+
+def callback_fund(future):
+    global fund_info
+    fund_info = future.result()
+    update_fund_line_3_4()
 
 
 def callback_fuel(future):
@@ -201,6 +225,18 @@ def update_rate_line_3_4():
     line4 = prefix_d.ljust(just, ' ') + str(rate_info.get_silver())
 
 
+def update_fund_line_3_4():
+    global line3
+    global line4
+
+    just = lcd_disp_length - 7
+    prefix_p = fund_info.get_scheme()[0:just]
+    prefix_d = fund_info.get_last_updated_time()[0:just]
+
+    line3 = prefix_p.ljust(just, ' ') + ' ' + str(fund_info.get_nav())
+    line4 = prefix_d.ljust(just, ' ') + str(fund_info.get_change_value())
+
+
 # update display fuel price line
 def update_fuel_line_3_4():
     global line5
@@ -241,6 +277,13 @@ def print_line3_and_4_rate():
 
 
 # print line 3 and 4
+def print_line3_and_4_fund():
+    if fund_info.get_error() is None:
+        display.lcd_display_string(line3, 3)
+        display.lcd_display_string(line4, 4)
+
+
+# print line 3 and 4
 def print_line3_and_4_fuel():
     if fuel_info.get_error() is None:
         display.lcd_display_string(line5, 3)
@@ -258,7 +301,7 @@ def every_second():
 
     if counter == 0:
         print_line2()
-        print_line3_and_4_rate()
+        print_line3_and_4_fund()
         counter = counter + 1
         return
 
@@ -266,8 +309,8 @@ def every_second():
     if counter % change_every_x_secs == 0:
         if _bool_20:
             update_weather_location_line2()
-            update_rate_line_3_4()
-            print_line3_and_4_rate()
+            update_fund_line_3_4()
+            print_line3_and_4_fund()
             _bool_20 = False
         else:
             update_weather_humidity_line2()
@@ -283,8 +326,8 @@ def every_second():
     if counter % change_every_x_secs == 0:
         if rand_bool:
             update_weather_cond_line2()
-            update_rate_line_3_4()
-            print_line3_and_4_rate()
+            update_fund_line_3_4()
+            print_line3_and_4_fund()
             rand_bool = False
         else:
             update_weather_preciption_line2()
@@ -330,6 +373,7 @@ def run_weather_thread(job_vars):
     job_thread.start()
 
 
+# not used ??
 def run_gold_thread(job_vars):
     job_func, job_args = job_vars
     job_thread = threading.Thread(target=job_func, args=job_args)
@@ -347,14 +391,14 @@ def add_scheduler(location):
     schedule.every().hour.at(':45').do(run_weather_thread, (call_weather_api, [location]))
 
     # Update gold rate every 1 hour except sunday from 10 AM to 5 PM
-    gold_times = ["09:30", "10:00", "11:00", "12:00", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "17:00"]
+    gold_times = ["09:00", "10:00", "11:00", "12:00", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "17:00"]
     for x in gold_times:
-        schedule.every().monday.at(x).do(jobqueue.put, (call_gold_api, []))
-        schedule.every().tuesday.at(x).do(jobqueue.put, (call_gold_api, []))
-        schedule.every().wednesday.at(x).do(jobqueue.put, (call_gold_api, []))
-        schedule.every().thursday.at(x).do(jobqueue.put, (call_gold_api, []))
-        schedule.every().friday.at(x).do(jobqueue.put, (call_gold_api, []))
-        schedule.every().saturday.at(x).do(jobqueue.put, (call_gold_api, []))
+        schedule.every().monday.at(x).do(jobqueue.put, (call_fund_api, []))
+        schedule.every().tuesday.at(x).do(jobqueue.put, (call_fund_api, []))
+        schedule.every().wednesday.at(x).do(jobqueue.put, (call_fund_api, []))
+        schedule.every().thursday.at(x).do(jobqueue.put, (call_fund_api, []))
+        schedule.every().friday.at(x).do(jobqueue.put, (call_fund_api, []))
+        schedule.every().saturday.at(x).do(jobqueue.put, (call_fund_api, []))
 
     # Update fuel rate from 6 to 8 AM except sunday
     fuel_times = ["06:00", "06:30", "07:00", "07:30", "08:00"]
@@ -396,7 +440,8 @@ if __name__ == '__main__':
         call_apis_async(location)
 
         update_weather_location_line2()
-        update_rate_line_3_4()
+        #update_rate_line_3_4()
+        update_fund_line_3_4()
         update_fuel_line_3_4()
 
         add_scheduler(location)
