@@ -206,7 +206,7 @@ def update_fuel_line_3_4():
     global line5
     global line6
 
-    just = lcd_disp_length - 5
+    just = lcd_disp_length - 6
     prefix_p = 'Petrol'
     prefix_d = 'Diesel'
 
