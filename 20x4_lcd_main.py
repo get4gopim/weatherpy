@@ -206,11 +206,15 @@ def update_fuel_line_3_4():
     global line5
     global line6
 
-    just = lcd_disp_length - 6
+    pet_len = len(str(fuel_info.get_petrol()))
+    die_len = len(str(fuel_info.get_diesel()))
+
     prefix_p = 'Petrol'
     prefix_d = 'Diesel'
 
+    just = lcd_disp_length - pet_len
     line6 = prefix_p.ljust(just, ' ') + str(fuel_info.get_petrol())
+    just = lcd_disp_length - die_len
     line5 = prefix_d.ljust(just, ' ') + str(fuel_info.get_diesel())
 
 

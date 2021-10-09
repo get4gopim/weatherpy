@@ -15,7 +15,7 @@ from service import MongoCloudService
 
 
 query_str = {'attr_name': 'aws_weather_uri'}
-default_url = 'https://rryf2kws46.execute-api.ap-south-1.amazonaws.com/dev'
+default_url = 'https://zj6n6pb7e9.execute-api.ap-south-1.amazonaws.com/dev'
 weather_url = '/api/v1/weather'
 gold_rate_url = '/api/v1/gold'
 fuel_rate_url = '/api/v1/fuel'
