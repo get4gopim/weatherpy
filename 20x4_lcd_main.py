@@ -98,7 +98,7 @@ def call_fund_api():
 
     f1 = asyncio.Future()
 
-    f1.add_done_callback(callback_gold)
+    f1.add_done_callback(callback_fund)
 
     tasks = [Forecast.get_fund_price(f1)]
     loop.run_until_complete(asyncio.wait(tasks))
