@@ -28,6 +28,7 @@ The following libraries can be installed via a sudo apt install python command o
 - python3-aiohttp (http client/server for asyncio)
 - python3-bs4 (error-tolerant HTML parser for Python 3)
 - python3-schedule (Job scheduling for humans) (sudo pip3 install schedule==0.6.0)
+- python3-pymongo (Python3 interface to the MongoDB document-oriented database)
 
 > Example: sudo apt install python3-aiohttp
 
