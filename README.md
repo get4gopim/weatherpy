@@ -24,9 +24,9 @@ sudo apt install i2c-tools
 
 The following libraries can be installed via a sudo apt install python command or pip install command
 - python3-smbus
-- python3-aiohttp
-- python3-bs4
-- python3-schedule (sudo pip3 install schedule==0.6.0)
+- python3-aiohttp (http client/server for asyncio)
+- python3-bs4 (error-tolerant HTML parser for Python 3)
+- python3-schedule (Job scheduling for humans) (sudo pip3 install schedule==0.6.0)
 
 > Example: sudo apt install python3-aiohttp
 
