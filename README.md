@@ -20,7 +20,8 @@ More info: https://github.com/get4gopim/weatherpy/wiki
 
 ## Required Python Libraries
 For I2C communication i2c tools is required, install using the below command:
-sudo apt install i2c-tools
+- sudo apt install i2c-tools
+- sudo apt install python3-pip (Python package installer)
 
 The following libraries can be installed via a sudo apt install python command or pip install command
 - python3-smbus
